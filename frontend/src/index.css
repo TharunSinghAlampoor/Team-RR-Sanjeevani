@@ -101,6 +101,24 @@ body::before {
   animation: fadeIn 0.6s ease-out;
 }
 
+.auth-container.register-container {
+  max-width: 580px;
+  padding: 12px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
 .auth-card {
   background: transparent;
   backdrop-filter: blur(12px);

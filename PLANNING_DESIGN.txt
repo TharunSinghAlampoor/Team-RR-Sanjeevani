@@ -1,0 +1,64 @@
+================================================================================
+          TEAM-RR-SANJEEVANI E-COMMERCE PLATFORM - SYSTEM PLANNING DESIGN
+================================================================================
+Repository URL: https://github.com/TharunSinghAlampoor/Team-RR-Sanjeevani
+Project Name:   Team-RR-Sanjeevani (E-Commerce Platform)
+Last Updated:   2026-07-28
+
+--------------------------------------------------------------------------------
+1. ARCHITECTURE & SYSTEM OVERVIEW
+--------------------------------------------------------------------------------
+Full-stack User Authentication and E-Commerce System featuring a React 18 frontend
+(Vite 6 + CSS3) and a Spring Boot 4.1.0 backend (Java 21 + Spring Security 7.x + JWT)
+backed by MySQL 8.4.
+
+Frontend Stack:
+  - Framework: React 18.3, Vite 6.x, Axios, React Router v7
+  - Features: Modular UI components, custom styling system, full auth flows
+
+Backend Stack:
+  - Framework: Spring Boot 4.1.0, Spring Security 7.x, Spring Data JPA
+  - Features: JWT Token Security, Session Management, OTP Verification, Rate Limiting
+
+Database:
+  - Engine: MySQL 8.4 LTS
+  - Schema: E-Commerce (`users`, `sessions`, `otps`, `jwt_tokens`, `categories`, 
+                     `products`, `productimages`, `cart_items`, `orders`, `order_items`)
+
+--------------------------------------------------------------------------------
+2. DEFAULT SEEDED ACCOUNTS
+--------------------------------------------------------------------------------
+1. System Admin:
+   - Email:    admin@sanjeevani.com
+   - Password: Admin@1234
+   - Phone:    +919999999999
+   - Role:     ADMIN
+
+2. Customer Account:
+   - Email:    tharunsingh851@gmail.com
+   - Password: Tharun@2005
+   - Phone:    +917702173084
+   - Role:     CUSTOMER
+
+--------------------------------------------------------------------------------
+3. QUICK CLONE & RUN INSTRUCTIONS
+--------------------------------------------------------------------------------
+1. Clone Repository:
+   git clone https://github.com/TharunSinghAlampoor/Team-RR-Sanjeevani.git
+   cd Team-RR-Sanjeevani
+
+2. Start MySQL and Create Database:
+   CREATE DATABASE `E-Commerce`;
+
+3. Launch Backend:
+   cd backend
+   mvn spring-boot:run
+
+4. Launch Frontend:
+   cd frontend
+   npm install
+   npm run dev
+
+For detailed entity schemas, security specifications, and API documentation, 
+see CLONE.txt (file:///d:/E-Commerce/CLONE.txt).
+================================================================================

@@ -31,11 +31,13 @@ public class JwtToken {
     }
 
     public JwtToken() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public JwtToken(User user, String token, LocalDateTime expiresAt) {
         this.user = user;
         this.token = token;
+        this.createdAt = LocalDateTime.now();
         this.expiresAt = expiresAt;
     }
 

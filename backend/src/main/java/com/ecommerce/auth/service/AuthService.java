@@ -1,10 +1,12 @@
 package com.ecommerce.auth.service;
 
 import com.ecommerce.auth.dto.*;
+import com.ecommerce.auth.entity.JwtToken;
 import com.ecommerce.auth.entity.Role;
 import com.ecommerce.auth.entity.Session;
 import com.ecommerce.auth.entity.User;
 import com.ecommerce.auth.exception.AuthException;
+import com.ecommerce.auth.repository.JwtTokenRepository;
 import com.ecommerce.auth.repository.SessionRepository;
 import com.ecommerce.auth.repository.UserRepository;
 import com.ecommerce.auth.util.ValidationUtil;
@@ -26,6 +28,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
+    private final JwtTokenRepository jwtTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final OtpService otpService;
@@ -34,12 +37,14 @@ public class AuthService {
     public AuthService(
             UserRepository userRepository,
             SessionRepository sessionRepository,
+            JwtTokenRepository jwtTokenRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             OtpService otpService,
             @Value("${session.expiry-minutes:60}") int sessionExpiryMinutes) {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
+        this.jwtTokenRepository = jwtTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.otpService = otpService;
@@ -116,6 +121,10 @@ public class AuthService {
         Session session = new Session(user, token, loginTime, expiryTime);
         sessionRepository.save(session);
 
+        // Save JWT token in database
+        JwtToken jwtTokenEntity = new JwtToken(user, token, expiryTime);
+        jwtTokenRepository.save(jwtTokenEntity);
+
         LoginResponse.UserProfile profile = new LoginResponse.UserProfile(
                 user.getUserId(),
                 user.getFullName(),
@@ -126,14 +135,19 @@ public class AuthService {
 
         LoginResponse response = new LoginResponse(token, jwtService.getExpirationMs(), profile);
 
-        logger.info("User logged in: {}", user.getEmail());
+        logger.info("User logged in: {}, JWT token saved in database", user.getEmail());
         return ApiResponse.success("Login successful", response);
     }
 
     @Transactional
     public ApiResponse<Object> logout(String token) {
         sessionRepository.invalidateByToken(token);
-        logger.info("User logged out, session invalidated");
+        try {
+            jwtTokenRepository.deleteByToken(token);
+        } catch (Exception e) {
+            logger.warn("Deleting JWT token from database failed during logout: {}", e.getMessage());
+        }
+        logger.info("User logged out, session invalidated, JWT token removed from database");
         return ApiResponse.success("Logged out successfully");
     }
 
@@ -186,6 +200,7 @@ public class AuthService {
 
         try {
             sessionRepository.invalidateAllActiveSessions(user);
+            jwtTokenRepository.deleteByUserUserId(user.getUserId());
         } catch (Exception e) {
             logger.warn("Session invalidation during reset password bypassed: {}", e.getMessage());
         }
@@ -220,7 +235,12 @@ public class AuthService {
         userRepository.save(user);
 
         sessionRepository.invalidateByToken(currentToken);
-        logger.info("Password changed for user: {}. Session invalidated.", user.getEmail());
+        try {
+            jwtTokenRepository.deleteByToken(currentToken);
+        } catch (Exception e) {
+            logger.warn("Deleting JWT token failed during change password: {}", e.getMessage());
+        }
+        logger.info("Password changed for user: {}. Session invalidated and token removed.", user.getEmail());
 
         return ApiResponse.success("Password changed successfully. Please log in again.");
     }

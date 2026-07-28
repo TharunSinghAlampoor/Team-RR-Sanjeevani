@@ -58,7 +58,7 @@ CREATE TABLE users (
 CREATE TABLE jwt_tokens (
     token_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
-    token VARCHAR(255) NOT NULL,
+    token VARCHAR(512) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id)

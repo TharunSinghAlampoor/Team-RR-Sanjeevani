@@ -16,7 +16,7 @@ public class JwtToken {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "token", nullable = false, length = 255)
+    @Column(name = "token", nullable = false, length = 512)
     private String token;
 
     @Column(name = "created_at", nullable = false, updatable = false)

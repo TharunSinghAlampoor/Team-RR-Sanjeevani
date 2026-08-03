@@ -263,6 +263,9 @@ export const Dashboard = () => {
   }, [categories, allProducts]);
 
   const handleSelectCategory = useCallback((catId) => {
+    setIsFavoritesOpen(false);
+    setIsCartOpen(false);
+    setIsOrdersOpen(false);
     if (catId === null || catId === undefined) {
       setSelectedCategory(null);
       return;
@@ -477,7 +480,13 @@ export const Dashboard = () => {
             <div className="cat-hero-cards">
               {/* All Products option */}
               <motion.div
-                onClick={() => handleSelectCategory(null)}
+                onClick={(e) => {
+                  if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                  handleSelectCategory(null);
+                }}
                 className={`cat-hero-card ${selectedCategory === null ? 'cat-hero-card--active' : ''}`}
                 style={{
                   '--card-color': '#059669',
@@ -500,7 +509,13 @@ export const Dashboard = () => {
                   key={cat.categoryId}
                   category={cat}
                   isSelected={selectedCategory === cat.categoryId || (cat.categoryIds && cat.categoryIds.includes(selectedCategory))}
-                  onClick={() => handleSelectCategory(cat.categoryId)}
+                  onClick={(e) => {
+                    if (e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                    handleSelectCategory(cat.categoryId);
+                  }}
                 />
               ))}
             </div>

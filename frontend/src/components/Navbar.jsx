@@ -38,11 +38,15 @@ export const Navbar = ({
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const handleCategoryClick = (catName) => {
+  const handleCategoryClick = (e, catName, catId) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setShowCategoriesDropdown(false);
-    const id = `cat-section-${catName.replace(/\s+/g, '-').toLowerCase()}`;
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (onScrollToCategory) {
+      onScrollToCategory(catId || catName);
+    }
   };
 
   return (
@@ -147,7 +151,7 @@ export const Navbar = ({
                   {categories.map(cat => (
                     <button
                       key={cat.categoryId}
-                      onClick={() => handleCategoryClick(cat.categoryName)}
+                      onClick={(e) => handleCategoryClick(e, cat.categoryName, cat.categoryId)}
                       className="navbar-cat-item"
                     >
                       {formatCategoryName(cat.categoryName)}

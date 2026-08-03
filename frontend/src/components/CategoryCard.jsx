@@ -38,7 +38,13 @@ export const CategoryCard = ({ category, isSelected, onClick }) => {
 
   return (
     <motion.div
-      onClick={onClick}
+      onClick={(e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        if (onClick) onClick();
+      }}
       className={`cat-hero-card ${isSelected ? 'cat-hero-card--active' : ''}`}
       style={{
         '--card-color': meta.color,

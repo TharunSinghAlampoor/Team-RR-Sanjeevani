@@ -106,10 +106,17 @@ public class ProductSeeder implements CommandLineRunner {
                     skippedCount++;
                 }
 
-                // Ensure ProductImage exists
+                // Ensure ProductImage exists and is updated to the latest database image URL
                 List<ProductImage> existingImages = productImageRepository.findByProductProductId(existingProduct.getProductId());
                 if (existingImages.isEmpty()) {
                     productImageRepository.save(new ProductImage(existingProduct, imageUrl));
+                } else {
+                    ProductImage img = existingImages.get(0);
+                    if (imageUrl != null && !imageUrl.trim().equals(img.getImageUrl())) {
+                        img.setImageUrl(imageUrl.trim());
+                        productImageRepository.save(img);
+                        logger.info("[ACTION PERFORMED] Updated ProductImage URL for Product: '{}'", name);
+                    }
                 }
             } else {
                 Product product = new Product(name, description, price, stock, cat);

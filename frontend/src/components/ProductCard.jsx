@@ -85,13 +85,12 @@ const ProductCard = React.memo(({
       {/* Product Image */}
       <div className="pcard__image-wrap">
         <ProductImage
-          src={(!imgError && product.imageUrl) ? product.imageUrl : 'https://placehold.co/260x260/f0fdf4/0f766e?text=No+Image'}
+          src={product.imageUrl}
           alt={product.name}
           loading="lazy"
           decoding="async"
           className="pcard__image object-contain w-full h-full select-none"
           draggable="false"
-          onError={() => setImgError(true)}
         />
       </div>
 

@@ -69,7 +69,7 @@ export const Navbar = ({
           <img
             src="/sanjeevani_text_transparent.png"
             alt="Sanjeevani"
-            style={{ height: 32, width: 'auto', objectFit: 'contain', display: 'block' }}
+            style={{ height: 46, width: 'auto', objectFit: 'contain', display: 'block' }}
             className="brand-text-img"
           />
         </div>

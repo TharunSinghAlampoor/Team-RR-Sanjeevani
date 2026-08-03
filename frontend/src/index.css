@@ -2517,16 +2517,16 @@ body:has(.dashboard-page) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
   border: 1.5px solid #a7f3d0;
   flex-shrink: 0;
 }
 
 .brand-logo-img {
-  height: 28px;
+  height: 34px;
   width: auto;
   object-fit: contain;
 }

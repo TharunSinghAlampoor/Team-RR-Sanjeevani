@@ -11,6 +11,7 @@ import CategorySection from '../components/CategorySection';
 import CategoryCard, { formatCategoryName } from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
 import DashboardFooter from '../components/DashboardFooter';
+import BrandLoader from '../components/BrandLoader';
 
 // Direct modal & drawer imports for instant UI responsiveness
 import ProductDetailsModal from '../components/ProductDetailsModal';
@@ -547,18 +548,9 @@ export const Dashboard = () => {
               </div>
             </div>
             <div className="cat-section__divider" style={{ background: 'linear-gradient(90deg, #05966940, transparent)' }} />
-            <div className="cat-section__grid">
+            <div className="cat-section__grid" style={{ minHeight: loadingProducts ? 300 : 'auto', display: loadingProducts ? 'flex' : 'grid', alignItems: 'center', justifyContent: 'center' }}>
               {loadingProducts
-                ? Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className="pcard pcard--skeleton">
-                      <div className="pcard-skel-img" />
-                      <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <div className="pcard-skel-line" style={{ width: '45%', height: 8 }} />
-                        <div className="pcard-skel-line" style={{ width: '85%', height: 10 }} />
-                        <div className="pcard-skel-line" style={{ width: '60%', height: 8 }} />
-                      </div>
-                    </div>
-                  ))
+                ? <BrandLoader fullScreen={false} message="Loading Healthcare Essentials..." />
                 : filteredProducts.map((product, i) => (
                     <ProductCard
                       key={product.productId}

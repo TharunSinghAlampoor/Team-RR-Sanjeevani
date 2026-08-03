@@ -119,8 +119,8 @@ const s = {
   },
 };
 
-export const FavoritesDrawer = ({ isOpen, favorites = [], onClose, onRemoveFavorite, onAddToCart }) => {
-  if (!isOpen) return null;
+export const FavoritesDrawer = ({ isOpen = true, favorites = [], onClose, onRemoveFavorite, onAddToCart }) => {
+  if (isOpen === false) return null;
 
   return (
     <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>

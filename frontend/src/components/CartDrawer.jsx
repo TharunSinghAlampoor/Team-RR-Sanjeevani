@@ -165,8 +165,8 @@ const s = {
   },
 };
 
-export const CartDrawer = ({ isOpen, cartItems = [], onClose, onUpdateQuantity, onRemoveItem, onProceedToCheckout, onCheckout }) => {
-  if (!isOpen) return null;
+export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQuantity, onRemoveItem, onProceedToCheckout, onCheckout }) => {
+  if (isOpen === false) return null;
 
   const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.itemTotal) || 0), 0);
   const FREE_THRESHOLD = 500;

@@ -3048,13 +3048,13 @@ body:has(.dashboard-page) {
 
 .navbar-cat-item {
   width: 100%;
-  padding: 0.55rem 0.85rem;
+  padding: 0.65rem 0.95rem;
   border: none;
   background: transparent;
   text-align: left;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
   border-radius: 0.6rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
@@ -3063,7 +3063,7 @@ body:has(.dashboard-page) {
 .navbar-cat-item:hover {
   background: #f0fdfa;
   color: #0f766e;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .dark .navbar-cat-item {
@@ -3514,8 +3514,8 @@ body:has(.dashboard-page) {
 }
 
 .cat-hero-card__name {
-  font-size: 0.85rem;
-  font-weight: 800;
+  font-size: 0.92rem;
+  font-weight: 900;
   color: #1e293b;
   line-height: 1.35;
   text-align: center;

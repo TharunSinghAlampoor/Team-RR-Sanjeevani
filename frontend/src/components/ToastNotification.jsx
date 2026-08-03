@@ -17,12 +17,12 @@ export const ToastNotification = ({ toast, onClose }) => {
 
   const getIcon = () => {
     if (icon) return icon;
-    if (type === 'cart-add') return <ShoppingBag style={{ width: 18, height: 18, color: '#059669' }} />;
-    if (type === 'cart-remove') return <Trash2 style={{ width: 18, height: 18, color: '#ef4444' }} />;
-    if (type === 'fav-add') return <Heart style={{ width: 18, height: 18, color: '#f43f5e', fill: '#f43f5e' }} />;
-    if (type === 'fav-remove') return <Heart style={{ width: 18, height: 18, color: '#94a3b8' }} />;
-    if (type === 'error') return <AlertCircle style={{ width: 18, height: 18, color: '#ef4444' }} />;
-    return <CheckCircle2 style={{ width: 18, height: 18, color: '#059669' }} />;
+    if (type === 'cart-add') return <ShoppingBag style={{ width: 22, height: 22, color: '#059669' }} />;
+    if (type === 'cart-remove') return <Trash2 style={{ width: 22, height: 22, color: '#ef4444' }} />;
+    if (type === 'fav-add') return <Heart style={{ width: 22, height: 22, color: '#f43f5e', fill: '#f43f5e' }} />;
+    if (type === 'fav-remove') return <Heart style={{ width: 22, height: 22, color: '#94a3b8' }} />;
+    if (type === 'error') return <AlertCircle style={{ width: 22, height: 22, color: '#ef4444' }} />;
+    return <CheckCircle2 style={{ width: 22, height: 22, color: '#059669' }} />;
   };
 
   const getBadgeBg = () => {
@@ -35,33 +35,35 @@ export const ToastNotification = ({ toast, onClose }) => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -40, scale: 0.92 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -20, scale: 0.92 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+        initial={{ opacity: 0, y: -50, x: '-50%', scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }}
+        exit={{ opacity: 0, y: -30, x: '-50%', scale: 0.9 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 26 }}
         style={{
           position: 'fixed',
-          top: '24px',
-          right: '24px',
+          top: '32px',
+          left: '50%',
+          transform: 'translateX(-50%)',
           zIndex: 99999,
           background: 'rgba(255, 255, 255, 0.98)',
           backdropFilter: 'blur(16px)',
-          border: '1.5px solid rgba(226, 232, 240, 0.9)',
-          borderRadius: '1.1rem',
-          padding: '0.9rem 1.2rem',
+          border: '1.5px solid rgba(16, 185, 129, 0.3)',
+          borderRadius: '1.25rem',
+          padding: '1.1rem 1.6rem',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.85rem',
-          boxShadow: '0 12px 36px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(15, 118, 110, 0.08)',
-          maxWidth: '380px',
+          gap: '1rem',
+          boxShadow: '0 16px 48px rgba(15, 23, 42, 0.18), 0 6px 20px rgba(5, 150, 105, 0.12)',
+          maxWidth: '460px',
+          width: 'calc(100% - 32px)',
           pointerEvents: 'auto',
         }}
       >
         {/* Badge Icon */}
         <div style={{
-          width: '38px',
-          height: '38px',
-          borderRadius: '12px',
+          width: '44px',
+          height: '44px',
+          borderRadius: '14px',
           background: getBadgeBg(),
           display: 'flex',
           alignItems: 'center',
@@ -74,11 +76,11 @@ export const ToastNotification = ({ toast, onClose }) => {
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {title && (
-            <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
+            <p style={{ margin: 0, fontSize: '1.02rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.25 }}>
               {title}
             </p>
           )}
-          <p style={{ margin: '0.15rem 0 0', fontSize: '0.8rem', fontWeight: 600, color: '#475569', lineHeight: 1.35 }}>
+          <p style={{ margin: '0.2rem 0 0', fontSize: '0.92rem', fontWeight: 600, color: '#334155', lineHeight: 1.4 }}>
             {message}
           </p>
         </div>
@@ -88,18 +90,19 @@ export const ToastNotification = ({ toast, onClose }) => {
           onClick={onClose}
           style={{
             border: 'none',
-            background: 'transparent',
-            color: '#94a3b8',
+            background: 'rgba(241, 245, 249, 0.8)',
+            color: '#64748b',
             cursor: 'pointer',
-            padding: '0.2rem',
+            padding: '0.4rem',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transition: 'color 0.15s',
+            transition: 'all 0.18s ease',
+            flexShrink: 0,
           }}
         >
-          <X style={{ width: 16, height: 16 }} />
+          <X style={{ width: 18, height: 18 }} />
         </button>
       </motion.div>
     </AnimatePresence>

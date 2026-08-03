@@ -7,6 +7,22 @@ import { getTransparentProductImage, getCachedTransparentImage } from '../utils/
  * rendering crisp, transparent PNG images that blend naturally into dark & light themes.
  * Caches transparent versions permanently in IndexedDB for 0ms loading on subsequent requests.
  */
+const DEFAULT_FALLBACKS = [
+  'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=500&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=500&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&auto=format&fit=crop&q=80',
+];
+
+const getCleanUrl = (url) => {
+  if (!url) return '';
+  try {
+    return encodeURI(url.trim());
+  } catch (e) {
+    return url;
+  }
+};
+
 export const ProductImage = ({
   src,
   alt = 'Product image',
@@ -15,18 +31,19 @@ export const ProductImage = ({
   decoding = 'async',
   draggable = false,
   onError,
-  fallbackSrc = 'https://placehold.co/300x300/10b981/ffffff?text=Product+Image',
+  fallbackSrc = DEFAULT_FALLBACKS[0],
   ...props
 }) => {
-  const [displaySrc, setDisplaySrc] = useState(() => getCachedTransparentImage(src) || src);
-  const [isProcessing, setIsProcessing] = useState(() => !getCachedTransparentImage(src) && Boolean(src));
+  const safeSrc = getCleanUrl(src);
+  const [displaySrc, setDisplaySrc] = useState(() => getCachedTransparentImage(safeSrc) || safeSrc);
+  const [isProcessing, setIsProcessing] = useState(() => !getCachedTransparentImage(safeSrc) && Boolean(safeSrc));
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    if (!src) return;
+    if (!safeSrc) return;
 
     // Check if already cached in memory
-    const cached = getCachedTransparentImage(src);
+    const cached = getCachedTransparentImage(safeSrc);
     if (cached) {
       setDisplaySrc(cached);
       setIsProcessing(false);
@@ -36,7 +53,7 @@ export const ProductImage = ({
     let isMounted = true;
     setIsProcessing(true);
 
-    getTransparentProductImage(src)
+    getTransparentProductImage(safeSrc)
       .then((transparentUrl) => {
         if (isMounted) {
           setDisplaySrc(transparentUrl);
@@ -45,7 +62,7 @@ export const ProductImage = ({
       })
       .catch(() => {
         if (isMounted) {
-          setDisplaySrc(src);
+          setDisplaySrc(safeSrc);
           setIsProcessing(false);
         }
       });
@@ -53,7 +70,7 @@ export const ProductImage = ({
     return () => {
       isMounted = false;
     };
-  }, [src]);
+  }, [safeSrc]);
 
   const handleImageError = (e) => {
     setHasError(true);

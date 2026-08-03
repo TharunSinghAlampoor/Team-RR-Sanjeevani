@@ -16,6 +16,7 @@ import ProductDetailsModal from '../components/ProductDetailsModal';
 import CheckoutModal from '../components/CheckoutModal';
 import BuyNowModal from '../components/BuyNowModal';
 import BrandLoader from '../components/BrandLoader';
+import ToastNotification from '../components/ToastNotification';
 import { useAuth } from '../context/AuthContext';
 
 const API_BASE = 'http://localhost:8080/api';
@@ -74,6 +75,7 @@ export function CategoryProductsPage() {
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
+  const [toast, setToast] = useState(null);
   const [buyNowProduct, setBuyNowProduct] = useState(null);
   const [selectedProductDetails, setSelectedProductDetails] = useState(null);
 
@@ -209,16 +211,24 @@ export function CategoryProductsPage() {
   }, [favorites]);
 
   const handleToggleFavorite = (prod) => {
+    const pId = prod?.productId || prod;
+    const isFav = favorites.some(f => f.productId === pId);
     setFavorites(prev => {
-      const exists = prev.some(f => f.productId === prod.productId);
-      if (exists) return prev.filter(f => f.productId !== prod.productId);
+      const exists = prev.some(f => f.productId === pId);
+      if (exists) return prev.filter(f => f.productId !== pId);
       return [...prev, prod];
+    });
+    setToast({
+      type: isFav ? 'fav-remove' : 'fav-add',
+      title: isFav ? 'Removed from Wishlist' : 'Saved to Wishlist!',
+      message: isFav ? `${prod?.name || 'Product'} removed from your wishlist.` : `${prod?.name || 'Product'} saved to your wishlist.`
     });
   };
 
   const handleAddToCart = (prod) => {
+    const targetProd = typeof prod === 'object' ? prod : allProducts.find(p => p.productId === prod);
     setCartItems(prev => {
-      const existingIndex = prev.findIndex(item => item.product?.productId === prod.productId);
+      const existingIndex = prev.findIndex(item => item.product?.productId === (targetProd?.productId || prod));
       if (existingIndex > -1) {
         const updated = [...prev];
         updated[existingIndex] = {
@@ -227,27 +237,18 @@ export function CategoryProductsPage() {
         };
         return updated;
       }
-      return [...prev, { product: prod, quantity: 1 }];
+      return [...prev, { product: targetProd || { productId: prod, name: 'Product' }, quantity: 1 }];
     });
-    setIsCartOpen(true);
-  };
-
-  const handleUpdateQuantity = (prodId, delta) => {
-    setCartItems(prev => {
-      return prev
-        .map(item => {
-          if (item.product?.productId === prodId) {
-            const newQty = item.quantity + delta;
-            return newQty > 0 ? { ...item, quantity: newQty } : null;
-          }
-          return item;
-        })
-        .filter(Boolean);
+    setToast({
+      type: 'cart-add',
+      title: 'Added to Cart!',
+      message: `${targetProd?.name || 'Product'} added to your cart.`
     });
   };
 
   const handleRemoveFromCart = (prodId) => {
     setCartItems(prev => prev.filter(item => item.product?.productId !== prodId));
+    setToast({ type: 'cart-remove', title: 'Removed from Cart', message: 'Item removed from your cart.' });
   };
 
   const handleStartBuyNow = (prod) => {
@@ -455,6 +456,8 @@ export function CategoryProductsPage() {
       </main>
 
       <DashboardFooter />
+
+      <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
       {/* Drawers & Modals */}
       <CartDrawer

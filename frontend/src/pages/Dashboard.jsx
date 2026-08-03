@@ -10,8 +10,8 @@ import HeroBanner from '../components/HeroBanner';
 import CategorySection from '../components/CategorySection';
 import CategoryCard, { formatCategoryName } from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
-import DashboardFooter from '../components/DashboardFooter';
 import BrandLoader from '../components/BrandLoader';
+import ToastNotification from '../components/ToastNotification';
 
 // Direct modal & drawer imports for instant UI responsiveness
 import ProductDetailsModal from '../components/ProductDetailsModal';
@@ -35,7 +35,8 @@ export const Dashboard = () => {
   const [pageLoading, setPageLoading] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [favorites, setFavorites] = useState([]);
-  const [orders, setOrders] = useState([]);
+  // Toast Notification state
+  const [toast, setToast] = useState(null);
   // Filter / Search
   const [searchQuery, setSearchQuery] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -346,9 +347,15 @@ export const Dashboard = () => {
 
   // ─── Cart Handlers ────────────────────────────────────────────────
   const handleAddToCart = async (productId, quantity = 1) => {
+    const targetPId = typeof productId === 'object' ? productId.productId : productId;
+    const prod = allProducts.find(p => p && p.productId === targetPId);
+    const prodName = prod?.name || 'Product';
     try {
-      const res = await shopService.addToCart(productId, quantity);
-      if (res.success) { fetchCart(); }
+      const res = await shopService.addToCart(targetPId, quantity);
+      if (res.success) {
+        fetchCart();
+        setToast({ type: 'cart-add', title: 'Added to Cart!', message: `${prodName} added to your cart.` });
+      }
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to add to cart.');
     }
@@ -364,25 +371,38 @@ export const Dashboard = () => {
   const handleRemoveCartItem = async (cartItemId) => {
     try {
       const res = await shopService.removeCartItem(cartItemId);
-      if (res.success) fetchCart();
+      if (res.success) {
+        fetchCart();
+        setToast({ type: 'cart-remove', title: 'Removed from Cart', message: 'Item removed from your cart.' });
+      }
     } catch (err) { console.error(err); }
   };
 
   // ─── Favorite Handlers ────────────────────────────────────────────
   const handleToggleFavorite = async (productId) => {
+    const targetPId = typeof productId === 'object' ? productId.productId : productId;
+    const isFav = !!favoritesMap[targetPId];
+    const prod = allProducts.find(p => p && p.productId === targetPId);
+    const prodName = prod?.name || 'Product';
     try {
-      const res = await shopService.toggleFavorite(productId);
+      const res = await shopService.toggleFavorite(targetPId);
       if (res.success) {
         await fetchFavorites();
+        setToast({
+          type: isFav ? 'fav-remove' : 'fav-add',
+          title: isFav ? 'Removed from Wishlist' : 'Saved to Wishlist!',
+          message: isFav ? `${prodName} removed from your wishlist.` : `${prodName} saved to your wishlist.`
+        });
       }
     } catch (err) { console.error(err); }
   };
 
   const handleRemoveFavorite = async (productId) => {
-    // Optimistically remove from state for instant UI responsiveness
-    setFavorites((prev) => prev.filter((item) => (item.productId || item.product?.productId) !== productId));
+    const targetPId = typeof productId === 'object' ? productId.productId : productId;
+    setFavorites((prev) => prev.filter((item) => (item.productId || item.product?.productId) !== targetPId));
+    setToast({ type: 'fav-remove', title: 'Removed from Wishlist', message: 'Product removed from your wishlist.' });
     try {
-      await shopService.removeFavorite(productId);
+      await shopService.removeFavorite(targetPId);
       await fetchFavorites();
     } catch (err) {
       console.error('Remove favorite error:', err);
@@ -608,6 +628,9 @@ export const Dashboard = () => {
 
       {/* ── Footer ───────────────────────────────── */}
       <DashboardFooter />
+
+      {/* Global Toast Popup Notifications */}
+      <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
       {/* ── Modals & Drawers ──────────────────────── */}
       <React.Suspense fallback={null}>

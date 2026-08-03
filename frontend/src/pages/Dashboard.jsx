@@ -266,12 +266,14 @@ export const Dashboard = () => {
     setIsFavoritesOpen(false);
     setIsCartOpen(false);
     setIsOrdersOpen(false);
-    if (catId === null || catId === undefined) {
-      setSelectedCategory(null);
-      return;
-    }
-    navigate(`/category/${catId}`);
-  }, [navigate]);
+    setSelectedCategory(catId);
+    setTimeout(() => {
+      const el = document.getElementById('products-catalog-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
+  }, []);
 
   const handleSearchChange = useCallback((query) => {
     setSearchQuery(query);
@@ -302,7 +304,9 @@ export const Dashboard = () => {
         c => c.categoryId === selectedCategory || c.categoryName === selectedCategory || (c.categoryIds && c.categoryIds.includes(selectedCategory))
       );
       if (targetCat) {
-        items = items.filter(p => targetCat.categoryIds.includes(p.categoryId) || formatCategoryName(p.categoryName) === targetCat.categoryName);
+        items = items.filter(p => (p.categoryId && targetCat.categoryIds.includes(p.categoryId)) || formatCategoryName(p.categoryName) === targetCat.categoryName);
+      } else {
+        items = items.filter(p => p.categoryId === selectedCategory || (p.categoryName && formatCategoryName(p.categoryName).toLowerCase().includes(String(selectedCategory).toLowerCase())));
       }
     }
 

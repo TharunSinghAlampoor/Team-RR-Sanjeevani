@@ -31,6 +31,7 @@ export const Dashboard = () => {
   // Data States
   const [categories, setCategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [favorites, setFavorites] = useState([]);

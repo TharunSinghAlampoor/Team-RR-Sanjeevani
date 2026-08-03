@@ -83,7 +83,11 @@ export const HeroBanner = ({ onExploreOffers }) => {
 
   return (
     <div id="offers-hero-section" style={{ position: 'relative', width: '100%', marginBottom: '1.5rem' }}>
-      <div
+      <motion.div
+        key={`banner-container-${offer.id}`}
+        initial={{ opacity: 0.9, scale: 0.99 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
         style={{
           borderRadius: '1.25rem',
           overflow: 'hidden',
@@ -91,43 +95,60 @@ export const HeroBanner = ({ onExploreOffers }) => {
           background: `${offer.bgGradient}, ${offer.bgImage}`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          boxShadow: '0 12px 32px rgba(0,0,0,0.15)',
-          minHeight: '220px',
+          boxShadow: '0 16px 36px rgba(0,0,0,0.18)',
+          minHeight: '230px',
           display: 'flex',
           alignItems: 'center',
-          transition: 'background 0.5s ease',
+          transition: 'background 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
           padding: '1.75rem 2rem',
           color: '#ffffff',
         }}
       >
-        {/* Decorative background glow circle */}
-        <div
+        {/* Animated Background Pulse Circle */}
+        <motion.div
+          animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.15, 0.08] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           style={{
             position: 'absolute',
-            top: '-50%',
+            top: '-40%',
             right: '-10%',
-            width: '320px',
-            height: '320px',
+            width: '360px',
+            height: '360px',
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.08)',
+            background: 'rgba(255, 255, 255, 0.15)',
             pointerEvents: 'none',
           }}
         />
 
+        {/* Floating Rotating Sparkle Particle */}
+        <motion.div
+          animate={{ rotate: 360, y: [0, -10, 0] }}
+          transition={{ rotate: { duration: 15, repeat: Infinity, ease: 'linear' }, y: { duration: 3, repeat: Infinity, ease: 'easeInOut' } }}
+          style={{ position: 'absolute', right: '280px', top: '25px', opacity: 0.25, pointerEvents: 'none' }}
+        >
+          <Sparkles size={32} style={{ color: '#ffffff' }} />
+        </motion.div>
+
         <AnimatePresence mode="wait">
           <motion.div
             key={offer.id}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
+            initial={{ opacity: 0, x: 50, scale: 0.98 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -50, scale: 0.98 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             style={{ width: '100%', zIndex: 2 }}
           >
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.25rem' }}>
               <div style={{ maxWidth: '650px' }}>
-                {/* Badge Tag */}
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.65rem' }}>
-                  <span
+                {/* Animated Badge Tag */}
+                <motion.div
+                  initial={{ y: -12, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.35, delay: 0.1 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.65rem' }}
+                >
+                  <motion.span
+                    whileHover={{ scale: 1.04 }}
                     style={{
                       background: 'rgba(255, 255, 255, 0.22)',
                       backdropFilter: 'blur(8px)',
@@ -141,14 +162,18 @@ export const HeroBanner = ({ onExploreOffers }) => {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.35rem',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     }}
                   >
                     <OfferIcon style={{ width: 14, height: 14 }} />
                     {offer.tag}
-                  </span>
-                  <span
+                  </motion.span>
+
+                  <motion.span
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
                     style={{
-                      background: 'rgba(0, 0, 0, 0.25)',
+                      background: 'rgba(0, 0, 0, 0.3)',
                       color: '#fef08a',
                       fontSize: '0.72rem',
                       fontWeight: 800,
@@ -157,98 +182,127 @@ export const HeroBanner = ({ onExploreOffers }) => {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.25rem',
+                      border: '1px solid rgba(254, 240, 138, 0.3)',
                     }}
                   >
                     <Tag style={{ width: 12, height: 12 }} /> CODE: {offer.code}
-                  </span>
-                </div>
+                  </motion.span>
+                </motion.div>
 
-                {/* Title */}
-                <h1
+                {/* Animated Title */}
+                <motion.h1
+                  initial={{ y: 12, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.35, delay: 0.15 }}
                   style={{
-                    fontSize: '1.6rem',
+                    fontSize: '1.65rem',
                     fontWeight: 900,
                     margin: '0 0 0.4rem',
                     lineHeight: 1.25,
                     letterSpacing: '-0.02em',
                     color: '#ffffff',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                    textShadow: '0 2px 6px rgba(0,0,0,0.2)',
                   }}
                 >
                   {offer.title}
-                </h1>
+                </motion.h1>
 
-                {/* Subtitle */}
-                <p
+                {/* Animated Subtitle */}
+                <motion.p
+                  initial={{ y: 12, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.35, delay: 0.2 }}
                   style={{
-                    fontSize: '0.9rem',
+                    fontSize: '0.92rem',
                     margin: '0 0 1rem',
-                    opacity: 0.92,
-                    lineHeight: 1.4,
+                    opacity: 0.94,
+                    lineHeight: 1.45,
                     maxWidth: '550px',
                     fontWeight: 500,
                   }}
                 >
                   {offer.subtitle}
-                </p>
+                </motion.p>
 
                 {/* Highlights & CTA Button */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                  <button
+                <motion.div
+                  initial={{ y: 12, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.35, delay: 0.25 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}
+                >
+                  <motion.button
                     onClick={onExploreOffers}
+                    whileHover={{ scale: 1.05, y: -2, boxShadow: '0 8px 20px rgba(0,0,0,0.25)' }}
+                    whileTap={{ scale: 0.96 }}
                     style={{
                       background: '#ffffff',
                       color: offer.badgeText,
                       border: 'none',
-                      padding: '0.65rem 1.25rem',
+                      padding: '0.65rem 1.3rem',
                       borderRadius: '0.75rem',
                       fontSize: '0.88rem',
                       fontWeight: 800,
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.4rem',
+                      gap: '0.45rem',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                      transition: 'transform 0.2s ease, boxShadow 0.2s ease',
                     }}
                   >
                     <span>{offer.buttonText}</span>
                     <ArrowRight style={{ width: 16, height: 16 }} />
-                  </button>
+                  </motion.button>
 
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', fontWeight: 700, opacity: 0.95 }}>
                     <ShieldCheck style={{ width: 16, height: 16, color: '#fef08a' }} />
                     <span>{offer.highlight}</span>
                   </div>
-                </div>
+                </motion.div>
               </div>
 
-              {/* Promo Graphic Box */}
-              <div
+              {/* Floating Promo Graphic Box */}
+              <motion.div
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1, y: [0, -6, 0] }}
+                transition={{
+                  scale: { duration: 0.4, delay: 0.2 },
+                  opacity: { duration: 0.4, delay: 0.2 },
+                  y: { duration: 3.5, repeat: Infinity, ease: 'easeInOut' }
+                }}
+                whileHover={{ scale: 1.06, rotate: 1 }}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.12)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1.5px solid rgba(255, 255, 255, 0.25)',
-                  padding: '1.25rem 1.5rem',
-                  borderRadius: '1rem',
+                  background: 'rgba(255, 255, 255, 0.14)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.3)',
+                  padding: '1.25rem 1.6rem',
+                  borderRadius: '1.1rem',
                   textAlign: 'center',
-                  minWidth: '160px',
+                  minWidth: '165px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                 }}
               >
-                <OfferIcon style={{ width: 38, height: 38, marginBottom: '0.4rem', color: '#ffffff' }} />
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.9 }}>USE PROMO CODE</span>
-                <span style={{ fontSize: '1.15rem', fontWeight: 900, letterSpacing: '0.05em', color: '#fef08a' }}>{offer.code}</span>
-              </div>
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                >
+                  <OfferIcon style={{ width: 40, height: 40, marginBottom: '0.4rem', color: '#ffffff', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+                </motion.div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, opacity: 0.9, letterSpacing: '0.04em' }}>USE PROMO CODE</span>
+                <span style={{ fontSize: '1.18rem', fontWeight: 900, letterSpacing: '0.06em', color: '#fef08a', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>{offer.code}</span>
+              </motion.div>
             </div>
           </motion.div>
         </AnimatePresence>
 
         {/* Carousel Navigation Arrows */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.15, background: 'rgba(0,0,0,0.5)' }}
+          whileTap={{ scale: 0.9 }}
           onClick={prevSlide}
           aria-label="Previous Slide"
           style={{
@@ -259,8 +313,8 @@ export const HeroBanner = ({ onExploreOffers }) => {
             background: 'rgba(0,0,0,0.3)',
             color: '#fff',
             border: 'none',
-            width: '32px',
-            height: '32px',
+            width: '34px',
+            height: '34px',
             borderRadius: '50%',
             cursor: 'pointer',
             display: 'flex',
@@ -271,9 +325,11 @@ export const HeroBanner = ({ onExploreOffers }) => {
           }}
         >
           <ChevronLeft style={{ width: 18, height: 18 }} />
-        </button>
+        </motion.button>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.15, background: 'rgba(0,0,0,0.5)' }}
+          whileTap={{ scale: 0.9 }}
           onClick={nextSlide}
           aria-label="Next Slide"
           style={{
@@ -284,8 +340,8 @@ export const HeroBanner = ({ onExploreOffers }) => {
             background: 'rgba(0,0,0,0.3)',
             color: '#fff',
             border: 'none',
-            width: '32px',
-            height: '32px',
+            width: '34px',
+            height: '34px',
             borderRadius: '50%',
             cursor: 'pointer',
             display: 'flex',
@@ -296,7 +352,24 @@ export const HeroBanner = ({ onExploreOffers }) => {
           }}
         >
           <ChevronRight style={{ width: 18, height: 18 }} />
-        </button>
+        </motion.button>
+
+        {/* Animated Slide Progress Bar */}
+        <motion.div
+          key={`progress-${currentSlide}`}
+          initial={{ width: '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 5.5, ease: 'linear' }}
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            height: '3px',
+            background: '#ffffff',
+            opacity: 0.7,
+            zIndex: 4,
+          }}
+        />
 
         {/* Dot Indicators */}
         <div
@@ -316,18 +389,18 @@ export const HeroBanner = ({ onExploreOffers }) => {
               onClick={() => setCurrentSlide(idx)}
               aria-label={`Slide ${idx + 1}`}
               style={{
-                width: currentSlide === idx ? '20px' : '8px',
+                width: currentSlide === idx ? '22px' : '8px',
                 height: '8px',
                 borderRadius: '9999px',
                 background: currentSlide === idx ? '#ffffff' : 'rgba(255, 255, 255, 0.4)',
                 border: 'none',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
               }}
             />
           ))}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

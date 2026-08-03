@@ -262,10 +262,22 @@ export const Dashboard = () => {
     return Array.from(map.values());
   }, [categories, allProducts]);
 
+  const handleSelectCategory = useCallback((catId) => {
+    if (catId === null || catId === undefined) {
+      setSelectedCategory(null);
+      return;
+    }
+    navigate(`/category/${catId}`);
+  }, [navigate]);
+
   const handleSearchChange = useCallback((query) => {
     setSearchQuery(query);
     if (query && query.trim() !== '') {
       setSelectedCategory(null);
+      setTimeout(() => {
+        const el = document.getElementById('products-catalog-section');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
     }
   }, []);
 
@@ -435,7 +447,7 @@ export const Dashboard = () => {
         }}
         onLogout={handleLogout}
         categories={displayCategories}
-        onScrollToCategory={scrollToCategory}
+        onScrollToCategory={handleSelectCategory}
       />
 
       {/* ── Main content ──────────────────────────── */}
@@ -465,7 +477,7 @@ export const Dashboard = () => {
             <div className="cat-hero-cards">
               {/* All Products option */}
               <motion.div
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => handleSelectCategory(null)}
                 className={`cat-hero-card ${selectedCategory === null ? 'cat-hero-card--active' : ''}`}
                 style={{
                   '--card-color': '#059669',
@@ -488,7 +500,7 @@ export const Dashboard = () => {
                   key={cat.categoryId}
                   category={cat}
                   isSelected={selectedCategory === cat.categoryId || (cat.categoryIds && cat.categoryIds.includes(selectedCategory))}
-                  onClick={() => setSelectedCategory(cat.categoryId)}
+                  onClick={() => handleSelectCategory(cat.categoryId)}
                 />
               ))}
             </div>
@@ -497,6 +509,7 @@ export const Dashboard = () => {
         </div>
 
         {/* ── Category-wise Product Sections ───────── */}
+        <div id="products-catalog-section">
         {isSearchActive ? (
           /* When searching/filtering: flat grid with all matched results */
           <section className="cat-section">
@@ -568,6 +581,7 @@ export const Dashboard = () => {
             </div>
           ))
         )}
+        </div>
       </main>
 
       {/* ── Footer ───────────────────────────────── */}

@@ -116,6 +116,8 @@ const PageLoader = () => (
   </div>
 );
 
+const CategoryProductsPage = lazy(() => import('./pages/CategoryProductsPage'));
+
 function App() {
   return (
     <ErrorBoundary>
@@ -126,6 +128,7 @@ function App() {
               {/* Store & Public Routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />

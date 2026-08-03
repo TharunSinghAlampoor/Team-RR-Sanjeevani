@@ -36,6 +36,7 @@ export const Dashboard = () => {
   const [pageLoading, setPageLoading] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [favorites, setFavorites] = useState([]);
+  const [orders, setOrders] = useState([]);
   // Toast Notification state
   const [toast, setToast] = useState(null);
   // Filter / Search

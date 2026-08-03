@@ -262,11 +262,27 @@ export const Dashboard = () => {
     return Array.from(map.values());
   }, [categories, allProducts]);
 
+  const handleSearchChange = useCallback((query) => {
+    setSearchQuery(query);
+    if (query && query.trim() !== '') {
+      setSelectedCategory(null);
+    }
+  }, []);
+
   // ─── Computed: Products filtered by multi-keyword search & stock ──
   const filteredProducts = useMemo(() => {
-    let items = allProducts;
-    // Filter by selected category
-    if (selectedCategory !== null) {
+    let items = Array.isArray(allProducts) ? allProducts : [];
+
+    // If active search query exists, search across ALL products
+    if (searchQuery.trim()) {
+      const keywords = searchQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
+      items = items.filter(p => {
+        if (!p) return false;
+        const text = `${p.name || ''} ${p.brand || ''} ${p.description || ''} ${p.categoryName || ''} ${formatCategoryName(p.categoryName) || ''}`.toLowerCase();
+        return keywords.every(kw => text.includes(kw));
+      });
+    } else if (selectedCategory !== null) {
+      // Filter by selected category when not actively searching
       const targetCat = displayCategories.find(
         c => c.categoryId === selectedCategory || c.categoryName === selectedCategory || (c.categoryIds && c.categoryIds.includes(selectedCategory))
       );
@@ -274,13 +290,7 @@ export const Dashboard = () => {
         items = items.filter(p => targetCat.categoryIds.includes(p.categoryId) || formatCategoryName(p.categoryName) === targetCat.categoryName);
       }
     }
-    if (searchQuery.trim()) {
-      const keywords = searchQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
-      items = items.filter(p => {
-        const text = `${p.name || ''} ${p.brand || ''} ${p.description || ''} ${p.categoryName || ''}`.toLowerCase();
-        return keywords.every(kw => text.includes(kw));
-      });
-    }
+
     if (inStockOnly) {
       items = items.filter(p => p.stock > 0);
     }
@@ -416,7 +426,7 @@ export const Dashboard = () => {
         cartCount={cartItems.length}
         favoriteCount={favorites.length}
         searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={handleSearchChange}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenFavorites={() => setIsFavoritesOpen(true)}
         onOpenOrders={() => {

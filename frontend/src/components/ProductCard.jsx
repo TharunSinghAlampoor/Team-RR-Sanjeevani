@@ -121,27 +121,15 @@ const ProductCard = React.memo(({
 
       {/* Actions */}
       <div className="pcard__actions" style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginTop: '0.75rem' }}>
-        <div style={{ display: 'flex', gap: '0.45rem' }}>
-          <button
-            disabled={!inStock}
-            onClick={handleCart}
-            className="pcard__btn pcard__btn--cart"
-            style={{ flex: 1 }}
-          >
-            <ShoppingCart className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>Add to Cart</span>
-          </button>
-
-          <button
-            disabled={!inStock}
-            onClick={handleBuy}
-            className="pcard__btn pcard__btn--buy"
-            style={{ flex: 1 }}
-          >
-            <CreditCard className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>Buy Now</span>
-          </button>
-        </div>
+        <button
+          disabled={!inStock}
+          onClick={handleCart}
+          className="pcard__btn pcard__btn--cart"
+          style={{ width: '100%' }}
+        >
+          <ShoppingCart className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>Add to Cart</span>
+        </button>
 
         <button
           type="button"

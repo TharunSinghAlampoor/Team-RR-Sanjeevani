@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getCookie, clearSessionCookies } from '../utils/cookieUtils';
 
 const API_BASE_URL = 'http://localhost:8080/api/auth';
 
@@ -11,7 +12,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,6 +25,9 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
+      clearSessionCookies();
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.dispatchEvent(new Event('auth-unauthorized'));

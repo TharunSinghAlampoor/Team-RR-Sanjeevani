@@ -11,6 +11,10 @@ public class AuthException extends RuntimeException {
         this.status = status;
     }
 
+    public AuthException(String message) {
+        this(message, HttpStatus.BAD_REQUEST);
+    }
+
     public HttpStatus getStatus() {
         return status;
     }

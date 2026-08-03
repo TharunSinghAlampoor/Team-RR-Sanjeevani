@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Spring Security configuration for stateless JWT-based authentication.
@@ -21,14 +22,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CorsConfigurationSource corsConfigurationSource;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, CorsConfigurationSource corsConfigurationSource) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Enable CORS with custom configuration
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+
                 // Disable CSRF — stateless REST API
                 .csrf(csrf -> csrf.disable())
 
@@ -45,7 +51,11 @@ public class SecurityConfig {
                                 "/auth/forgot-password",
                                 "/auth/verify-otp",
                                 "/auth/reset-password",
-                                "/auth/dev/otps"
+                                "/auth/dev/otps",
+                                "/categories",
+                                "/categories/**",
+                                "/products",
+                                "/products/**"
                         ).permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated()

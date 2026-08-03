@@ -1,0 +1,77 @@
+package com.ecommerce.auth.controller;
+
+import com.ecommerce.auth.dto.ApiResponse;
+import com.ecommerce.auth.dto.OrderDto;
+import com.ecommerce.auth.dto.PaymentDto;
+import com.ecommerce.auth.service.RazorpayService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/payment")
+public class PaymentController {
+
+    private final RazorpayService razorpayService;
+
+    public PaymentController(RazorpayService razorpayService) {
+        this.razorpayService = razorpayService;
+    }
+
+    /**
+     * Creates a Razorpay order for the user's current cart.
+     * Does NOT create a database order.
+     */
+    @PostMapping("/create-order")
+    public ResponseEntity<ApiResponse<PaymentDto>> createOrder(
+            @AuthenticationPrincipal Integer userId) {
+        PaymentDto paymentDto = razorpayService.createRazorpayOrder(userId);
+        return ResponseEntity.ok(ApiResponse.success("Razorpay order created", paymentDto));
+    }
+
+    /**
+     * Verifies Razorpay payment signature and places the order.
+     * Only after successful verification: order is created, stock reduced, cart cleared.
+     */
+    @PostMapping("/verify")
+    public ResponseEntity<ApiResponse<OrderDto>> verifyPayment(
+            @AuthenticationPrincipal Integer userId,
+            @RequestBody PaymentDto paymentDto) {
+        OrderDto order = razorpayService.verifyAndPlaceOrder(userId, paymentDto);
+        return ResponseEntity.ok(ApiResponse.success("Payment verified and order placed successfully", order));
+    }
+
+    /**
+     * Creates a Razorpay order for Buy Now (single product).
+     */
+    @PostMapping("/create-buy-now-order")
+    public ResponseEntity<ApiResponse<PaymentDto>> createBuyNowOrder(
+            @AuthenticationPrincipal Integer userId,
+            @RequestParam Integer productId,
+            @RequestParam(defaultValue = "1") Integer quantity) {
+        PaymentDto paymentDto = razorpayService.createBuyNowRazorpayOrder(userId, productId, quantity);
+        return ResponseEntity.ok(ApiResponse.success("Razorpay Buy Now order created", paymentDto));
+    }
+
+    /**
+     * Verifies Razorpay payment signature and places Buy Now order.
+     */
+    @PostMapping("/verify-buy-now")
+    public ResponseEntity<ApiResponse<OrderDto>> verifyBuyNowPayment(
+            @AuthenticationPrincipal Integer userId,
+            @RequestBody PaymentDto paymentDto) {
+        OrderDto order = razorpayService.verifyAndPlaceBuyNowOrder(userId, paymentDto);
+        return ResponseEntity.ok(ApiResponse.success("Buy Now payment verified and order placed successfully", order));
+    }
+
+    /**
+     * Records a failed or cancelled payment attempt in the database.
+     */
+    @PostMapping("/record-failure")
+    public ResponseEntity<ApiResponse<String>> recordPaymentFailure(
+            @AuthenticationPrincipal Integer userId,
+            @RequestBody PaymentDto paymentDto) {
+        razorpayService.recordPaymentFailure(userId, paymentDto);
+        return ResponseEntity.ok(ApiResponse.success("Failed payment recorded", "Recorded successfully"));
+    }
+}

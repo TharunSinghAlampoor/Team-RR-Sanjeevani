@@ -1,208 +1,626 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import authService from '../api/authService';
+import shopService from '../api/shopService';
 
-/* ─── Simple Inline Icons ─── */
-const icons = {
-  stethoscope: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/>
-      <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/>
-      <circle cx="20" cy="10" r="2"/>
-    </svg>
-  ),
-  pill: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m10.5 1.5 3 3-8 8-3-3a4.24 4.24 0 0 1 0-6 4.24 4.24 0 0 1 6 0z"/>
-      <line x1="10" y1="5" x2="19" y2="14"/>
-    </svg>
-  ),
-  fileText: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-      <polyline points="14 2 14 8 20 8"/>
-    </svg>
-  ),
-  shieldAlert: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      <line x1="12" y1="8" x2="12" y2="12"/>
-      <line x1="12" y1="16" x2="12.01" y2="16"/>
-    </svg>
-  )
-};
+import Navbar from '../components/Navbar';
+import HeroBanner from '../components/HeroBanner';
+import CategorySection from '../components/CategorySection';
+import CategoryCard, { formatCategoryName } from '../components/CategoryCard';
+import ProductCard from '../components/ProductCard';
+import DashboardFooter from '../components/DashboardFooter';
 
+// Direct modal & drawer imports for instant UI responsiveness
+import ProductDetailsModal from '../components/ProductDetailsModal';
+import CartDrawer from '../components/CartDrawer';
+import FavoritesDrawer from '../components/FavoritesDrawer';
+import BuyNowModal from '../components/BuyNowModal';
+import CheckoutModal from '../components/CheckoutModal';
+import OrdersModal from '../components/OrdersModal';
+import OrderSuccessModal from '../components/OrderSuccessModal';
 
-
-/* ─── SVG Background Elements ─── */
-const FloatingLeaf = ({ style, delay = 0, size = 24 }) => (
-  <svg
-    className="floating-health-element floating-leaf"
-    style={{ ...style, animationDelay: `${delay}s` }}
-    width={size} height={size} viewBox="0 0 24 24" fill="none"
-  >
-    <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20c4 0 8.5-3 9-8 .5-5-2-8-2-8z"
-      fill="rgba(16, 185, 129, 0.12)" stroke="rgba(16, 185, 129, 0.25)" strokeWidth="1"/>
-    <path d="M2 2s7.5 1.5 9 5c1.5 3.5 1 6.5 0 9" stroke="rgba(16, 185, 129, 0.2)" strokeWidth="1" fill="none"/>
-  </svg>
-);
-
-const FloatingCross = ({ style, delay = 0, size = 20 }) => (
-  <svg
-    className="floating-health-element floating-cross"
-    style={{ ...style, animationDelay: `${delay}s` }}
-    width={size} height={size} viewBox="0 0 24 24" fill="none"
-  >
-    <rect x="9" y="2" width="6" height="20" rx="2" fill="rgba(6, 182, 212, 0.1)" stroke="rgba(6, 182, 212, 0.2)" strokeWidth="1"/>
-    <rect x="2" y="9" width="20" height="6" rx="2" fill="rgba(6, 182, 212, 0.1)" stroke="rgba(6, 182, 212, 0.2)" strokeWidth="1"/>
-  </svg>
-);
-
-const FloatingCapsule = ({ style, delay = 0, size = 22 }) => (
-  <svg
-    className="floating-health-element floating-capsule"
-    style={{ ...style, animationDelay: `${delay}s` }}
-    width={size} height={size} viewBox="0 0 24 24" fill="none"
-  >
-    <path d="M5.12 17.88L17.88 5.12a4 4 0 0 1 0 5.66L10.78 17.88a4 4 0 0 1-5.66 0z"
-      fill="rgba(16, 185, 129, 0.08)" stroke="rgba(16, 185, 129, 0.22)" strokeWidth="1"/>
-    <line x1="11.5" y1="11.5" x2="17.88" y2="5.12" stroke="rgba(6, 182, 212, 0.15)" strokeWidth="1"/>
-  </svg>
-);
-
-const FloatingHeartbeat = ({ style, delay = 0 }) => (
-  <svg
-    className="floating-health-element floating-heartbeat"
-    style={{ ...style, animationDelay: `${delay}s` }}
-    width="80" height="30" viewBox="0 0 80 30" fill="none"
-  >
-    <polyline
-      points="0,15 15,15 20,5 25,25 30,10 35,20 40,15 55,15 60,5 65,25 70,15 80,15"
-      stroke="rgba(16, 185, 129, 0.15)"
-      strokeWidth="1.5"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="heartbeat-line"
-    />
-  </svg>
-);
-
-const FloatingDNA = ({ style, delay = 0 }) => (
-  <svg
-    className="floating-health-element floating-dna"
-    style={{ ...style, animationDelay: `${delay}s` }}
-    width="24" height="60" viewBox="0 0 24 60" fill="none"
-  >
-    <path d="M4 0C4 0 4 15 12 15S20 30 20 30S20 45 12 45S4 60 4 60"
-      stroke="rgba(16, 185, 129, 0.18)" strokeWidth="1.2" fill="none"/>
-    <path d="M20 0C20 0 20 15 12 15S4 30 4 30S4 45 12 45S20 60 20 60"
-      stroke="rgba(6, 182, 212, 0.15)" strokeWidth="1.2" fill="none"/>
-    <line x1="6" y1="7" x2="18" y2="7" stroke="rgba(255,255,255,0.05)" strokeWidth="0.8"/>
-    <line x1="5" y1="15" x2="19" y2="15" stroke="rgba(255,255,255,0.05)" strokeWidth="0.8"/>
-    <line x1="6" y1="23" x2="18" y2="23" stroke="rgba(255,255,255,0.05)" strokeWidth="0.8"/>
-    <line x1="5" y1="37" x2="19" y2="37" stroke="rgba(255,255,255,0.05)" strokeWidth="0.8"/>
-    <line x1="6" y1="53" x2="18" y2="53" stroke="rgba(255,255,255,0.05)" strokeWidth="0.8"/>
-  </svg>
-);
+import { Search, SlidersHorizontal, RotateCcw, LayoutGrid } from 'lucide-react';
 
 export const Dashboard = () => {
-  const { user, logout } = useAuth();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem('dashboard-theme') || 'dark');
+  const { user, logout, updateShoppingState } = useAuth();
   const navigate = useNavigate();
 
-  // Close dropdowns
-  useEffect(() => {
-    const handler = (e) => {
-      if (showDropdown && !e.target.closest('.navbar-profile-container')) setShowDropdown(false);
-    };
-    document.addEventListener('click', handler);
-    return () => document.removeEventListener('click', handler);
-  }, [showDropdown]);
+  // Data States
+  const [categories, setCategories] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
-  const toggleTheme = () => {
-    const nextTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(nextTheme);
-    localStorage.setItem('dashboard-theme', nextTheme);
-  };
+  // Filter / Search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  // Loading
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  // Modal / Drawer States
+  const [selectedProductDetails, setSelectedProductDetails] = useState(null);
+  const [buyNowTargetProduct, setBuyNowTargetProduct] = useState(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const [completedOrder, setCompletedOrder] = useState(null);
+  const [isProcessingOrder, setIsProcessingOrder] = useState(false);
+
+  // Favorites lookup map
+  const favoritesMap = useMemo(() => {
+    const map = {};
+    const favList = Array.isArray(favorites) ? favorites : [];
+    favList.forEach((item) => {
+      if (!item) return;
+      const pId = item.productId || item.product?.productId;
+      if (pId) map[pId] = true;
+    });
+    return map;
+  }, [favorites]);
 
   const handleLogout = async () => {
-    setIsLoggingOut(true);
     try { await authService.logout(); } catch {}
     finally { logout(); navigate('/login'); }
   };
 
+  // ─── Data Fetchers ───────────────────────────────────────────────
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await shopService.getCategories();
+      if (res && res.success && Array.isArray(res.data)) {
+        setCategories(res.data);
+      } else {
+        setCategories([]);
+      }
+    } catch (e) {
+      console.error('Fetch categories:', e);
+      setCategories([]);
+    }
+  }, []);
+
+  const fetchAllProducts = useCallback(async () => {
+    setLoadingProducts(true);
+    try {
+      const res = await shopService.getProducts({});
+      if (res && res.success && Array.isArray(res.data)) {
+        // Fisher-Yates shuffle to randomize product order
+        const shuffled = [...res.data];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        setAllProducts(shuffled);
+      } else {
+        setAllProducts([]);
+      }
+    } catch (e) {
+      console.error('Fetch products:', e);
+      setAllProducts([]);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }, []);
+
+  const fetchCart = useCallback(async () => {
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!activeToken) return;
+    try {
+      const res = await shopService.getCart();
+      if (res && res.success && Array.isArray(res.data)) {
+        setCartItems(res.data);
+      }
+    } catch (e) { /* Ignore 401 for guest sessions */ }
+  }, []);
+
+  const fetchFavorites = useCallback(async () => {
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!activeToken) return;
+    try {
+      const res = await shopService.getFavorites();
+      if (res && res.success && Array.isArray(res.data)) {
+        setFavorites(res.data);
+      }
+    } catch (e) { /* Ignore 401 for guest sessions */ }
+  }, []);
+
+  const fetchOrders = useCallback(async () => {
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!activeToken) return;
+    try {
+      const res = await shopService.getOrders();
+      if (res && res.success && Array.isArray(res.data)) {
+        setOrders(res.data);
+      }
+    } catch (e) { /* Ignore 401 for guest sessions */ }
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    fetchCategories();
+    fetchAllProducts();
+    fetchCart();
+    fetchFavorites();
+    fetchOrders();
+  }, [fetchCategories, fetchAllProducts, fetchCart, fetchFavorites, fetchOrders]);
+
+  // Sync shopping counts to cookies whenever cart or favorites change
+  useEffect(() => {
+    const safeCartCount = Array.isArray(cartItems) ? cartItems.length : 0;
+    const safeFavCount = Array.isArray(favorites) ? favorites.length : 0;
+    if (typeof updateShoppingState === 'function') {
+      updateShoppingState(safeCartCount, safeFavCount);
+    }
+  }, [cartItems, favorites, updateShoppingState]);
+
+  // ─── Deep Link Product Purchase Auto-Open ─────────────────────
+  useEffect(() => {
+    const safeProducts = Array.isArray(allProducts) ? allProducts : [];
+    if (safeProducts.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const targetId = params.get('productId') || params.get('buy') || params.get('product');
+    if (targetId) {
+      const found = safeProducts.find(p => p && String(p.productId) === String(targetId));
+      if (found) {
+        handleOpenDetails(found);
+      }
+    }
+  }, [allProducts]);
+
+  // ─── Live API Search Sync ─────────────────────────────────────
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await shopService.getProducts({
+          search: searchQuery.trim(),
+          inStock: inStockOnly || undefined,
+        });
+        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setAllProducts(prev => {
+            const map = new Map();
+            const safePrev = Array.isArray(prev) ? prev : [];
+            res.data.forEach(p => { if (p) map.set(p.productId, p); });
+            safePrev.forEach(p => { if (p && !map.has(p.productId)) map.set(p.productId, p); });
+            return Array.from(map.values());
+          });
+        }
+      } catch (e) { console.error('Search sync:', e); }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, inStockOnly]);
+
+  // ─── Deduplicated Unique Categories for Display (with Automatic Fallbacks) ───
+  const displayCategories = useMemo(() => {
+    const map = new Map();
+    const safeCategories = Array.isArray(categories) ? categories : [];
+    const safeProducts = Array.isArray(allProducts) ? allProducts : [];
+
+    // 1. Process API categories if present
+    if (safeCategories.length > 0) {
+      safeCategories.forEach(cat => {
+        if (!cat || !cat.categoryName) return;
+        const formatted = formatCategoryName(cat.categoryName);
+        if (!map.has(formatted)) {
+          map.set(formatted, {
+            ...cat,
+            categoryName: formatted,
+            categoryIds: [cat.categoryId],
+            productCount: cat.productCount || 0,
+          });
+        } else {
+          const existing = map.get(formatted);
+          if (cat.categoryId && !existing.categoryIds.includes(cat.categoryId)) {
+            existing.categoryIds.push(cat.categoryId);
+          }
+          existing.productCount += (cat.productCount || 0);
+        }
+      });
+    }
+
+    // 2. Fallback to categories derived from allProducts if API categories is empty
+    if (map.size === 0 && safeProducts.length > 0) {
+      safeProducts.forEach(p => {
+        if (!p) return;
+        const rawName = p.categoryName || 'Prescriptions & Pharmacy';
+        const formatted = formatCategoryName(rawName);
+        if (!map.has(formatted)) {
+          map.set(formatted, {
+            categoryId: p.categoryId || 1,
+            categoryName: formatted,
+            categoryIds: [p.categoryId || 1],
+            productCount: 1,
+          });
+        } else {
+          const existing = map.get(formatted);
+          if (p.categoryId && !existing.categoryIds.includes(p.categoryId)) {
+            existing.categoryIds.push(p.categoryId);
+          }
+          existing.productCount += 1;
+        }
+      });
+    }
+
+    // 3. Ultimate Fallback to standard healthcare categories if still empty
+    if (map.size === 0) {
+      const DEFAULT_CATS = [
+        { categoryId: 1, categoryName: 'Prescriptions & Pharmacy', categoryIds: [1], productCount: 0 },
+        { categoryId: 2, categoryName: 'Nutrition & Health', categoryIds: [2], productCount: 0 },
+        { categoryId: 3, categoryName: 'Medical Devices', categoryIds: [3], productCount: 0 },
+        { categoryId: 4, categoryName: "Kid's Essentials", categoryIds: [4], productCount: 0 },
+        { categoryId: 5, categoryName: 'Dermocosmetics (Skin Care)', categoryIds: [5], productCount: 0 },
+      ];
+      DEFAULT_CATS.forEach(c => map.set(c.categoryName, c));
+    }
+
+    return Array.from(map.values());
+  }, [categories, allProducts]);
+
+  // ─── Computed: Products filtered by multi-keyword search & stock ──
+  const filteredProducts = useMemo(() => {
+    let items = allProducts;
+    // Filter by selected category
+    if (selectedCategory !== null) {
+      const targetCat = displayCategories.find(
+        c => c.categoryId === selectedCategory || c.categoryName === selectedCategory || (c.categoryIds && c.categoryIds.includes(selectedCategory))
+      );
+      if (targetCat) {
+        items = items.filter(p => targetCat.categoryIds.includes(p.categoryId) || formatCategoryName(p.categoryName) === targetCat.categoryName);
+      }
+    }
+    if (searchQuery.trim()) {
+      const keywords = searchQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
+      items = items.filter(p => {
+        const text = `${p.name || ''} ${p.brand || ''} ${p.description || ''} ${p.categoryName || ''}`.toLowerCase();
+        return keywords.every(kw => text.includes(kw));
+      });
+    }
+    if (inStockOnly) {
+      items = items.filter(p => p.stock > 0);
+    }
+    return items;
+  }, [allProducts, searchQuery, inStockOnly, selectedCategory, displayCategories]);
+
+  // Group products by category
+  const productsByCategory = useMemo(() => {
+    const map = {};
+    displayCategories.forEach(cat => { map[cat.categoryName] = []; });
+    filteredProducts.forEach(product => {
+      const formattedCat = formatCategoryName(product.categoryName);
+      if (map[formattedCat]) {
+        map[formattedCat].push(product);
+      } else if (displayCategories.length > 0) {
+        const fallbackCatName = displayCategories[0].categoryName;
+        if (!map[fallbackCatName]) map[fallbackCatName] = [];
+        map[fallbackCatName].push(product);
+      }
+    });
+    return map;
+  }, [displayCategories, filteredProducts]);
+
+  const isSearchActive = searchQuery.trim() !== '' || inStockOnly || selectedCategory !== null;
+  const totalFiltered = filteredProducts.length;
+
+  // ─── Cart Handlers ────────────────────────────────────────────────
+  const handleAddToCart = async (productId, quantity = 1) => {
+    try {
+      const res = await shopService.addToCart(productId, quantity);
+      if (res.success) { fetchCart(); }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to add to cart.');
+    }
+  };
+
+  const handleUpdateCartQuantity = async (cartItemId, newQty) => {
+    try {
+      const res = await shopService.updateCartItem(cartItemId, newQty);
+      if (res.success) fetchCart();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleRemoveCartItem = async (cartItemId) => {
+    try {
+      const res = await shopService.removeCartItem(cartItemId);
+      if (res.success) fetchCart();
+    } catch (err) { console.error(err); }
+  };
+
+  // ─── Favorite Handlers ────────────────────────────────────────────
+  const handleToggleFavorite = async (productId) => {
+    try {
+      const res = await shopService.toggleFavorite(productId);
+      if (res.success) {
+        await fetchFavorites();
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const handleRemoveFavorite = async (productId) => {
+    // Optimistically remove from state for instant UI responsiveness
+    setFavorites((prev) => prev.filter((item) => (item.productId || item.product?.productId) !== productId));
+    try {
+      await shopService.removeFavorite(productId);
+      await fetchFavorites();
+    } catch (err) {
+      console.error('Remove favorite error:', err);
+      await fetchFavorites();
+    }
+  };
+
+  // ─── Product Details Handler ──────────────────────────────────────
+  const handleOpenDetails = async (product) => {
+    setSelectedProductDetails(product);
+    try {
+      const res = await shopService.getRelatedProducts(product.productId);
+      if (res.success) setRelatedProducts(res.data || []);
+    } catch { setRelatedProducts([]); }
+  };
+
+  // ─── Buy Now Handlers ─────────────────────────────────────────────
+  const handleStartBuyNow = (product) => setBuyNowTargetProduct(product);
+
+  const handleConfirmBuyNow = async (payload) => {
+    setIsProcessingOrder(true);
+    try {
+      const res = await shopService.buyNow(payload);
+      if (res.success) {
+        setBuyNowTargetProduct(null);
+        fetchOrders();
+        fetchAllProducts();
+        alert(`✅ Order Placed! Order ID: ${res.data.orderId}`);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Buy Now failed.');
+    } finally { setIsProcessingOrder(false); }
+  };
+
+  // ─── Cart Checkout / Buy Now (Razorpay Payment Success) ──────────────
+  const handlePaymentSuccess = (orderData) => {
+    setIsCheckoutOpen(false);
+    setIsCartOpen(false);
+    setBuyNowTargetProduct(null);
+    fetchCart();
+    fetchOrders();
+    fetchAllProducts();
+    setCompletedOrder(orderData);
+  };
+
+  const handleCategorySelectFromBanner = (catName) => {
+    const el = document.getElementById(`cat-section-${catName.replace(/\s+/g, '-').toLowerCase()}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const resetFilters = () => {
+    setSearchQuery('');
+    setInStockOnly(false);
+    setSelectedCategory(null);
+  };
+
+  const scrollToCategory = (catName) => {
+    const id = `cat-section-${catName.replace(/\s+/g, '-').toLowerCase()}`;
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <div className={`launch-page dashboard-page theme-${theme}`}>
-      {/* Navbar */}
-      <nav className={`dashboard-navbar theme-${theme}`}>
-        <div className="navbar-logo" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/sanjeevani_symbol.png" alt="Sanjeevani Logo" className="dashboard-logo-img" />
-          <img src="/sanjeevani_text_transparent.png" alt="Sanjeevani" className="dashboard-logo-text-img" style={{ height: '38px', objectFit: 'contain' }} />
-        </div>
+    <div className="dashboard-page light">
+      {/* ── Sticky Navbar ─────────────────────────── */}
+      <Navbar
+        user={user}
+        cartCount={cartItems.length}
+        favoriteCount={favorites.length}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onOpenCart={() => setIsCartOpen(true)}
+        onOpenFavorites={() => setIsFavoritesOpen(true)}
+        onOpenOrders={() => {
+          fetchOrders();
+          setIsOrdersOpen(true);
+        }}
+        onLogout={handleLogout}
+        categories={displayCategories}
+        onScrollToCategory={scrollToCategory}
+      />
 
-        <div className="navbar-controls-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Theme Toggle Button */}
-          <button 
-            type="button" 
-            className="theme-toggle-btn" 
-            onClick={toggleTheme}
-            title={theme === 'light' ? "Switch to Dark Mode" : "Switch to Light Mode"}
+      {/* ── Main content ──────────────────────────── */}
+      <main className="dashboard-main">
+
+        {/* ── Shop by Category Row ────────────────────── */}
+        {displayCategories.length > 0 && (
+          <motion.div
+            className="cat-hero-row"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
           >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
+            <div className="cat-hero-row__header">
+              <h2 className="cat-hero-row__title">🏪 Shop by Category</h2>
+              <p className="cat-hero-row__subtitle">Explore our curated healthcare product categories</p>
+            </div>
+            <div className="cat-hero-cards">
+              {/* All Products option */}
+              <motion.div
+                onClick={() => setSelectedCategory(null)}
+                className={`cat-hero-card ${selectedCategory === null ? 'cat-hero-card--active' : ''}`}
+                style={{
+                  '--card-color': '#059669',
+                  '--card-bg': 'transparent',
+                  '--card-ring': '#6ee7b7',
+                }}
+                whileHover={{ y: -6, scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="cat-hero-card__icon-wrap">
+                  <div className="cat-hero-card__icon-fallback" style={{ display: 'flex' }}>
+                    <LayoutGrid style={{ color: '#059669', width: 28, height: 28 }} />
+                  </div>
+                </div>
+                <p className="cat-hero-card__name">All Products</p>
+              </motion.div>
+              {displayCategories.map((cat) => (
+                <CategoryCard
+                  key={cat.categoryId}
+                  category={cat}
+                  isSelected={selectedCategory === cat.categoryId || (cat.categoryIds && cat.categoryIds.includes(selectedCategory))}
+                  onClick={() => setSelectedCategory(cat.categoryId)}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
 
-          <div className="navbar-profile-container">
-            <button type="button" className="profile-emoji-btn" onClick={() => setShowDropdown(!showDropdown)}>
-              👤
-          </button>
-          {showDropdown && (
-            <div className="profile-dropdown">
-              <div className="dropdown-header"><h4>User Profile</h4></div>
-              <div className="dropdown-info">
-                <div className="dropdown-field">
-                  <span className="field-label">Full Name</span>
-                  <span className="field-value">{user?.fullName || 'N/A'}</span>
+        {/* ── Category-wise Product Sections ───────── */}
+        {isSearchActive ? (
+          /* When searching/filtering: flat grid with all matched results */
+          <section className="cat-section">
+            <div className="cat-section__header" style={{ borderLeftColor: '#059669' }}>
+              <div className="cat-section__title-group">
+                <div className="cat-section__icon-wrap" style={{ background: '#d1fae5' }}>
+                  <Search style={{ color: '#059669', width: 22, height: 22 }} />
                 </div>
-                <div className="dropdown-field">
-                  <span className="field-label">Email Address</span>
-                  <span className="field-value">{user?.email || 'N/A'}</span>
+                <div>
+                  <h2 className="cat-section__title">
+                    {selectedCategory && !searchQuery.trim()
+                      ? displayCategories.find(c => c.categoryId === selectedCategory || c.categoryIds?.includes(selectedCategory))?.categoryName || 'Category'
+                      : 'Search Results'}
+                  </h2>
                 </div>
-                <div className="dropdown-field">
-                  <span className="field-label">Phone Number</span>
-                  <span className="field-value">{user?.phoneNumber || user?.mobileNumber || 'N/A'}</span>
-                </div>
-              </div>
-              <div className="dropdown-divider"></div>
-              <div className="dropdown-actions">
-                <button onClick={() => { setShowDropdown(false); navigate('/change-password'); }} className="dropdown-btn">
-                  🔑 Change Password
-                </button>
-                <button onClick={handleLogout} className="dropdown-btn logout-btn" disabled={isLoggingOut}>
-                  {isLoggingOut ? 'Logging Out...' : '🚪 Log Out'}
-                </button>
               </div>
             </div>
-          )}
-        </div>
-      </div>
-    </nav>
-
-      {/* Main dashboard content area */}
-      <main className="dashboard-content">
-        <div className="dashboard-hero-card">
-          <div className="launch-badge">🏥 Welcome to Sanjeevani Portal</div>
-          <h1 className="launch-title">
-            Welcome back, <span className="shimmer-text">{user?.fullName || 'Patient'}</span>
-          </h1>
-          <p className="launch-subtitle">
-            Manage consultations, pharmacy prescriptions, and lab test orders from one integrated dashboard.
-          </p>
-        </div>
+            <div className="cat-section__divider" style={{ background: 'linear-gradient(90deg, #05966940, transparent)' }} />
+            <div className="cat-section__grid">
+              {loadingProducts
+                ? Array.from({ length: 10 }).map((_, i) => (
+                    <div key={i} className="pcard pcard--skeleton">
+                      <div className="pcard-skel-img" />
+                      <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div className="pcard-skel-line" style={{ width: '45%', height: 8 }} />
+                        <div className="pcard-skel-line" style={{ width: '85%', height: 10 }} />
+                        <div className="pcard-skel-line" style={{ width: '60%', height: 8 }} />
+                      </div>
+                    </div>
+                  ))
+                : filteredProducts.map((product, i) => (
+                    <ProductCard
+                      key={product.productId}
+                      product={product}
+                      index={i}
+                      isFavorite={!!favoritesMap[product.productId]}
+                      onToggleFavorite={handleToggleFavorite}
+                      onAddToCart={handleAddToCart}
+                      onBuyNow={handleStartBuyNow}
+                      onOpenDetails={handleOpenDetails}
+                    />
+                  ))
+              }
+            </div>
+            {!loadingProducts && filteredProducts.length === 0 && (
+              <div className="cat-section__empty">
+                <Search style={{ color: '#94a3b8', width: 44, height: 44, opacity: 0.4 }} />
+                <p>No products found{searchQuery ? ` matching "${searchQuery}"` : ' in this category'}.</p>
+              </div>
+            )}
+          </section>
+        ) : (
+          /* Default: one section per category */
+          displayCategories.map(category => (
+            <div
+              key={category.categoryId}
+              id={`cat-section-${category.categoryName.replace(/\s+/g, '-').toLowerCase()}`}
+            >
+              <CategorySection
+                category={category}
+                products={productsByCategory[category.categoryName] || []}
+                loading={loadingProducts}
+                favoritesMap={favoritesMap}
+                onToggleFavorite={handleToggleFavorite}
+                onAddToCart={handleAddToCart}
+                onBuyNow={handleStartBuyNow}
+                onOpenDetails={handleOpenDetails}
+              />
+            </div>
+          ))
+        )}
       </main>
+
+      {/* ── Footer ───────────────────────────────── */}
+      <DashboardFooter />
+
+      {/* ── Modals & Drawers ──────────────────────── */}
+      <React.Suspense fallback={null}>
+        {selectedProductDetails && (
+          <ProductDetailsModal
+            product={selectedProductDetails}
+            relatedProducts={relatedProducts}
+            isFavorite={!!favoritesMap[selectedProductDetails.productId]}
+            onClose={() => setSelectedProductDetails(null)}
+            onToggleFavorite={handleToggleFavorite}
+            onAddToCart={handleAddToCart}
+            onBuyNow={handleStartBuyNow}
+            onSelectProduct={handleOpenDetails}
+          />
+        )}
+
+        {isCartOpen && (
+          <CartDrawer
+            cartItems={cartItems}
+            onClose={() => setIsCartOpen(false)}
+            onUpdateQuantity={handleUpdateCartQuantity}
+            onRemoveItem={handleRemoveCartItem}
+            onCheckout={() => { setIsCartOpen(false); setIsCheckoutOpen(true); }}
+          />
+        )}
+
+        {isFavoritesOpen && (
+          <FavoritesDrawer
+            favorites={favorites}
+            onClose={() => setIsFavoritesOpen(false)}
+            onRemoveFavorite={handleRemoveFavorite}
+            onAddToCart={handleAddToCart}
+          />
+        )}
+
+        {buyNowTargetProduct && (
+          <BuyNowModal
+            product={buyNowTargetProduct}
+            onClose={() => setBuyNowTargetProduct(null)}
+            onPaymentSuccess={handlePaymentSuccess}
+          />
+        )}
+
+        {isCheckoutOpen && (
+          <CheckoutModal
+            cartItems={cartItems}
+            onClose={() => setIsCheckoutOpen(false)}
+            onPaymentSuccess={handlePaymentSuccess}
+          />
+        )}
+
+        {isOrdersOpen && (
+          <OrdersModal
+            orders={orders}
+            onClose={() => setIsOrdersOpen(false)}
+          />
+        )}
+
+        {completedOrder && (
+          <OrderSuccessModal
+            order={completedOrder}
+            onClose={() => setCompletedOrder(null)}
+            onOpenOrders={() => {
+              setCompletedOrder(null);
+              setIsOrdersOpen(true);
+            }}
+          />
+        )}
+      </React.Suspense>
     </div>
   );
 };

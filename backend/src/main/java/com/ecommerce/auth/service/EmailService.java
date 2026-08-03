@@ -42,4 +42,45 @@ public class EmailService {
             logger.info("═══════════════════════════════════════════");
         }
     }
+
+    public void sendOrderInvoiceEmail(String toEmail, String orderId, Double totalAmount, String paymentId, String referenceNumber) {
+        String recipient = (toEmail != null && !toEmail.isBlank()) ? toEmail : "customer@sanjeevani.com";
+        String subject = "Sanjeevani Healthcare - Official Tax Invoice for Order " + orderId;
+        String body = String.format(
+            "Dear Customer,\n\n" +
+            "Thank you for shopping with Sanjeevani Healthcare!\n" +
+            "Here are your invoice details:\n\n" +
+            "Order ID: %s\n" +
+            "Grand Total: ₹%.2f\n" +
+            "Payment ID: %s\n" +
+            "Reference Number: %s\n" +
+            "Status: PAID / COMPLETED\n\n" +
+            "If you have any questions, reach out to support@sanjeevani.com.\n\n" +
+            "Best regards,\n" +
+            "Sanjeevani Healthcare Team",
+            orderId, (totalAmount != null ? totalAmount : 0.0), 
+            (paymentId != null ? paymentId : "pay_verified"), 
+            (referenceNumber != null ? referenceNumber : "ref_verified")
+        );
+
+        if (mailSender == null) {
+            logger.warn("JavaMailSender is not configured. Console log invoice email fallback.");
+            logger.info("═══════════════════════════════════════════");
+            logger.info(" [Console Fallback] Tax Invoice Email sent to {}:\n{}", recipient, body);
+            logger.info("═══════════════════════════════════════════");
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("invoices@sanjeevani.com");
+            message.setTo(recipient);
+            message.setSubject(subject);
+            message.setText(body);
+            mailSender.send(message);
+            logger.info("Tax Invoice Email sent successfully to {}", recipient);
+        } catch (Exception e) {
+            logger.error("Failed to send Tax Invoice Email to {}: {}", recipient, e.getMessage());
+        }
+    }
 }

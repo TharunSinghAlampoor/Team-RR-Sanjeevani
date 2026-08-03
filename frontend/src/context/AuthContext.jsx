@@ -1,39 +1,92 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import authService from '../api/authService';
+import {
+  saveSessionCookies,
+  loadSessionCookies,
+  clearSessionCookies,
+  saveShoppingState,
+  loadShoppingState,
+} from '../utils/cookieUtils';
 
 const AuthContext = createContext(null);
+
+// ── Force immediate clean up of localStorage ─────────────────────
+(function cleanLocalStorageOnModuleLoad() {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const raw = localStorage.getItem('user');
+    if (raw && (raw.startsWith('{') || raw.startsWith('['))) {
+      try {
+        const parsed = JSON.parse(raw);
+        const name = parsed.fullName || parsed.name || parsed.email || '';
+        localStorage.setItem('user', name);
+      } catch (e) {
+        localStorage.removeItem('user');
+      }
+    }
+  }
+})();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Shopping state cached from cookies for instant badge display
+  const [cachedCartCount, setCachedCartCount] = useState(0);
+  const [cachedFavoritesCount, setCachedFavoritesCount] = useState(0);
+
   useEffect(() => {
-    // Load persisted session on app startup
     const loadSession = async () => {
-      const storedToken = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
+      // 1. Try loading from sessionStorage first, then localStorage
+      let localToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+      let localUserName = sessionStorage.getItem('user') || localStorage.getItem('user');
 
-      if (storedToken && storedUser) {
-        setToken(storedToken);
-        
-        // Migrate / parse storedUser to get the name
-        let name = storedUser;
-        if (storedUser.trim().startsWith('{') && storedUser.trim().endsWith('}')) {
-          try {
-            const parsed = JSON.parse(storedUser);
-            name = parsed.fullName || name;
-          } catch (e) {}
+      // If localUserName was stored as JSON, extract just the name string
+      if (localUserName && (localUserName.startsWith('{') || localUserName.startsWith('['))) {
+        try {
+          const parsed = JSON.parse(localUserName);
+          localUserName = parsed.fullName || parsed.name || parsed.email || '';
+        } catch (e) {
+          localUserName = '';
         }
-        
-        // Update local storage to only contain the plain name string
-        localStorage.setItem('user', name);
-        setUser({ fullName: name });
+      }
 
+      // 2. Fallback to session cookies if sessionStorage/localStorage is empty
+      if (!localToken || !localUserName) {
+        const cookieSession = loadSessionCookies();
+        if (cookieSession && cookieSession.token) {
+          localToken = cookieSession.token;
+          localUserName = cookieSession.userName;
+        }
+      }
+
+      if (localToken && localUserName) {
+        setToken(localToken);
+        setUser({ fullName: localUserName });
+
+        // Save token and user name in sessionStorage (and sync localStorage + cookies)
+        sessionStorage.setItem('token', localToken);
+        sessionStorage.setItem('user', localUserName);
+        localStorage.setItem('token', localToken);
+        localStorage.setItem('user', localUserName);
+        saveSessionCookies(localUserName, localToken);
+
+        // Load cached shopping counts for instant badge display
+        const shopping = loadShoppingState();
+        setCachedCartCount(shopping.cartCount);
+        setCachedFavoritesCount(shopping.favoritesCount);
+
+        // Fetch fresh full profile from API
         try {
           const response = await authService.getCurrentUser();
           if (response.success && response.data) {
             setUser(response.data);
+            const freshName = response.data.fullName || response.data.email || localUserName;
+            sessionStorage.setItem('token', localToken);
+            sessionStorage.setItem('user', freshName);
+            localStorage.setItem('token', localToken);
+            localStorage.setItem('user', freshName);
+            saveSessionCookies(freshName, localToken);
           }
         } catch (err) {
           if (err.response && err.response.status === 401) {
@@ -58,17 +111,42 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const saveSession = (userData, jwtToken) => {
+    // Extract display name string only
+    const userName = typeof userData === 'string'
+      ? userData
+      : (userData.fullName || userData.name || userData.email || '');
+
+    // Set sessionStorage (JWT Token + User Name String)
+    sessionStorage.setItem('token', jwtToken);
+    sessionStorage.setItem('user', userName);
+
+    // Sync localStorage & cookies
     localStorage.setItem('token', jwtToken);
-    localStorage.setItem('user', userData.fullName);
+    localStorage.setItem('user', userName);
+    saveSessionCookies(userName, jwtToken);
+
+    // Update state
     setToken(jwtToken);
     setUser(userData);
   };
 
   const clearSession = () => {
+    clearSessionCookies();
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
+    setCachedCartCount(0);
+    setCachedFavoritesCount(0);
+  };
+
+  // Called by Dashboard to sync shopping counts to cookies
+  const updateShoppingState = (cartCount, favoritesCount) => {
+    setCachedCartCount(cartCount);
+    setCachedFavoritesCount(favoritesCount);
+    saveShoppingState({ cartCount, favoritesCount });
   };
 
   const login = (userData, jwtToken) => {
@@ -84,6 +162,9 @@ export const AuthProvider = ({ children }) => {
     token,
     loading,
     isAuthenticated: !!token,
+    cachedCartCount,
+    cachedFavoritesCount,
+    updateShoppingState,
     login,
     logout,
   };

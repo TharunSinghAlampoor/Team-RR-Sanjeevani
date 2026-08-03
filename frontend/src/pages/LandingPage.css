@@ -18,34 +18,38 @@ body:has(.simple-landing) {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  color: var(--text-primary);
+  color: #0f172a;
   font-family: 'Outfit', sans-serif;
   position: relative;
-  background: transparent;
 }
 
-/* ── Background Glow Effects ── */
-.landing-bg {
-  position: absolute;
+.simple-landing::before {
+  content: '';
+  position: fixed;
   inset: 0;
-  overflow: hidden;
+  background: url('/custom_medical_bg_light.jpg') no-repeat center center / cover;
+  z-index: -10;
   pointer-events: none;
-  z-index: 0;
+  transform: translateZ(0);
+}
+
+/* ── Pure Background Image Mode (No extra overlays) ── */
+.landing-bg {
+  display: none;
 }
 
 .hero-orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(140px);
-  opacity: 0.15;
-  mix-blend-mode: screen;
+  opacity: 0.25;
 }
 
 .hero-orb-1 {
   width: 50vw;
   height: 50vw;
   max-width: 600px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.6), transparent 70%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.35), transparent 70%);
   top: -10%;
   left: -5%;
 }
@@ -54,7 +58,7 @@ body:has(.simple-landing) {
   width: 40vw;
   height: 40vw;
   max-width: 500px;
-  background: radial-gradient(circle, rgba(6, 182, 212, 0.5), transparent 70%);
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.3), transparent 70%);
   bottom: 10%;
   right: -5%;
 }
@@ -62,7 +66,7 @@ body:has(.simple-landing) {
 .hero-grid {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1.5px, transparent 0);
+  background-image: radial-gradient(rgba(15, 23, 42, 0.04) 1.5px, transparent 0);
   background-size: 32px 32px;
   mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black, transparent);
   -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black, transparent);
@@ -93,20 +97,13 @@ body:has(.simple-landing) {
   text-decoration: none;
   font-size: 1.4rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: #0f172a;
   letter-spacing: -0.5px;
 }
 
 .landing-logo-icon {
   font-size: 1.6rem;
   filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
-}
-
-.landing-logo-text {
-  background: linear-gradient(135deg, var(--text-primary), var(--primary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .landing-nav-actions {
@@ -119,7 +116,7 @@ body:has(.simple-landing) {
   padding: 10px 20px;
   border-radius: 10px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   transition: all 0.25s ease;
   cursor: pointer;
@@ -128,24 +125,27 @@ body:has(.simple-landing) {
 }
 
 .landing-nav-btn.ghost {
-  background: transparent;
-  color: var(--text-secondary);
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 
 .landing-nav-btn.ghost:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  color: #0f172a;
+  border-color: #94a3b8;
+  background: #f8fafc;
 }
 
 .landing-nav-btn.primary {
   background: linear-gradient(135deg, #10b981, #059669);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
 .landing-nav-btn.primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
 }
 
 /* ── Hero Section ── */
@@ -155,7 +155,7 @@ body:has(.simple-landing) {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 100px 32px 80px;
+  padding: 80px 32px 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -165,7 +165,7 @@ body:has(.simple-landing) {
 }
 
 .landing-hero-content {
-  max-width: 720px;
+  max-width: 740px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -176,23 +176,23 @@ body:has(.simple-landing) {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #047857;
   padding: 6px 16px;
   border-radius: 99px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 800;
   margin-bottom: 24px;
-  animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12);
 }
 
 .hero-badge-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  background: #059669;
+  box-shadow: 0 0 8px rgba(5, 150, 105, 0.5);
   animation: pulse-dot 2s infinite;
 }
 
@@ -203,27 +203,26 @@ body:has(.simple-landing) {
 
 .hero-title {
   font-size: clamp(2.4rem, 5vw, 3.8rem);
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.15;
   letter-spacing: -1.5px;
-  color: var(--text-primary);
+  color: #0f172a;
   margin-bottom: 20px;
-  animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
 .hero-gradient-text {
-  background: linear-gradient(135deg, #10b981, #06b6d4);
+  background: linear-gradient(135deg, #059669, #0284c7);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .hero-subtitle {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
+  font-size: 1.12rem;
+  color: #475569;
+  font-weight: 600;
   line-height: 1.65;
   margin-bottom: 36px;
-  animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
 }
 
 .hero-actions {
@@ -231,7 +230,6 @@ body:has(.simple-landing) {
   gap: 16px;
   flex-wrap: wrap;
   justify-content: center;
-  animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
 }
 
 .hero-btn-primary {
@@ -242,39 +240,40 @@ body:has(.simple-landing) {
   border: none;
   border-radius: 12px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 800;
   color: #fff;
   text-decoration: none;
   background: linear-gradient(135deg, #10b981, #059669);
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
   transition: all 0.25s ease;
   font-family: inherit;
 }
 
 .hero-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
 }
 
 .hero-btn-secondary {
   display: inline-flex;
   align-items: center;
   padding: 14px 28px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1.5px solid #cbd5e1;
   border-radius: 12px;
   font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.02);
+  font-weight: 800;
+  color: #0f172a;
+  background: #ffffff;
   text-decoration: none;
   transition: all 0.25s ease;
   font-family: inherit;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .hero-btn-secondary:hover {
-  color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.05);
+  color: #059669;
+  border-color: #10b981;
+  background: #f0fdf4;
 }
 
 /* ── Hero Image Preview ── */
@@ -392,23 +391,10 @@ body:has(.simple-landing) {
   line-height: 1.6;
 }
 
-/* ── Minimalist Footer ── */
-.landing-footer {
-  margin-top: auto;
-  padding: 36px 0;
-  background: transparent;
-}
-
-.footer-bottom {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 32px;
-  text-align: center;
-}
-
-.footer-bottom p {
-  color: var(--text-muted);
-  font-size: 0.85rem;
+/* ── Landing Footer Container ── */
+.landing .dashboard-footer {
+  width: 100%;
+  margin-top: 4rem;
 }
 
 /* ── Responsive design ── */
@@ -444,6 +430,13 @@ body:has(.simple-landing) {
 @media (max-width: 768px) {
   .services-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
   }
 }
 

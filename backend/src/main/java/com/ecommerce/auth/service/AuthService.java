@@ -156,12 +156,13 @@ public class AuthService {
         String identifier = request.getIdentifier().trim();
         User user = findUserByIdentifier(identifier);
 
-        String otp = otpService.generateAndSaveOtp(user, true);
+        otpService.generateAndSaveOtp(user, true);
 
+        // OTP is sent only to registered email via Gmail SMTP - never exposed in API response
         return ApiResponse.success(
-                "OTP has been sent to your registered email. It expires in 5 minutes.",
-                java.util.Map.of("otp", otp)
+                "OTP has been sent to your registered Gmail. Please check your inbox. It expires in 5 minutes."
         );
+
     }
 
     @Transactional

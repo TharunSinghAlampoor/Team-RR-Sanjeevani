@@ -18,12 +18,9 @@ export const ForgotPassword = () => {
   const [apiSuccess, setApiSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [receivedOtp, setReceivedOtp] = useState('');
 
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [timeLeft, setTimeLeft] = useState(300);
-
-  const navigate = useNavigate();
 
   // Manage countdown timer for OTP
   useEffect(() => {
@@ -100,14 +97,7 @@ export const ForgotPassword = () => {
       const identifier = getIdentifier();
       const response = await authService.forgotPassword(identifier);
 
-      setApiSuccess(response.message || 'OTP sent successfully!');
-
-      if (response.data && response.data.otp) {
-        setReceivedOtp(response.data.otp);
-      } else {
-        setReceivedOtp('');
-      }
-
+      setApiSuccess(response.message || 'OTP sent to your Gmail! Please check your inbox.');
       setStep(2);
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
@@ -132,13 +122,7 @@ export const ForgotPassword = () => {
       const identifier = getIdentifier();
       const response = await authService.forgotPassword(identifier);
 
-      setApiSuccess(response.message || 'OTP resent successfully!');
-
-      if (response.data && response.data.otp) {
-        setReceivedOtp(response.data.otp);
-      } else {
-        setReceivedOtp('');
-      }
+      setApiSuccess(response.message || 'OTP resent to your Gmail!');
 
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
@@ -377,13 +361,8 @@ export const ForgotPassword = () => {
 
         {step === 2 && (
           <form onSubmit={handleOtpSubmit} noValidate>
-            {receivedOtp && (
-              <div className="alert alert-success" style={{ marginBottom: '16px', textAlign: 'center', fontWeight: 'bold' }}>
-                🔑 VERIFICATION OTP: {receivedOtp}
-              </div>
-            )}
-
             <div className="otp-info-container">
+
               <p className="otp-sent-text">
                 OTP has been sent to your registered {method === 'email' ? 'email' : 'phone number'}:{' '}
                 <span className="otp-target-highlight">

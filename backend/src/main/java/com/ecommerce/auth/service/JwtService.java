@@ -54,7 +54,18 @@ public class JwtService {
     }
 
     public Integer extractUserId(String token) {
-        return parseToken(token).getPayload().get("userId", Integer.class);
+        try {
+            Object val = parseToken(token).getPayload().get("userId");
+            if (val instanceof Number n) {
+                return n.intValue();
+            }
+            if (val != null) {
+                return Integer.parseInt(val.toString());
+            }
+        } catch (Exception e) {
+            logger.error("Failed to extract userId from token: {}", e.getMessage());
+        }
+        return null;
     }
 
     public long getExpirationMs() {

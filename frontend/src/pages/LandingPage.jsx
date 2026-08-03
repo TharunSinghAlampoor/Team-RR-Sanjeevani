@@ -1,58 +1,142 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import DashboardFooter from '../components/DashboardFooter';
+import { Pill, Stethoscope, Microscope, ShieldCheck, ArrowRight, Clock, Sparkles } from 'lucide-react';
 import './LandingPage.css';
 
-/* ─── Simple Inline SVG Icons ─── */
-const icons = {
-  stethoscope: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/>
-      <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/>
-      <circle cx="20" cy="10" r="2"/>
-    </svg>
-  ),
-  pill: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m10.5 1.5 3 3-8 8-3-3a4.24 4.24 0 0 1 0-6 4.24 4.24 0 0 1 6 0z"/>
-      <line x1="10" y1="5" x2="19" y2="14"/>
-    </svg>
-  ),
-  microscope: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M8 6h4"/><path d="M12 2v4"/>
-    </svg>
-  ),
-  arrowRight: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-    </svg>
-  )
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
+  },
 };
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 25 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, scale: 0.92, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: 'easeOut' },
+  },
+};
+
+const SERVICES = [
+  {
+    icon: Pill,
+    title: 'Express Medicine Delivery',
+    desc: 'Order genuine prescription medicines & health supplements with 100% door-step express delivery across India.',
+    color: '#059669',
+    bg: '#ffffff',
+    border: '#a7f3d0',
+  },
+  {
+    icon: Stethoscope,
+    title: '24/7 Doctor Consultations',
+    desc: 'Consult top verified healthcare specialists online anytime with instant e-prescriptions.',
+    color: '#0284c7',
+    bg: '#ffffff',
+    border: '#bae6fd',
+  },
+  {
+    icon: Microscope,
+    title: 'Diagnostic Lab Tests',
+    desc: 'Book full body health checkups & lab tests with certified home sample collection & digital reports.',
+    color: '#7c3aed',
+    bg: '#ffffff',
+    border: '#ddd6fe',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Razorpay Instant Payments',
+    desc: '100% secure payment gateway supporting PhonePe, Google Pay, Paytm, UPI QR scan & Cards.',
+    color: '#2563eb',
+    bg: '#ffffff',
+    border: '#bfdbfe',
+  },
+];
+
+const STATS = [
+  { value: '100K+', label: 'Happy Patients Served', icon: Sparkles, color: '#059669' },
+  { value: '100%', label: 'Genuine Medicines Guarantee', icon: ShieldCheck, color: '#0284c7' },
+  { value: '24/7', label: 'Express Delivery & Support', icon: Clock, color: '#7c3aed' },
+];
 
 export const LandingPage = () => {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
-    <div className="landing simple-landing">
-      {/* ── Background Glows ── */}
+    <div className="landing simple-landing light-landing">
+      {/* ── Background Animated Glows ── */}
       <div className="landing-bg">
-        <div className="hero-orb hero-orb-1" />
-        <div className="hero-orb hero-orb-2" />
+        <motion.div
+          className="hero-orb hero-orb-1"
+          animate={{
+            x: [0, 40, -30, 0],
+            y: [0, -50, 30, 0],
+            scale: [1, 1.1, 0.95, 1],
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="hero-orb hero-orb-2"
+          animate={{
+            x: [0, -35, 45, 0],
+            y: [0, 40, -30, 0],
+            scale: [1, 0.9, 1.08, 1],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+        />
         <div className="hero-grid" />
       </div>
 
       {/* ── Navbar ── */}
-      <nav className="landing-nav">
+      <motion.nav
+        className="landing-nav"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+      >
         <div className="landing-nav-inner">
           <Link to="/" className="landing-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/sanjeevani_symbol.png" alt="Sanjeevani Logo" className="landing-logo-img" style={{ width: '54px', height: '54px', borderRadius: '50%', objectFit: 'contain', border: '1.5px solid rgba(16, 185, 129, 0.25)' }} />
+            <motion.img
+              src="/sanjeevani_symbol.png"
+              alt="Sanjeevani Logo"
+              className="landing-logo-img"
+              style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'contain', border: '2px solid #10b981', background: '#ffffff', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)' }}
+              whileHover={{ rotate: 360, scale: 1.08 }}
+              transition={{ duration: 0.8 }}
+            />
             <img src="/sanjeevani_text_transparent.png" alt="Sanjeevani" className="landing-logo-text-img" style={{ height: '42px', objectFit: 'contain' }} />
           </Link>
 
           <div className="landing-nav-actions">
             {isAuthenticated ? (
-              <Link to="/dashboard" className="landing-nav-btn primary">Dashboard</Link>
+              <Link to="/dashboard" className="landing-nav-btn primary">
+                Dashboard
+              </Link>
             ) : (
               <>
                 <Link to="/login" className="landing-nav-btn ghost">Sign In</Link>
@@ -61,73 +145,183 @@ export const LandingPage = () => {
             )}
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* ── Hero Section ── */}
       <main className="landing-hero">
-        <div className="landing-hero-content">
-          <div style={{ marginBottom: '28px' }}>
-            <img src="/sanjeevani_text_transparent.png" alt="Sanjeevani Logo" className="landing-logo-text-img" style={{ height: '84px', objectFit: 'contain' }} />
-          </div>
+        <motion.div
+          className="landing-hero-content"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Logo Brand Animation */}
+          <motion.div variants={itemVariants} style={{ marginBottom: '24px' }}>
+            <motion.img
+              src="/sanjeevani_text_transparent.png"
+              alt="Sanjeevani Logo"
+              className="landing-logo-text-img"
+              style={{ height: '92px', objectFit: 'contain' }}
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </motion.div>
 
-          <div className="hero-badge">
+          {/* Active Badge */}
+          <motion.div variants={itemVariants} className="hero-badge">
             <span className="hero-badge-dot" />
-            Active Healthcare Services
-          </div>
+            <span>Active Healthcare Services • Pan India Express</span>
+          </motion.div>
 
-          <h1 className="hero-title">
+          {/* Title */}
+          <motion.h1 variants={itemVariants} className="hero-title">
             Health Delivered<br />
             <span className="hero-gradient-text">To You.</span>
-          </h1>
+          </motion.h1>
 
-          <p className="hero-subtitle">
-            Consult verified doctors online, order medicines with home delivery, 
-            and book diagnostic lab tests with quick report turnaround.
-          </p>
+          {/* Subtitle */}
+          <motion.p variants={itemVariants} className="hero-subtitle">
+            Order 100% genuine prescription medicines, consult verified doctors online, 
+            and experience seamless Razorpay payments with instant door-step delivery.
+          </motion.p>
 
-          <div className="hero-actions">
+          {/* Action Buttons */}
+          <motion.div variants={itemVariants} className="hero-actions">
             {isAuthenticated ? (
-              <Link to="/dashboard" className="hero-btn-primary">
-                Go to Dashboard
-                {icons.arrowRight}
-              </Link>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                <Link to="/dashboard" className="hero-btn-primary">
+                  Go to Dashboard
+                  <ArrowRight style={{ width: 18, height: 18 }} />
+                </Link>
+              </motion.div>
             ) : (
               <>
-                <Link to="/register" className="hero-btn-primary">
-                  Get Started Now
-                  {icons.arrowRight}
-                </Link>
-                <Link to="/login" className="hero-btn-secondary">
-                  Sign In
-                </Link>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                  <Link to="/register" className="hero-btn-primary">
+                    Get Started Now
+                    <ArrowRight style={{ width: 18, height: 18 }} />
+                  </Link>
+                </motion.div>
+
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                  <Link to="/login" className="hero-btn-secondary">
+                    Sign In
+                  </Link>
+                </motion.div>
               </>
             )}
-          </div>
-        </div>
+          </motion.div>
+
+          {/* Light Theme Stats Bar */}
+          <motion.div
+            variants={itemVariants}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '1.25rem',
+              marginTop: '3.5rem',
+              paddingTop: '2rem',
+              borderTop: '1px solid #cbd5e1',
+              width: '100%',
+              maxWidth: 820,
+            }}
+            className="landing-stats-grid"
+          >
+            {STATS.map(({ value, label, icon: Icon, color }) => (
+              <motion.div
+                key={label}
+                whileHover={{ y: -4, scale: 1.03 }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '1.1rem',
+                  borderRadius: '1rem',
+                  background: 'rgba(255, 255, 255, 0.92)',
+                  border: '1.5px solid #e2e8f0',
+                  backdropFilter: 'blur(12px)',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color, fontWeight: 900, fontSize: '1.5rem' }}>
+                  <Icon style={{ width: 20, height: 20 }} />
+                  <span>{value}</span>
+                </div>
+                <span style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '0.25rem', textAlign: 'center' }}>{label}</span>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
       </main>
 
-      {/* ── Key Features / Services (Simple, no duplicates) ── */}
-      <section className="landing-services">
-        <div className="services-grid">
-          <div className="service-card">
-            <div className="service-icon pharmacy-color">
-              {icons.pill}
-            </div>
-            <h3>Medicine Delivery</h3>
-            <p>Order prescription medicines directly to your door with fast home delivery.</p>
+      {/* ── Key Healthcare Services Section ── */}
+      <section className="landing-services" style={{ padding: '4rem 1.5rem 6rem', maxWidth: 1200, margin: '0 auto' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          style={{ textAlign: 'center', marginBottom: '3rem' }}
+        >
+          <div className="hero-badge" style={{ display: 'inline-flex', marginBottom: '0.8rem' }}>
+            <Sparkles style={{ width: 14, height: 14, color: '#059669' }} />
+            <span>Why Choose Sanjeevani</span>
           </div>
-        </div>
+          <h2 style={{ fontSize: '2.1rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.5rem' }}>
+            Complete Healthcare Solutions
+          </h2>
+          <p style={{ fontSize: '0.98rem', color: '#475569', fontWeight: 600, maxWidth: 580, margin: '0 auto' }}>
+            Designed for modern medical care with instant online ordering, verified medications, and express delivery.
+          </p>
+        </motion.div>
+
+        <motion.div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '1.5rem',
+          }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={containerVariants}
+        >
+          {SERVICES.map(({ icon: Icon, title, desc, color, bg, border }) => (
+            <motion.div
+              key={title}
+              variants={cardVariants}
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              style={{
+                padding: '1.85rem 1.6rem',
+                borderRadius: '1.25rem',
+                background: bg,
+                border: `1.5px solid ${border}`,
+                boxShadow: '0 12px 32px rgba(0, 0, 0, 0.08)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.9rem',
+                backdropFilter: 'blur(12px)',
+              }}
+            >
+              <div style={{
+                width: 52, height: 52, borderRadius: '0.85rem',
+                background: '#f8fafc',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: `1.5px solid ${border}`,
+                boxShadow: `0 4px 14px ${color}20`,
+              }}>
+                <Icon style={{ width: 26, height: 26, color }} />
+              </div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>{title}</h3>
+              <p style={{ fontSize: '0.88rem', color: '#475569', fontWeight: 500, margin: 0, lineHeight: 1.6 }}>{desc}</p>
+            </motion.div>
+          ))}
+        </motion.div>
       </section>
 
-      {/* ── Minimalist Footer ── */}
-      <footer className="landing-footer">
-        <div className="footer-bottom">
-          <div className="footer-logo" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-            <img src="/sanjeevani_text_transparent.png" alt="Sanjeevani" className="landing-logo-text-img" style={{ height: '48px', objectFit: 'contain' }} />
-          </div>
-          <p>© {new Date().getFullYear()} Sanjeevani Healthcare. All rights reserved.</p>
-        </div>
-      </footer>
+      {/* ── Footer ── */}
+      <DashboardFooter />
     </div>
   );
 };

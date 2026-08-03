@@ -83,6 +83,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Integer userId = jwtService.extractUserId(token);
             String email = jwtService.extractEmail(token);
 
+            if (userId == null && session.getUser() != null) {
+                userId = session.getUser().getUserId();
+            }
+
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             userId, // principal = userId
@@ -92,7 +96,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            logger.debug("Authenticated user: {} (ID: {})", email, userId);
+            logger.trace("Authenticated user: {} (ID: {})", email, userId);
 
         } catch (Exception e) {
             logger.error("JWT authentication error: {}", e.getMessage());

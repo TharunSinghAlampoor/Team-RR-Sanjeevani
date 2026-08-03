@@ -10,6 +10,7 @@ import HeroBanner from '../components/HeroBanner';
 import CategorySection from '../components/CategorySection';
 import CategoryCard, { formatCategoryName } from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
+import DashboardFooter from '../components/DashboardFooter';
 import BrandLoader from '../components/BrandLoader';
 import ToastNotification from '../components/ToastNotification';
 

@@ -614,7 +614,7 @@ export const Dashboard = () => {
         {selectedProductDetails && (
           <ProductDetailsModal
             product={selectedProductDetails}
-            relatedProducts={relatedProducts}
+            relatedProducts={allProducts.filter(p => p && p.productId !== selectedProductDetails.productId).slice(0, 4)}
             isFavorite={!!favoritesMap[selectedProductDetails.productId]}
             onClose={() => setSelectedProductDetails(null)}
             onToggleFavorite={handleToggleFavorite}

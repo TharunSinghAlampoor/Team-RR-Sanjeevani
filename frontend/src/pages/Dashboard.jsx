@@ -31,18 +31,14 @@ export const Dashboard = () => {
   // Data States
   const [categories, setCategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
-  const [cartItems, setCartItems] = useState([]);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [relatedProducts, setRelatedProducts] = useState([]);
-
   // Filter / Search
   const [searchQuery, setSearchQuery] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
-
-  // Loading
-  const [loadingProducts, setLoadingProducts] = useState(true);
 
   // Modal / Drawer States
   const [selectedProductDetails, setSelectedProductDetails] = useState(null);
@@ -144,11 +140,19 @@ export const Dashboard = () => {
 
   // Initial load
   useEffect(() => {
-    fetchCategories();
-    fetchAllProducts();
-    fetchCart();
-    fetchFavorites();
-    fetchOrders();
+    let isMounted = true;
+    Promise.all([
+      fetchCategories(),
+      fetchAllProducts(),
+      fetchCart(),
+      fetchFavorites(),
+      fetchOrders()
+    ]).finally(() => {
+      setTimeout(() => {
+        if (isMounted) setPageLoading(false);
+      }, 600);
+    });
+    return () => { isMounted = false; };
   }, [fetchCategories, fetchAllProducts, fetchCart, fetchFavorites, fetchOrders]);
 
   // Sync shopping counts to cookies whenever cart or favorites change
@@ -267,13 +271,15 @@ export const Dashboard = () => {
     setIsFavoritesOpen(false);
     setIsCartOpen(false);
     setIsOrdersOpen(false);
+    setLoadingProducts(true);
     setSelectedCategory(catId);
     setTimeout(() => {
+      setLoadingProducts(false);
       const el = document.getElementById('products-catalog-section');
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    }, 50);
+    }, 450);
   }, []);
 
   const handleSearchChange = useCallback((query) => {
@@ -437,6 +443,10 @@ export const Dashboard = () => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  if (pageLoading) {
+    return <BrandLoader fullScreen message="Loading Sanjeevani Store..." />;
+  }
 
   return (
     <div className="dashboard-page light">

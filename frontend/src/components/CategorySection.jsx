@@ -6,6 +6,14 @@ import ProductCard from './ProductCard';
 import { formatCategoryName } from './CategoryCard';
 
 export const CATEGORY_META = {
+  'Prescriptions & Medicines': {
+    icon: Pill,
+    color: '#0F766E',
+    bg: '#f0fdfa',
+    gradient: 'from-teal-500 to-emerald-600',
+    badgeColor: '#ccfbf1',
+    badgeText: '#0f766e',
+  },
   'Prescriptions & Pharmacy': {
     icon: Pill,
     color: '#0F766E',
@@ -30,6 +38,14 @@ export const CATEGORY_META = {
     badgeColor: '#dbeafe',
     badgeText: '#1d4ed8',
   },
+  'Nutrition & Wellness': {
+    icon: Activity,
+    color: '#2563EB',
+    bg: '#eff6ff',
+    gradient: 'from-blue-500 to-indigo-600',
+    badgeColor: '#dbeafe',
+    badgeText: '#1d4ed8',
+  },
   'Nutrition and Health Supplements': {
     icon: Activity,
     color: '#2563EB',
@@ -46,6 +62,30 @@ export const CATEGORY_META = {
     badgeColor: '#ede9fe',
     badgeText: '#6d28d9',
   },
+  'Medical Devices & Equipment': {
+    icon: Stethoscope,
+    color: '#7c3aed',
+    bg: '#f5f3ff',
+    gradient: 'from-violet-500 to-purple-600',
+    badgeColor: '#ede9fe',
+    badgeText: '#6d28d9',
+  },
+  'Baby & Kids': {
+    icon: Baby,
+    color: '#db2777',
+    bg: '#fdf2f8',
+    gradient: 'from-pink-500 to-rose-600',
+    badgeColor: '#fce7f3',
+    badgeText: '#be185d',
+  },
+  "Baby & Kid's Essentials": {
+    icon: Baby,
+    color: '#db2777',
+    bg: '#fdf2f8',
+    gradient: 'from-pink-500 to-rose-600',
+    badgeColor: '#fce7f3',
+    badgeText: '#be185d',
+  },
   "Kid's Essentials": {
     icon: Baby,
     color: '#db2777',
@@ -54,13 +94,21 @@ export const CATEGORY_META = {
     badgeColor: '#fce7f3',
     badgeText: '#be185d',
   },
-  'Baby Needs and Pediatric Needs': {
-    icon: Baby,
-    color: '#db2777',
-    bg: '#fdf2f8',
-    gradient: 'from-pink-500 to-rose-600',
-    badgeColor: '#fce7f3',
-    badgeText: '#be185d',
+  'Skin Care': {
+    icon: Sparkles,
+    color: '#ea580c',
+    bg: '#fff7ed',
+    gradient: 'from-orange-500 to-amber-600',
+    badgeColor: '#ffedd5',
+    badgeText: '#c2410c',
+  },
+  'Skin Care & Dermocosmetics': {
+    icon: Sparkles,
+    color: '#ea580c',
+    bg: '#fff7ed',
+    gradient: 'from-orange-500 to-amber-600',
+    badgeColor: '#ffedd5',
+    badgeText: '#c2410c',
   },
   'Dermocosmetics (Skin Care)': {
     icon: Sparkles,

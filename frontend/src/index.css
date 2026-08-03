@@ -2474,7 +2474,8 @@ body:has(.dashboard-page) {
 .medical-navbar {
   background: #ffffff;
   border-bottom: 1.5px solid #e8f5f0;
-  padding: 0.55rem 1.5rem;
+  padding: 0.85rem 1.75rem;
+  min-height: 74px;
   width: 100%;
   position: sticky;
   top: 0;

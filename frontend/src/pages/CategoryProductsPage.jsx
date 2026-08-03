@@ -15,6 +15,7 @@ import OrdersModal from '../components/OrdersModal';
 import ProductDetailsModal from '../components/ProductDetailsModal';
 import CheckoutModal from '../components/CheckoutModal';
 import BuyNowModal from '../components/BuyNowModal';
+import BrandLoader from '../components/BrandLoader';
 import { useAuth } from '../context/AuthContext';
 
 const API_BASE = 'http://localhost:8080/api';
@@ -265,6 +266,10 @@ export function CategoryProductsPage() {
       .filter(p => p.productId !== selectedProductDetails.productId)
       .slice(0, 4);
   }, [allProducts, selectedProductDetails]);
+
+  if (loading) {
+    return <BrandLoader fullScreen message={`Loading ${currentCatMeta?.name || 'Category'}...`} />;
+  }
 
   return (
     <div className="dashboard-page light" style={{ minHeight: '100vh', background: '#f8fafc' }}>

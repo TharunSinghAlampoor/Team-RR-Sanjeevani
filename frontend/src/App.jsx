@@ -91,30 +91,10 @@ class ErrorBoundary extends Component {
   }
 }
 
+import BrandLoader from './components/BrandLoader';
+
 // Lightweight page loader during route transitions
-const PageLoader = () => (
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    background: '#edfaf6',
-    color: '#059669',
-    fontFamily: 'system-ui, -apple-system, sans-serif'
-  }}>
-    <div style={{
-      width: '40px',
-      height: '40px',
-      border: '3px solid rgba(5, 150, 105, 0.2)',
-      borderTopColor: '#059669',
-      borderRadius: '50%',
-      animation: 'spin 0.8s linear infinite'
-    }} />
-    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    <p style={{ marginTop: '1rem', fontSize: '0.9rem', letterSpacing: '0.05em', color: '#059669', fontWeight: 600 }}>Loading Sanjeevani Store...</p>
-  </div>
-);
+const PageLoader = () => <BrandLoader fullScreen message="Loading Sanjeevani Store..." />;
 
 const CategoryProductsPage = lazy(() => import('./pages/CategoryProductsPage'));
 

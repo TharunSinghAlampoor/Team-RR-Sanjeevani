@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, Heart, ShoppingBag, PackageCheck, LogOut, Key,
+  Search, Heart, ShoppingCart, Truck, LogOut, Key,
   X, Home, LayoutGrid, ChevronDown, UserCheck, ShieldCheck
 } from 'lucide-react';
 import { formatCategoryName } from './CategoryCard';
@@ -183,16 +183,17 @@ export const Navbar = ({
             </AnimatePresence>
           </motion.button>
 
-          {/* Cart */}
+          {/* My Cart (Shopping Cart 🛒) */}
           <motion.button
             onClick={onOpenCart}
             className="action-btn"
-            title="My Cart"
+            title="My Cart (Items & Checkout)"
+            aria-label="My Cart"
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
             style={{ position: 'relative' }}
           >
-            <ShoppingBag style={{ width: 20, height: 20, color: '#059669' }} />
+            <ShoppingCart style={{ width: 20, height: 20, color: '#059669' }} />
             <AnimatePresence>
               {cartCount > 0 && (
                 <motion.span
@@ -216,14 +217,18 @@ export const Navbar = ({
             </AnimatePresence>
           </motion.button>
 
-          {/* Orders */}
-          <button
+          {/* My Orders (Delivery Truck 🚚) */}
+          <motion.button
             onClick={onOpenOrders}
             className="action-btn"
-            title="My Orders"
+            title="My Orders & Delivery Tracking"
+            aria-label="My Orders"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            style={{ position: 'relative' }}
           >
-            <PackageCheck style={{ width: 20, height: 20, color: '#6366f1' }} />
-          </button>
+            <Truck style={{ width: 20, height: 20, color: '#6366f1' }} />
+          </motion.button>
 
           {/* ── User Profile Pill & Dropdown ─────────────── */}
           <div style={{ position: 'relative' }} ref={profileRef}>

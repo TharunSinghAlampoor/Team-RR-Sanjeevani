@@ -165,7 +165,9 @@ const s = {
   },
 };
 
-export const CartDrawer = ({ cartItems = [], onClose, onUpdateQuantity, onRemoveItem, onCheckout }) => {
+export const CartDrawer = ({ isOpen, cartItems = [], onClose, onUpdateQuantity, onRemoveItem, onProceedToCheckout, onCheckout }) => {
+  if (!isOpen) return null;
+
   const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.itemTotal) || 0), 0);
   const FREE_THRESHOLD = 500;
   const progress = Math.min(100, (subtotal / FREE_THRESHOLD) * 100);

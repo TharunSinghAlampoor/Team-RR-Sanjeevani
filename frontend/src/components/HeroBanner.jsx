@@ -82,38 +82,38 @@ export const HeroBanner = ({ onExploreOffers }) => {
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + OFFERS.length) % OFFERS.length);
 
   return (
-    <div id="offers-hero-section" style={{ position: 'relative', width: '100%', marginBottom: '2rem' }}>
+    <div id="offers-hero-section" style={{ position: 'relative', width: '100%', marginBottom: '1.75rem' }}>
       <motion.div
         key={`banner-container-${offer.id}`}
         initial={{ opacity: 0.92, scale: 0.99 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.55 }}
         style={{
-          borderRadius: '1.6rem',
+          borderRadius: '1.35rem',
           overflow: 'hidden',
           position: 'relative',
           background: `${offer.bgGradient}, ${offer.bgImage}`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          boxShadow: '0 20px 45px rgba(0,0,0,0.22)',
-          minHeight: '340px',
+          boxShadow: '0 16px 36px rgba(0,0,0,0.18)',
+          minHeight: '260px',
           display: 'flex',
           alignItems: 'center',
           transition: 'background 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
-          padding: '2.75rem 3.5rem',
+          padding: '2.25rem 2.75rem',
           color: '#ffffff',
         }}
       >
         {/* Animated Background Pulse Circle */}
         <motion.div
-          animate={{ scale: [1, 1.25, 1], opacity: [0.1, 0.22, 0.1] }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
           style={{
             position: 'absolute',
-            top: '-50%',
+            top: '-45%',
             right: '-10%',
-            width: '480px',
-            height: '480px',
+            width: '420px',
+            height: '420px',
             borderRadius: '50%',
             background: 'rgba(255, 255, 255, 0.18)',
             pointerEvents: 'none',
@@ -122,30 +122,30 @@ export const HeroBanner = ({ onExploreOffers }) => {
 
         {/* Floating Rotating Sparkle Particles */}
         <motion.div
-          animate={{ rotate: 360, y: [0, -12, 0] }}
+          animate={{ rotate: 360, y: [0, -10, 0] }}
           transition={{ rotate: { duration: 16, repeat: Infinity, ease: 'linear' }, y: { duration: 3.5, repeat: Infinity, ease: 'easeInOut' } }}
-          style={{ position: 'absolute', right: '340px', top: '35px', opacity: 0.3, pointerEvents: 'none' }}
+          style={{ position: 'absolute', right: '300px', top: '30px', opacity: 0.3, pointerEvents: 'none' }}
         >
-          <Sparkles size={42} style={{ color: '#ffffff' }} />
+          <Sparkles size={36} style={{ color: '#ffffff' }} />
         </motion.div>
 
         <AnimatePresence mode="wait">
           <motion.div
             key={offer.id}
-            initial={{ opacity: 0, x: 60, scale: 0.98 }}
+            initial={{ opacity: 0, x: 50, scale: 0.98 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -60, scale: 0.98 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            exit={{ opacity: 0, x: -50, scale: 0.98 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             style={{ width: '100%', zIndex: 2 }}
           >
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '2rem' }}>
-              <div style={{ maxWidth: '720px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
+              <div style={{ maxWidth: '680px' }}>
                 {/* Animated Badge Tag */}
                 <motion.div
-                  initial={{ y: -15, opacity: 0 }}
+                  initial={{ y: -12, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.4, delay: 0.1 }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.9rem', flexWrap: 'wrap' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}
                 >
                   <motion.span
                     whileHover={{ scale: 1.05 }}
@@ -153,56 +153,56 @@ export const HeroBanner = ({ onExploreOffers }) => {
                       background: 'rgba(255, 255, 255, 0.25)',
                       backdropFilter: 'blur(10px)',
                       color: '#ffffff',
-                      fontSize: '0.85rem',
+                      fontSize: '0.78rem',
                       fontWeight: 800,
-                      padding: '0.35rem 0.95rem',
+                      padding: '0.3rem 0.85rem',
                       borderRadius: '9999px',
-                      letterSpacing: '0.06em',
+                      letterSpacing: '0.05em',
                       textTransform: 'uppercase',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.45rem',
+                      gap: '0.4rem',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
                     }}
                   >
-                    <OfferIcon style={{ width: 16, height: 16 }} />
+                    <OfferIcon style={{ width: 15, height: 15 }} />
                     {offer.tag}
                   </motion.span>
 
                   <motion.span
-                    animate={{ scale: [1, 1.06, 1] }}
+                    animate={{ scale: [1, 1.05, 1] }}
                     transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
                     style={{
                       background: 'rgba(0, 0, 0, 0.35)',
                       color: '#fef08a',
-                      fontSize: '0.85rem',
+                      fontSize: '0.78rem',
                       fontWeight: 800,
-                      padding: '0.35rem 0.85rem',
+                      padding: '0.3rem 0.75rem',
                       borderRadius: '9999px',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.35rem',
+                      gap: '0.3rem',
                       border: '1.5px solid rgba(254, 240, 138, 0.4)',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                     }}
                   >
-                    <Tag style={{ width: 14, height: 14 }} /> CODE: {offer.code}
+                    <Tag style={{ width: 13, height: 13 }} /> CODE: {offer.code}
                   </motion.span>
                 </motion.div>
 
-                {/* Animated Large Title */}
+                {/* Animated Title */}
                 <motion.h1
-                  initial={{ y: 15, opacity: 0 }}
+                  initial={{ y: 12, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.4, delay: 0.15 }}
                   style={{
-                    fontSize: '2.25rem',
+                    fontSize: '1.85rem',
                     fontWeight: 900,
-                    margin: '0 0 0.6rem',
-                    lineHeight: 1.2,
-                    letterSpacing: '-0.025em',
+                    margin: '0 0 0.5rem',
+                    lineHeight: 1.22,
+                    letterSpacing: '-0.02em',
                     color: '#ffffff',
-                    textShadow: '0 3px 8px rgba(0,0,0,0.25)',
+                    textShadow: '0 2px 6px rgba(0,0,0,0.22)',
                   }}
                 >
                   {offer.title}
@@ -210,91 +210,91 @@ export const HeroBanner = ({ onExploreOffers }) => {
 
                 {/* Animated Subtitle */}
                 <motion.p
-                  initial={{ y: 15, opacity: 0 }}
+                  initial={{ y: 12, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.4, delay: 0.2 }}
                   style={{
-                    fontSize: '1.08rem',
-                    margin: '0 0 1.5rem',
-                    opacity: 0.95,
-                    lineHeight: 1.55,
-                    maxWidth: '620px',
+                    fontSize: '0.98rem',
+                    margin: '0 0 1.25rem',
+                    opacity: 0.94,
+                    lineHeight: 1.5,
+                    maxWidth: '580px',
                     fontWeight: 500,
                   }}
                 >
                   {offer.subtitle}
                 </motion.p>
 
-                {/* Highlights & Large CTA Button */}
+                {/* Highlights & CTA Button */}
                 <motion.div
-                  initial={{ y: 15, opacity: 0 }}
+                  initial={{ y: 12, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.4, delay: 0.25 }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '1.1rem', flexWrap: 'wrap' }}
                 >
                   <motion.button
                     onClick={onExploreOffers}
-                    whileHover={{ scale: 1.06, y: -3, boxShadow: '0 12px 28px rgba(0,0,0,0.3)' }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.05, y: -2, boxShadow: '0 10px 24px rgba(0,0,0,0.28)' }}
+                    whileTap={{ scale: 0.96 }}
                     style={{
                       background: '#ffffff',
                       color: offer.badgeText,
                       border: 'none',
-                      padding: '0.85rem 1.75rem',
-                      borderRadius: '0.85rem',
-                      fontSize: '1.02rem',
+                      padding: '0.72rem 1.45rem',
+                      borderRadius: '0.8rem',
+                      fontSize: '0.95rem',
                       fontWeight: 800,
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.55rem',
-                      boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
+                      gap: '0.5rem',
+                      boxShadow: '0 5px 15px rgba(0,0,0,0.16)',
                     }}
                   >
                     <span>{offer.buttonText}</span>
-                    <ArrowRight style={{ width: 18, height: 18 }} />
+                    <ArrowRight style={{ width: 17, height: 17 }} />
                   </motion.button>
 
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.92rem', fontWeight: 700, opacity: 0.95 }}>
-                    <ShieldCheck style={{ width: 20, height: 20, color: '#fef08a' }} />
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.86rem', fontWeight: 700, opacity: 0.95 }}>
+                    <ShieldCheck style={{ width: 18, height: 18, color: '#fef08a' }} />
                     <span>{offer.highlight}</span>
                   </div>
                 </motion.div>
               </div>
 
-              {/* Large Floating Promo Graphic Box */}
+              {/* Floating Promo Graphic Box */}
               <motion.div
                 initial={{ scale: 0.85, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
+                animate={{ scale: 1, opacity: 1, y: [0, -7, 0] }}
                 transition={{
                   scale: { duration: 0.45, delay: 0.2 },
                   opacity: { duration: 0.45, delay: 0.2 },
-                  y: { duration: 3.8, repeat: Infinity, ease: 'easeInOut' }
+                  y: { duration: 3.6, repeat: Infinity, ease: 'easeInOut' }
                 }}
-                whileHover={{ scale: 1.08, rotate: 1.5 }}
+                whileHover={{ scale: 1.07, rotate: 1 }}
                 style={{
                   background: 'rgba(255, 255, 255, 0.16)',
-                  backdropFilter: 'blur(16px)',
-                  border: '2px solid rgba(255, 255, 255, 0.35)',
-                  padding: '1.75rem 2.2rem',
-                  borderRadius: '1.3rem',
+                  backdropFilter: 'blur(14px)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.32)',
+                  padding: '1.4rem 1.8rem',
+                  borderRadius: '1.2rem',
                   textAlign: 'center',
-                  minWidth: '210px',
+                  minWidth: '185px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 12px 32px rgba(0,0,0,0.18)',
+                  boxShadow: '0 10px 28px rgba(0,0,0,0.16)',
                 }}
               >
                 <motion.div
-                  animate={{ scale: [1, 1.12, 1] }}
+                  animate={{ scale: [1, 1.1, 1] }}
                   transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
                 >
-                  <OfferIcon style={{ width: 54, height: 54, marginBottom: '0.6rem', color: '#ffffff', filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.25))' }} />
+                  <OfferIcon style={{ width: 44, height: 44, marginBottom: '0.5rem', color: '#ffffff', filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.22))' }} />
                 </motion.div>
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, opacity: 0.9, letterSpacing: '0.06em' }}>USE PROMO CODE</span>
-                <span style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '0.08em', color: '#fef08a', textShadow: '0 2px 6px rgba(0,0,0,0.25)' }}>{offer.code}</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, opacity: 0.9, letterSpacing: '0.05em' }}>USE PROMO CODE</span>
+                <span style={{ fontSize: '1.32rem', fontWeight: 900, letterSpacing: '0.07em', color: '#fef08a', textShadow: '0 2px 5px rgba(0,0,0,0.22)' }}>{offer.code}</span>
               </motion.div>
             </div>
           </motion.div>

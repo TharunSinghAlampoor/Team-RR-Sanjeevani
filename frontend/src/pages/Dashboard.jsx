@@ -431,7 +431,16 @@ export const Dashboard = () => {
       {/* ── Main content ──────────────────────────── */}
       <main className="dashboard-main">
 
+        {/* ── Offers & Special Promotional Hero Banners ──────────────── */}
+        <HeroBanner onExploreOffers={() => {
+          setSelectedCategory(null);
+          setSearchQuery('');
+          const el = document.getElementById('shop-categories-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }} />
+
         {/* ── Shop by Category Row ────────────────────── */}
+        <div id="shop-categories-section">
         {displayCategories.length > 0 && (
           <motion.div
             className="cat-hero-row"
@@ -475,6 +484,7 @@ export const Dashboard = () => {
             </div>
           </motion.div>
         )}
+        </div>
 
         {/* ── Category-wise Product Sections ───────── */}
         {isSearchActive ? (

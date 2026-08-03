@@ -100,9 +100,17 @@ export const Navbar = ({
 
           {/* Home */}
           <button
-            onClick={() => { navigate('/dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            onClick={() => {
+              navigate('/dashboard');
+              const el = document.getElementById('offers-hero-section');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
             className="navbar-nav-link"
-            title="Home"
+            title="Home (Offers & Banners)"
           >
             <Home style={{ width: 20, height: 20, color: '#059669' }} />
             <span style={{ display: 'none' }} className="lg-only">Home</span>

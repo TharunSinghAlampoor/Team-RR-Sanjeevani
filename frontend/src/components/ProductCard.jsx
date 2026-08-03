@@ -100,8 +100,8 @@ const ProductCard = React.memo(({
         <div style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', gap: '0.4rem' }}>
           <p className="pcard__brand">{brandName}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1px', marginLeft: 'auto' }}>
-            <Star style={{ width: 12, height: 12, color: '#f59e0b', fill: '#f59e0b' }} />
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#d97706' }}>
+            <Star style={{ width: 13, height: 13, color: '#f59e0b', fill: '#f59e0b' }} />
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#d97706' }}>
               {Number(product.rating || 4.5).toFixed(1)}
             </span>
           </div>
@@ -135,15 +135,15 @@ const ProductCard = React.memo(({
           type="button"
           onClick={handleCardClick}
           style={{
-            width: '100%', padding: '0.45rem', borderRadius: '0.55rem',
+            width: '100%', padding: '0.5rem', borderRadius: '0.55rem',
             border: '1.5px solid #cbd5e1', background: '#f8fafc',
-            color: '#0f172a', fontWeight: 800, fontSize: '0.78rem',
+            color: '#0f172a', fontWeight: 800, fontSize: '0.84rem',
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
             transition: 'all 0.2s ease',
           }}
         >
           <span>See Details</span>
-          <ChevronRight style={{ width: 13, height: 13, color: '#0284c7' }} />
+          <ChevronRight style={{ width: 14, height: 14, color: '#0284c7' }} />
         </button>
       </div>
     </div>

@@ -76,6 +76,14 @@ export function CategoryProductsPage() {
   const [buyNowProduct, setBuyNowProduct] = useState(null);
   const [selectedProductDetails, setSelectedProductDetails] = useState(null);
 
+  // Reset drawers on route change
+  useEffect(() => {
+    setIsFavoritesOpen(false);
+    setIsCartOpen(false);
+    setIsOrdersOpen(false);
+    setSearchQuery('');
+  }, [categoryId]);
+
   // Fetch products & categories
   useEffect(() => {
     let isMounted = true;
@@ -138,14 +146,29 @@ export function CategoryProductsPage() {
   // Filter & sort products for this category page
   const categoryProducts = useMemo(() => {
     let prods = [...allProducts];
+    if (!prods.length) return [];
 
-    // Filter by category ID / name
     const numId = parseInt(categoryId, 10);
+    const targetName = (currentCatMeta?.name || '').toLowerCase();
+
+    // Find all matching category IDs from database categories list
+    const matchedCategoryIds = categories
+      .filter(c => {
+        const cName = formatCategoryName(c.categoryName).toLowerCase();
+        return cName === targetName || c.categoryName.toLowerCase() === targetName || (!isNaN(numId) && c.categoryId === numId);
+      })
+      .map(c => c.categoryId);
+
     prods = prods.filter(p => {
       if (!p) return false;
       if (!isNaN(numId) && p.categoryId === numId) return true;
-      if (p.categoryName && formatCategoryName(p.categoryName) === currentCatMeta.name) return true;
-      if (p.categoryName && p.categoryName.toLowerCase().includes(String(categoryId).toLowerCase())) return true;
+      if (matchedCategoryIds.includes(p.categoryId)) return true;
+      if (p.categoryName) {
+        const cleanPName = formatCategoryName(p.categoryName).toLowerCase();
+        const rawPName = p.categoryName.toLowerCase();
+        if (cleanPName === targetName || rawPName === targetName) return true;
+        if (cleanPName.includes(targetName) || targetName.includes(cleanPName)) return true;
+      }
       return false;
     });
 

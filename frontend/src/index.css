@@ -3417,8 +3417,8 @@ body:has(.dashboard-page) {
 }
 
 .cat-hero-row__title {
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 1.4rem;
+  font-weight: 900;
   color: #0f172a;
   letter-spacing: -0.02em;
   margin: 0 0 0.25rem;
@@ -3431,7 +3431,7 @@ body:has(.dashboard-page) {
 }
 
 .cat-hero-row__subtitle {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: #64748b;
   margin: 0;
 }
@@ -3459,7 +3459,7 @@ body:has(.dashboard-page) {
 /* Category Hero Card */
 .cat-hero-card {
   flex-shrink: 0;
-  width: 130px;
+  width: 140px;
   background: transparent;
   border-radius: 1rem;
   padding: 1rem 0.75rem 0.85rem;
@@ -3486,9 +3486,9 @@ body:has(.dashboard-page) {
 }
 
 .cat-hero-card__icon-wrap {
-  width: 64px;
-  height: 64px;
-  border-radius: 1rem;
+  width: 68px;
+  height: 68px;
+  border-radius: 1.1rem;
   background: transparent;
   border: 1.5px solid var(--card-ring, #e2e8f0);
   display: flex;
@@ -3514,10 +3514,10 @@ body:has(.dashboard-page) {
 }
 
 .cat-hero-card__name {
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 800;
   color: #1e293b;
-  line-height: 1.3;
+  line-height: 1.35;
   text-align: center;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -3535,8 +3535,8 @@ body:has(.dashboard-page) {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 700;
   color: #94a3b8;
 }
 

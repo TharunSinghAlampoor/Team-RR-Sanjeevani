@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 
 const getCleanUrl = (url) => {
   if (!url) return '';
+  let clean = url.trim();
   try {
-    return encodeURI(url.trim());
+    clean = decodeURIComponent(clean);
+  } catch (e) {}
+  try {
+    return encodeURI(clean);
   } catch (e) {
-    return url;
+    return clean;
   }
 };
 

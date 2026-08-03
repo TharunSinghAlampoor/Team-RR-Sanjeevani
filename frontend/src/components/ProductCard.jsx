@@ -119,31 +119,16 @@ const ProductCard = React.memo(({
         }
       </div>
 
-      {/* Actions */}
-      <div className="pcard__actions" style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginTop: '0.75rem' }}>
+      {/* Actions: Add to Cart Only */}
+      <div className="pcard__actions" style={{ marginTop: '0.75rem' }}>
         <button
           disabled={!inStock}
           onClick={handleCart}
           className="pcard__btn pcard__btn--cart"
-          style={{ width: '100%' }}
+          style={{ width: '100%', padding: '0.65rem' }}
         >
-          <ShoppingCart className="w-3.5 h-3.5 flex-shrink-0" />
+          <ShoppingCart className="w-4 h-4 flex-shrink-0" />
           <span>Add to Cart</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleCardClick}
-          style={{
-            width: '100%', padding: '0.5rem', borderRadius: '0.55rem',
-            border: '1.5px solid #cbd5e1', background: '#f8fafc',
-            color: '#0f172a', fontWeight: 800, fontSize: '0.84rem',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <span>See Details</span>
-          <ChevronRight style={{ width: 14, height: 14, color: '#0284c7' }} />
         </button>
       </div>
     </div>

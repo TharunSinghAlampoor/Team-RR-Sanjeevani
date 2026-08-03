@@ -3977,11 +3977,9 @@ body:has(.dashboard-page) {
   background: #fee2e2;
 }
 
-/* Actions — 2 equal buttons (Cart & Buy Now) */
+/* Actions — Single full-width Add to Cart button */
 .pcard__actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
+  display: block;
   padding: 0 0.55rem 0.55rem;
   flex-shrink: 0;
 }

@@ -73,7 +73,7 @@ export const Navbar = ({
         {/* ── Search Bar ─────────────────────────────────── */}
         <div className="navbar-search-wrapper">
           <form onSubmit={(e) => e.preventDefault()} className="search-input-group" role="search">
-            <Search className="search-icon" style={{ width: 16, height: 16 }} />
+            <Search className="search-icon" style={{ width: 18, height: 18 }} />
             <input
               type="search"
               className="search-input"
@@ -89,7 +89,7 @@ export const Navbar = ({
                 className="clear-search"
                 aria-label="Clear search"
               >
-                <X style={{ width: 14, height: 14 }} />
+                <X style={{ width: 15, height: 15 }} />
               </button>
             )}
           </form>
@@ -104,7 +104,7 @@ export const Navbar = ({
             className="navbar-nav-link"
             title="Home"
           >
-            <Home style={{ width: 15, height: 15, color: '#059669' }} />
+            <Home style={{ width: 20, height: 20, color: '#059669' }} />
             <span style={{ display: 'none' }} className="lg-only">Home</span>
           </button>
 
@@ -116,11 +116,11 @@ export const Navbar = ({
               onClick={() => setShowCategoriesDropdown(v => !v)}
               title="Categories"
             >
-              <LayoutGrid style={{ width: 15, height: 15, color: '#059669' }} />
+              <LayoutGrid style={{ width: 20, height: 20, color: '#059669' }} />
               <span style={{ display: 'none' }} className="lg-only">Categories</span>
               <ChevronDown
                 style={{
-                  width: 13, height: 13, color: '#6b7280',
+                  width: 15, height: 15, color: '#6b7280',
                   transition: 'transform 0.2s',
                   transform: showCategoriesDropdown ? 'rotate(180deg)' : 'rotate(0deg)'
                 }}
@@ -159,7 +159,7 @@ export const Navbar = ({
             whileTap={{ scale: 0.92 }}
             style={{ position: 'relative' }}
           >
-            <Heart style={{ width: 20, height: 20, color: '#f43f5e' }} />
+            <Heart style={{ width: 23, height: 23, color: '#f43f5e' }} />
             <AnimatePresence>
               {favoriteCount > 0 && (
                 <motion.span
@@ -193,7 +193,7 @@ export const Navbar = ({
             whileTap={{ scale: 0.92 }}
             style={{ position: 'relative' }}
           >
-            <ShoppingCart style={{ width: 20, height: 20, color: '#059669' }} />
+            <ShoppingCart style={{ width: 23, height: 23, color: '#059669' }} />
             <AnimatePresence>
               {cartCount > 0 && (
                 <motion.span
@@ -227,7 +227,7 @@ export const Navbar = ({
             whileTap={{ scale: 0.92 }}
             style={{ position: 'relative' }}
           >
-            <Truck style={{ width: 20, height: 20, color: '#6366f1' }} />
+            <Truck style={{ width: 23, height: 23, color: '#6366f1' }} />
           </motion.button>
 
           {/* ── User Profile Pill & Dropdown ─────────────── */}

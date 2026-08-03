@@ -1,0 +1,156 @@
+================================================================================
+SANJEEVANI HEALTHCARE E-COMMERCE PLATFORM — FULL PROJECT DOCUMENTATION (.TXT)
+================================================================================
+
+1. EXECUTIVE SYSTEM OVERVIEW
+--------------------------------------------------------------------------------
+The Sanjeevani Healthcare E-Commerce Platform is an enterprise medical equipment, 
+healthcare supplies, and pharmaceutical e-commerce solution. It features a 
+high-performance RESTful API backend built on Spring Boot 3 and Spring Security 6 
+with JWT authentication, connected to a React 18 frontend powered by Vite, 
+Razorpay Payment Gateway, GPS Location Auto-Detection, Order Tracking, and 
+Downloadable PDF Tax Invoice Generation.
+
+
+2. SYSTEM ARCHITECTURE & DATA FLOW
+--------------------------------------------------------------------------------
+[Client Layer] React.js 18 SPA (Vite)
+       |
+       v (HTTPS / REST API JSON Requests)
+[Security Layer] Spring Security 6 & JwtAuthenticationFilter
+       |
+       +---> Auth Controller (/api/auth/register, /api/auth/login)
+       +---> Category & Product Controllers (/categories, /products)
+       +---> Cart & Wishlist Controllers (/api/cart, /api/favorites)
+       +---> Order & Payment Controllers (/api/orders, /api/payments)
+       |
+[External Integrations]
+       +---> Razorpay Payment Gateway (SDK / Webhook Verification)
+       +---> OpenStreetMap Nominatim Reverse Geocoding API
+       |
+[Database Layer] MySQL / H2 Database (Spring Data JPA / Hibernate ORM)
+
+
+3. TECHNOLOGY STACK & KEY DEPENDENCIES
+--------------------------------------------------------------------------------
+A. BACKEND STACK (JAVA 17 / SPRING BOOT 3.2.x)
+- Framework: Spring Boot 3.2.x, Spring MVC, Spring Data JPA
+- Security: Spring Security 6, io.jsonwebtoken (JJWT 0.11.5)
+- Password Hashing: BCryptPasswordEncoder
+- Database: MySQL 8.0 / H2 Database
+- ORM: Hibernate 6
+- Payment Integration: Razorpay Java SDK (com.razorpay:razorpay-java:1.4.6)
+- Build System: Apache Maven
+
+B. FRONTEND STACK (JAVASCRIPT / REACT 18.2.0)
+- Core Library: React 18.2.0, React Router DOM 6
+- Build Tool: Vite 8.1.5 (Fast HMR & Minification)
+- Styling: Vanilla CSS3, Glassmorphism Tokens, Lucide React Icons
+- Animations: Framer Motion
+- HTTP Client: Axios with Request/Response Interceptors
+- Geolocation: Browser Geolocation API + OpenStreetMap Nominatim API
+
+
+4. CORE FEATURE SPECIFICATIONS (PIN-TO-PIN)
+--------------------------------------------------------------------------------
+1. AUTHENTICATION & SECURITY
+   - User Registration and Login with BCrypt password hashing.
+   - Stateless JWT authentication via Authorization Bearer headers.
+   - Public endpoint permits: /categories, /products, /api/auth/**.
+   - Session Interceptor: Prevents guest browsing from breaking on 401 calls.
+
+2. CATALOG & SEARCH SYSTEM
+   - Dynamic category navigation and full-text keyword search.
+   - Category Fallback Resolver: Automatically derives fallback categories from 
+     product items to prevent blank dashboard displays.
+
+3. SHOPPING CART & BUY NOW
+   - Multi-item cart management with real-time total computation.
+   - Instant "Buy Now" flow bypassing the shopping cart for direct checkout.
+
+4. GPS LOCATION AUTO-DETECTION & ADDRESS MANAGER
+   - Triggers browser GPS (navigator.geolocation.getCurrentPosition).
+   - Reverse geocodes coordinates via OpenStreetMap Nominatim API.
+   - Auto-fills delivery address and saves to localStorage (user_shipping_address).
+   - Editable text area with interactive "Detect My Location" button.
+
+5. RAZORPAY PAYMENT GATEWAY INTEGRATION
+   - Server-side Razorpay Order Creation via RazorpayClient.
+   - Client-side checkout modal invocation.
+   - Server-side HMAC SHA-256 signature verification before marking order PAID.
+
+6. ORDER HISTORY & TRACKING
+   - Reverse Chronological Sorting: Orders listed from Latest to Oldest.
+   - Order Details breakdown:
+     * Product Details
+     * Ship To (Customer Data & Address)
+     * Payment Details (Order ID, Payment Method, Razorpay Order/Payment IDs)
+     * Tracking Stepper (Ordered -> Paid -> Packed -> Out for Delivery)
+
+7. DOWNLOADABLE PDF TAX INVOICE
+   - Printable HTML invoice with high-legibility Inter typography.
+   - Sanjeevani brand logo, itemized pricing, side-by-side Payment & Order 
+     Summary boxes, and toll-free helpline (18001234321).
+
+
+5. BACKEND DATABASE SCHEMA SPECIFICATION
+--------------------------------------------------------------------------------
+TABLE: users
+  - id (BIGINT, PRIMARY KEY, AUTO_INCREMENT)
+  - name (VARCHAR(255), NOT NULL)
+  - email (VARCHAR(255), UNIQUE, NOT NULL)
+  - password (VARCHAR(255), NOT NULL)
+  - role (VARCHAR(50), DEFAULT 'ROLE_USER')
+
+TABLE: products
+  - id (BIGINT, PRIMARY KEY, AUTO_INCREMENT)
+  - name (VARCHAR(255), NOT NULL)
+  - description (TEXT)
+  - price (DECIMAL(10,2), NOT NULL)
+  - category_id (BIGINT, FOREIGN KEY)
+  - image_url (VARCHAR(500))
+
+TABLE: orders
+  - id (BIGINT, PRIMARY KEY, AUTO_INCREMENT)
+  - order_id (VARCHAR(100), UNIQUE, NOT NULL)
+  - user_id (BIGINT, FOREIGN KEY)
+  - total_amount (DECIMAL(10,2), NOT NULL)
+  - status (VARCHAR(50), DEFAULT 'PAID')
+  - payment_method (VARCHAR(100))
+  - razorpay_order_id (VARCHAR(255))
+  - razorpay_payment_id (VARCHAR(255))
+  - shipping_address (TEXT, NOT NULL)
+  - created_at (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
+
+
+6. RESTFUL API ENDPOINTS REFERENCE
+--------------------------------------------------------------------------------
+HTTP METHOD  | ENDPOINT PATH                | ACCESS        | DESCRIPTION
+-------------+------------------------------+---------------+------------------------------------
+POST         | /api/auth/register           | Public        | Register new user account
+POST         | /api/auth/login              | Public        | Authenticate user & return JWT token
+GET          | /categories                  | Public        | Fetch all product categories
+GET          | /products                    | Public        | Fetch catalog with search filters
+POST         | /api/payments/razorpay-order | Authenticated | Generate Razorpay Order ID
+POST         | /api/payments/verify         | Authenticated | Verify Razorpay HMAC signature
+GET          | /api/orders                  | Authenticated | Get user orders (Latest to Oldest)
+DELETE       | /api/cart/clear              | Authenticated | Clear user shopping cart
+
+
+7. ENVIRONMENT SETUP & EXECUTION COMMANDS
+--------------------------------------------------------------------------------
+A. START BACKEND SERVER:
+   cd backend
+   mvn clean compile
+   mvn spring-boot:run
+   Server running at http://localhost:8080/api
+
+B. START FRONTEND APPLICATION:
+   cd frontend
+   npm install
+   npm run dev
+   Client running at http://localhost:5173/
+
+================================================================================
+END OF DOCUMENTATION — SANJEEVANI HEALTHCARE PLATFORM
+================================================================================

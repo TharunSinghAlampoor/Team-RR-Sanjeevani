@@ -1,0 +1,289 @@
+/* ═══════════════════════════════════════════
+   SANJEEVANI — ADMIN PORTAL LOGIN STYLES
+   Healthcare Management Glassmorphism Theme
+   ═══════════════════════════════════════════ */
+
+.admin-login-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  background: linear-gradient(135deg, #0284c7 0%, #0f766e 40%, #059669 100%);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  position: relative;
+  overflow: hidden;
+  color: #0f172a;
+}
+
+/* Background animated glow orbs */
+.admin-bg-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.admin-bg-glow-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.6), transparent 70%);
+  top: -100px;
+  left: -100px;
+}
+.admin-bg-glow-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.6), transparent 70%);
+  bottom: -100px;
+  right: -100px;
+}
+
+/* Split screen container */
+.admin-login-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  z-index: 10;
+}
+
+@media (max-width: 960px) {
+  .admin-login-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-login-hero {
+    display: none;
+  }
+}
+
+/* Left Hero Section */
+.admin-login-hero {
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.25);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.admin-hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.admin-hero-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.admin-hero-body {
+  margin: 3rem 0;
+}
+.admin-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(8px);
+}
+.admin-hero-title {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 1.25rem;
+  color: #ffffff;
+}
+.admin-hero-subtitle {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(241, 245, 249, 0.9);
+  max-width: 520px;
+  font-weight: 500;
+}
+
+/* Visual Healthcare Graphics Box */
+.admin-visual-box {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.admin-visual-card {
+  padding: 1.2rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+.admin-visual-card svg {
+  width: 28px;
+  height: 28px;
+  color: #38bdf8;
+}
+.admin-visual-card span {
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+/* Pulse Heartbeat Line Graphic */
+.ecg-line-wrap {
+  width: 100%;
+  height: 40px;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Right Section - Login Card */
+.admin-login-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+}
+
+.admin-card {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 1.5rem;
+  padding: 2.75rem 2.25rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+}
+
+.admin-card-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.admin-card-logo {
+  height: 54px;
+  margin-bottom: 1rem;
+}
+.admin-card-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 0.35rem;
+}
+.admin-card-sub {
+  font-size: 0.88rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Inputs */
+.admin-input-group {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.admin-input-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.admin-input-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.admin-input-icon {
+  position: absolute;
+  left: 1rem;
+  color: #059669;
+  width: 18px;
+  height: 18px;
+}
+.admin-input {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.8rem;
+  border-radius: 0.85rem;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
+  transition: all 0.2s;
+}
+.admin-input:focus {
+  outline: none;
+  border-color: #059669;
+  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15);
+}
+
+.admin-toggle-pwd {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+.admin-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #475569;
+  cursor: pointer;
+}
+.admin-forgot-link {
+  color: #0284c7;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.admin-submit-btn {
+  width: 100%;
+  padding: 0.95rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, #059669 0%, #0284c7 100%);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.35);
+  transition: all 0.2s ease;
+}
+.admin-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(5, 150, 105, 0.45);
+}

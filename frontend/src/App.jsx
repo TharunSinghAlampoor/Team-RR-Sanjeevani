@@ -2,14 +2,29 @@ import React, { Component, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 
 import Dashboard from './pages/Dashboard';
 import { LandingPage } from './pages/LandingPage';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 
+// Admin imports
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminInventory from './pages/admin/AdminInventory';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminReports from './pages/admin/AdminReports';
+import AdminSettings from './pages/admin/AdminSettings';
+
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ChangePassword = lazy(() => import('./pages/ChangePassword'));
+const CategoryProductsPage = lazy(() => import('./pages/CategoryProductsPage'));
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -41,7 +56,7 @@ class ErrorBoundary extends Component {
           textAlign: 'center',
         }}>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#059669', marginBottom: '0.5rem' }}>
-            Sanjeevani Store
+            Sanjeevani Portal
           </h2>
           <p style={{ color: '#dc2626', fontWeight: 600, maxWidth: '600px', fontSize: '0.95rem', marginBottom: '1rem', wordBreak: 'break-word' }}>
             {this.state.error?.message || 'Something went wrong while loading the page.'}
@@ -63,25 +78,7 @@ class ErrorBoundary extends Component {
                 boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)',
               }}
             >
-              Reload Dashboard
-            </button>
-            <button
-              onClick={() => {
-                sessionStorage.clear();
-                localStorage.clear();
-                window.location.href = '/dashboard';
-              }}
-              style={{
-                padding: '0.75rem 1.5rem',
-                background: '#475569',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Reset Session
+              Reload Page
             </button>
           </div>
         </div>
@@ -93,10 +90,7 @@ class ErrorBoundary extends Component {
 
 import BrandLoader from './components/BrandLoader';
 
-// Lightweight page loader during route transitions
-const PageLoader = () => <BrandLoader fullScreen message="Loading Sanjeevani Store..." />;
-
-const CategoryProductsPage = lazy(() => import('./pages/CategoryProductsPage'));
+const PageLoader = () => <BrandLoader fullScreen message="Loading Sanjeevani Portal..." />;
 
 function App() {
   return (
@@ -105,7 +99,7 @@ function App() {
         <Router>
           <Suspense fallback={<PageLoader />}>
             <Routes>
-              {/* Store & Public Routes */}
+              {/* Customer & Public Routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
@@ -120,6 +114,28 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Dedicated Admin Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route
+                path="/admin"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminLayout />
+                  </AdminProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="inventory" element={<AdminInventory />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="reports" element={<AdminReports />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
 
               {/* Default Fallback */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />

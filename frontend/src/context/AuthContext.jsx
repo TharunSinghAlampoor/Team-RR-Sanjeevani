@@ -40,12 +40,14 @@ export const AuthProvider = ({ children }) => {
       // 1. Try loading from sessionStorage first, then localStorage
       let localToken = sessionStorage.getItem('token') || localStorage.getItem('token');
       let localUserName = sessionStorage.getItem('user') || localStorage.getItem('user');
+      let localRole = sessionStorage.getItem('user_role') || localStorage.getItem('user_role') || '';
 
       // If localUserName was stored as JSON, extract just the name string
       if (localUserName && (localUserName.startsWith('{') || localUserName.startsWith('['))) {
         try {
           const parsed = JSON.parse(localUserName);
           localUserName = parsed.fullName || parsed.name || parsed.email || '';
+          if (!localRole && parsed.role) localRole = parsed.role;
         } catch (e) {
           localUserName = '';
         }
@@ -62,13 +64,15 @@ export const AuthProvider = ({ children }) => {
 
       if (localToken && localUserName) {
         setToken(localToken);
-        setUser({ fullName: localUserName });
+        setUser({ fullName: localUserName, role: localRole });
 
         // Save token and user name in sessionStorage (and sync localStorage + cookies)
         sessionStorage.setItem('token', localToken);
         sessionStorage.setItem('user', localUserName);
+        sessionStorage.setItem('user_role', localRole);
         localStorage.setItem('token', localToken);
         localStorage.setItem('user', localUserName);
+        localStorage.setItem('user_role', localRole);
         saveSessionCookies(localUserName, localToken);
 
         // Load cached shopping counts for instant badge display
@@ -82,10 +86,13 @@ export const AuthProvider = ({ children }) => {
           if (response.success && response.data) {
             setUser(response.data);
             const freshName = response.data.fullName || response.data.email || localUserName;
+            const freshRole = response.data.role || localRole;
             sessionStorage.setItem('token', localToken);
             sessionStorage.setItem('user', freshName);
+            sessionStorage.setItem('user_role', freshRole);
             localStorage.setItem('token', localToken);
             localStorage.setItem('user', freshName);
+            localStorage.setItem('user_role', freshRole);
             saveSessionCookies(freshName, localToken);
           }
         } catch (err) {
@@ -115,14 +122,17 @@ export const AuthProvider = ({ children }) => {
     const userName = typeof userData === 'string'
       ? userData
       : (userData.fullName || userData.name || userData.email || '');
+    const userRole = typeof userData === 'object' && userData.role ? userData.role : '';
 
-    // Set sessionStorage (JWT Token + User Name String)
+    // Set sessionStorage (JWT Token + User Name String + Role)
     sessionStorage.setItem('token', jwtToken);
     sessionStorage.setItem('user', userName);
+    sessionStorage.setItem('user_role', userRole);
 
     // Sync localStorage & cookies
     localStorage.setItem('token', jwtToken);
     localStorage.setItem('user', userName);
+    localStorage.setItem('user_role', userRole);
     saveSessionCookies(userName, jwtToken);
 
     // Update state
@@ -134,8 +144,10 @@ export const AuthProvider = ({ children }) => {
     clearSessionCookies();
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
+    sessionStorage.removeItem('user_role');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('user_role');
     setToken(null);
     setUser(null);
     setCachedCartCount(0);

@@ -12,11 +12,15 @@ export const AdminProtectedRoute = ({ children }) => {
   }
 
   // Ensure user is logged in AND has ADMIN role
-  if (!isAuthenticated || !user) {
+  const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+  if (!isAuthenticated && !token) {
     return <Navigate to="/admin/login" replace />;
   }
 
-  const role = user.role ? String(user.role).toUpperCase() : '';
+  const role = (user && user.role) 
+    ? String(user.role).toUpperCase() 
+    : String(sessionStorage.getItem('user_role') || localStorage.getItem('user_role') || '').toUpperCase();
+
   if (role !== 'ADMIN') {
     return (
       <div style={{

@@ -640,22 +640,22 @@ export const BuyNowModal = ({
             )}
           </button>
 
-          {/* Address Warning Pop-up Banner */}
+          {/* Top-Middle Address Warning Pop-up Banner */}
           {showAddressPopup && (
             <div style={{
-              position: 'sticky', bottom: '10px', zIndex: 99,
-              background: '#fef2f2', border: '2px solid #ef4444', borderRadius: '0.85rem', padding: '0.85rem 1rem',
-              boxShadow: '0 8px 24px rgba(239, 68, 68, 0.25)', display: 'flex', alignItems: 'center', gap: '0.75rem',
-              color: '#991b1b', marginTop: '0.75rem'
+              position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)', zIndex: 99999,
+              background: '#fef2f2', border: '2px solid #ef4444', borderRadius: '1rem', padding: '0.9rem 1.25rem',
+              boxShadow: '0 20px 40px rgba(239, 68, 68, 0.35)', display: 'flex', alignItems: 'center', gap: '0.75rem',
+              color: '#991b1b', width: '90%', maxWidth: '440px'
             }}>
-              <AlertTriangle style={{ width: 22, height: 22, color: '#ef4444', flexShrink: 0 }} />
+              <AlertTriangle style={{ width: 24, height: 24, color: '#ef4444', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontWeight: 900, fontSize: '0.88rem' }}>⚠️ Delivery Address Required!</p>
-                <p style={{ margin: '2px 0 0 0', fontWeight: 600, fontSize: '0.75rem', color: '#b91c1c' }}>Please enter or detect your address above to place the order.</p>
+                <p style={{ margin: 0, fontWeight: 900, fontSize: '0.9rem' }}>⚠️ Delivery Address Required!</p>
+                <p style={{ margin: '2px 0 0 0', fontWeight: 700, fontSize: '0.78rem', color: '#b91c1c' }}>Please enter or detect your address to complete the order.</p>
               </div>
               <button
                 onClick={() => setShowAddressPopup(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 900, fontSize: '1rem', padding: '0 0.2rem' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 900, fontSize: '1.1rem', padding: '0 0.2rem' }}
               >
                 ✕
               </button>

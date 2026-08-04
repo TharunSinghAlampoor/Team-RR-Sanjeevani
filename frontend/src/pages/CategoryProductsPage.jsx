@@ -327,35 +327,62 @@ export function CategoryProductsPage() {
       />
 
       <main className="dashboard-main" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
-        {/* Absolute Far-Left Corner Back Button Header */}
-        <div style={{ width: '100%', padding: '0 1.5rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <motion.div whileHover={{ x: -4 }} whileTap={{ scale: 0.95 }} style={{ marginLeft: 0 }}>
-            <Link
-              to="/dashboard"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                padding: '0.45rem 1rem',
-                borderRadius: '0.65rem',
-                background: '#ffffff',
-                border: '1.5px solid #a7f3d0',
-                color: '#047857',
-                fontWeight: 800,
-                fontSize: '0.84rem',
-                textDecoration: 'none',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <ArrowLeft style={{ width: 18, height: 18, color: '#059669' }} />
-              <span>Back</span>
-            </Link>
-          </motion.div>
+        {/* Category Page Header Bar with Back Button & Category Name */}
+        <div style={{ maxWidth: 1280, margin: '0 auto 1.5rem auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <motion.div whileHover={{ x: -4 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                to="/dashboard"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  padding: '0.5rem 1.1rem',
+                  borderRadius: '0.75rem',
+                  background: '#ffffff',
+                  border: '1.5px solid #a7f3d0',
+                  color: '#047857',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <ArrowLeft style={{ width: 18, height: 18, color: '#059669' }} />
+                <span>Back</span>
+              </Link>
+            </motion.div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)', padding: '0.35rem 0.95rem', borderRadius: 99, border: '1px solid #cbd5e1', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}>
-            <span style={{ fontSize: '1rem' }}>{currentCatMeta.icon || '✨'}</span>
-            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>{currentCatMeta.name}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: '0.75rem',
+                  background: currentCatMeta.bgGrad || 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justify: 'center',
+                  fontSize: '1.25rem',
+                  boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)',
+                }}
+              >
+                {currentCatMeta.icon || '✨'}
+              </div>
+              <div>
+                <h1 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0f172a', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                  {currentCatMeta.name}
+                </h1>
+                <p style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, margin: 0 }}>
+                  Showing all genuine {currentCatMeta.name} products
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ background: '#ecfdf5', border: '1.5px solid #a7f3d0', padding: '0.35rem 0.85rem', borderRadius: '0.75rem', fontSize: '0.8rem', fontWeight: 800, color: '#047857' }}>
+            📦 {categoryProducts.length} Items Available
           </div>
         </div>
 

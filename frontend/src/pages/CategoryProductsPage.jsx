@@ -119,35 +119,31 @@ export function CategoryProductsPage() {
 
   // Determine current active category meta
   const currentCatMeta = useMemo(() => {
-    const numId = parseInt(categoryId, 10);
+    const rawStr = String(categoryId || '').trim();
+    const numId = parseInt(rawStr, 10);
+
+    // 1. Direct match by numeric ID in CATEGORY_META (1 to 5)
     if (!isNaN(numId) && CATEGORY_META[numId]) {
       return { id: numId, ...CATEGORY_META[numId] };
     }
 
-    // Try finding by name match
-    const matched = categories.find(c =>
-      String(c.categoryId) === String(categoryId) ||
-      c.categoryName.toLowerCase() === String(categoryId).toLowerCase()
-    );
+    // 2. Normalize category name from raw URL param string (handling dashes/spaces)
+    const normalizedName = formatCategoryName(rawStr.replace(/[-_]/g, ' '));
+    const metaEntry = Object.values(CATEGORY_META).find(m => m.name.toLowerCase() === normalizedName.toLowerCase());
 
-    if (matched) {
-      const cleanName = formatCategoryName(matched.categoryName);
-      const metaEntry = Object.values(CATEGORY_META).find(m => m.name === cleanName);
+    if (metaEntry) {
+      const catObj = categories.find(c => formatCategoryName(c.categoryName).toLowerCase() === normalizedName.toLowerCase());
       return {
-        id: matched.categoryId,
-        name: cleanName,
-        icon: metaEntry?.icon || '🏥',
-        desc: metaEntry?.desc || `Explore high quality ${cleanName} products.`,
-        color: metaEntry?.color || '#059669',
-        bgGrad: metaEntry?.bgGrad || 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
+        id: catObj ? catObj.categoryId : rawStr,
+        ...metaEntry
       };
     }
 
     return {
-      id: categoryId,
-      name: decodeURIComponent(categoryId || 'Products'),
+      id: rawStr,
+      name: normalizedName || 'Healthcare Category',
       icon: '🏥',
-      desc: 'Explore quality medical and healthcare essentials.',
+      desc: 'Explore high-quality medical and healthcare essentials.',
       color: '#059669',
       bgGrad: 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
     };
@@ -158,54 +154,34 @@ export function CategoryProductsPage() {
     let prods = [...allProducts];
     if (!prods.length) return [];
 
-    const rawParam = String(categoryId || '').trim().toLowerCase();
-    const numId = parseInt(rawParam, 10);
-    const targetCatName = (currentCatMeta?.name || '').toLowerCase();
-
-    // Find all matching category IDs from database categories list
-    const matchedCategoryIds = categories
-      .filter(c => {
-        const cName = formatCategoryName(c.categoryName).toLowerCase();
-        return cName === targetCatName || c.categoryName.toLowerCase() === targetCatName || (!isNaN(numId) && c.categoryId === numId);
-      })
-      .map(c => c.categoryId);
+    const targetCategoryName = currentCatMeta.name;
 
     prods = prods.filter(p => {
       if (!p) return false;
-      const pCatId = p.categoryId || p.category?.categoryId;
-      const pCatName = p.categoryName || p.category?.categoryName || '';
-      const formattedPCatName = formatCategoryName(pCatName).toLowerCase();
 
-      // 1. Direct numeric ID match
-      if (!isNaN(numId) && pCatId && Number(pCatId) === numId) return true;
+      // Extract category name from product
+      const pCatName = p.categoryName || p.category?.categoryName || p.category?.name || '';
+      const pFormattedCatName = formatCategoryName(pCatName);
 
-      // 2. Direct string ID or categoryId array match
-      if (pCatId && matchedCategoryIds.includes(Number(pCatId))) return true;
-
-      // 3. Formatted Category Name match (e.g. "skin care" === "skin care")
-      if (formattedPCatName && targetCatName && formattedPCatName === targetCatName) return true;
-
-      // 4. Raw Category Name comparison
-      if (pCatName && targetCatName) {
-        const rawLower = pCatName.toLowerCase();
-        if (rawLower.includes(targetCatName) || targetCatName.includes(rawLower)) return true;
+      // 1. Canonical formatted category name match (e.g. "Skin Care" === "Skin Care")
+      if (pFormattedCatName.toLowerCase() === targetCategoryName.toLowerCase()) {
+        return true;
       }
 
-      // 5. Keyword match for slug aliases
-      if (rawParam.includes('skin') || rawParam.includes('dermo')) {
-        return formattedPCatName === 'skin care' || pCatName.toLowerCase().includes('skin') || pCatName.toLowerCase().includes('dermo');
+      // 2. Numeric ID match if available
+      const targetCatId = Number(currentCatMeta.id);
+      const pCatId = Number(p.categoryId || p.category?.categoryId);
+      if (!isNaN(targetCatId) && !isNaN(pCatId) && targetCatId === pCatId) {
+        return true;
       }
-      if (rawParam.includes('nutrition') || rawParam.includes('supplement')) {
-        return formattedPCatName === 'nutrition & health' || pCatName.toLowerCase().includes('nutrition');
-      }
-      if (rawParam.includes('device') || rawParam.includes('equipment')) {
-        return formattedPCatName === 'medical devices' || pCatName.toLowerCase().includes('device');
-      }
-      if (rawParam.includes('baby') || rawParam.includes('kid')) {
-        return formattedPCatName === 'baby & kids' || pCatName.toLowerCase().includes('baby') || pCatName.toLowerCase().includes('kid');
-      }
-      if (rawParam.includes('medicine') || rawParam.includes('prescription') || rawParam.includes('pharmacy')) {
-        return formattedPCatName === 'prescriptions & pharmacy' || pCatName.toLowerCase().includes('medicine') || pCatName.toLowerCase().includes('pharmacy');
+
+      // 3. Substring match fallback
+      if (pCatName && targetCategoryName) {
+        const pLower = pCatName.toLowerCase();
+        const targetLower = targetCategoryName.toLowerCase();
+        if (pLower.includes(targetLower) || targetLower.includes(pLower)) {
+          return true;
+        }
       }
 
       return false;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { MapPin, Navigation, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { detectUserLocation, getSavedAddress, saveAddress } from '../utils/locationUtils';
 
@@ -11,15 +12,12 @@ export const LocationAddressInput = ({
 }) => {
   const [isDetecting, setIsDetecting] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
-  const [statusType, setStatusType] = useState('info'); // 'info' | 'success' | 'error'
+  const [statusType, setStatusType] = useState('info');
 
   useEffect(() => {
-    // If parent value is empty, try loading saved address from localStorage
     if (!value) {
       const saved = getSavedAddress();
-      if (saved && onChange) {
-        onChange(saved);
-      }
+      if (saved && onChange) onChange(saved);
     }
   }, []);
 
@@ -32,7 +30,7 @@ export const LocationAddressInput = ({
 
   const handleDetectLocation = async () => {
     setIsDetecting(true);
-    setStatusMsg('Accessing GPS & detecting address...');
+    setStatusMsg('Detecting location via GPS...');
     setStatusType('info');
 
     try {
@@ -41,13 +39,13 @@ export const LocationAddressInput = ({
         const detected = locData.formattedAddress;
         if (onChange) onChange(detected);
         saveAddress(detected);
-        setStatusMsg('Location auto-detected & address applied!');
+        setStatusMsg('Location auto-detected!');
         setStatusType('success');
-        setTimeout(() => setStatusMsg(''), 4000);
+        setTimeout(() => setStatusMsg(''), 3500);
       }
     } catch (err) {
       console.error('Location detection error:', err);
-      setStatusMsg(err.message || 'Could not detect location automatically.');
+      setStatusMsg(err.message || 'Could not detect location.');
       setStatusType('error');
     } finally {
       setIsDetecting(false);
@@ -55,18 +53,20 @@ export const LocationAddressInput = ({
   };
 
   return (
-    <div style={{ marginBottom: '1rem' }} className={className}>
+    <div style={{ marginBottom: '0.95rem' }} className={className}>
+      {/* Top Header Label & Detect Location Button on Far Right Corner */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justify: 'space-between',
           marginBottom: '0.45rem',
+          width: '100%',
         }}
       >
         <label
           style={{
-            fontSize: '0.78rem',
+            fontSize: '0.76rem',
             fontWeight: 800,
             color: '#334155',
             display: 'flex',
@@ -76,11 +76,13 @@ export const LocationAddressInput = ({
             letterSpacing: '0.03em',
           }}
         >
-          <MapPin style={{ width: 15, height: 15, color: '#10b981' }} />
+          <MapPin style={{ width: 14, height: 14, color: '#10b981' }} />
           <span>{label}</span>
         </label>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05, background: '#d1fae5' }}
+          whileTap={{ scale: 0.95 }}
           type="button"
           onClick={handleDetectLocation}
           disabled={isDetecting}
@@ -88,60 +90,61 @@ export const LocationAddressInput = ({
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.35rem',
-            padding: '0.3rem 0.65rem',
+            padding: '0.25rem 0.65rem',
             borderRadius: '0.5rem',
-            border: '1.5px solid #10b981',
-            background: isDetecting ? '#f0fdf4' : '#ecfdf5',
+            border: '1.5px solid #a7f3d0',
+            background: '#ecfdf5',
             color: '#047857',
-            fontSize: '0.75rem',
+            fontSize: '0.73rem',
             fontWeight: 800,
             cursor: isDetecting ? 'wait' : 'pointer',
             transition: 'all 0.18s ease',
-            boxShadow: '0 2px 6px rgba(16, 185, 129, 0.12)',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+            marginLeft: 'auto',
           }}
-          title="Click to detect current physical location via GPS"
+          title="Detect location using GPS"
         >
           {isDetecting ? (
             <>
-              <Loader2 style={{ width: 13, height: 13, animation: 'spin 1s linear infinite' }} />
+              <Loader2 style={{ width: 12, height: 12, animation: 'spin 1s linear infinite' }} />
               <span>Detecting...</span>
             </>
           ) : (
             <>
-              <Navigation style={{ width: 13, height: 13, color: '#059669' }} />
-              <span>📍 Detect My Location</span>
+              <Navigation style={{ width: 12, height: 12, color: '#059669' }} />
+              <span>Detect Location</span>
             </>
           )}
-        </button>
+        </motion.button>
       </div>
 
+      {/* Clean Address Textarea Box */}
       <div
         style={{
-          padding: '0.65rem',
-          borderRadius: '0.85rem',
-          border: '1.5px solid #d1fae5',
-          background: '#f0fdf4',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
+          borderRadius: '0.75rem',
+          border: '1.5px solid #cbd5e1',
+          background: '#ffffff',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+          overflow: 'hidden',
         }}
       >
         <textarea
-          rows="3"
+          rows="2"
           value={value}
           onChange={handleAddressChange}
           placeholder={placeholder}
           style={{
             width: '100%',
             padding: '0.65rem 0.75rem',
-            borderRadius: '0.6rem',
-            fontSize: '0.86rem',
-            border: '1.5px solid #cbd5e1',
+            fontSize: '0.84rem',
+            border: 'none',
             background: '#ffffff',
             color: '#0f172a',
             boxSizing: 'border-box',
             outline: 'none',
             resize: 'vertical',
             fontFamily: 'inherit',
-            lineHeight: 1.5,
+            lineHeight: 1.45,
             fontWeight: 600,
           }}
         />
@@ -152,18 +155,20 @@ export const LocationAddressInput = ({
               display: 'flex',
               alignItems: 'center',
               gap: '0.35rem',
-              marginTop: '0.45rem',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              color: statusType === 'error' ? '#dc2626' : statusType === 'success' ? '#059669' : '#0284c7',
+              padding: '0.35rem 0.75rem',
+              background: statusType === 'error' ? '#fef2f2' : statusType === 'success' ? '#f0fdf4' : '#f0f9ff',
+              borderTop: `1px solid ${statusType === 'error' ? '#fecdd3' : statusType === 'success' ? '#a7f3d0' : '#bae6fd'}`,
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              color: statusType === 'error' ? '#dc2626' : statusType === 'success' ? '#047857' : '#0284c7',
             }}
           >
             {statusType === 'error' ? (
-              <AlertCircle style={{ width: 13, height: 13 }} />
+              <AlertCircle style={{ width: 13, height: 13, flexShrink: 0 }} />
             ) : statusType === 'success' ? (
-              <CheckCircle2 style={{ width: 13, height: 13 }} />
+              <CheckCircle2 style={{ width: 13, height: 13, flexShrink: 0 }} />
             ) : (
-              <Loader2 style={{ width: 13, height: 13, animation: 'spin 1s linear infinite' }} />
+              <Loader2 style={{ width: 13, height: 13, animation: 'spin 1s linear infinite', flexShrink: 0 }} />
             )}
             <span>{statusMsg}</span>
           </div>

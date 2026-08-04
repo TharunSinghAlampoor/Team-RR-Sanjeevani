@@ -3649,36 +3649,39 @@ body:has(.dashboard-page) {
   opacity: 0.6;
 }
 
-/* Product grid — responsive CSS Grid */
+/* Product grid — responsive CSS Grid with generous card gaps */
 .cat-section__grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.85rem;
+  gap: 1.4rem;
   align-items: stretch;
 }
 
 @media (max-width: 1400px) {
   .cat-section__grid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 1.3rem;
   }
 }
 
 @media (max-width: 1024px) {
   .cat-section__grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
   }
 }
 
 @media (max-width: 680px) {
   .cat-section__grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
+    gap: 1rem;
   }
 }
 
 @media (max-width: 380px) {
   .cat-section__grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 

@@ -158,27 +158,56 @@ export function CategoryProductsPage() {
     let prods = [...allProducts];
     if (!prods.length) return [];
 
-    const numId = parseInt(categoryId, 10);
-    const targetName = (currentCatMeta?.name || '').toLowerCase();
+    const rawParam = String(categoryId || '').trim().toLowerCase();
+    const numId = parseInt(rawParam, 10);
+    const targetCatName = (currentCatMeta?.name || '').toLowerCase();
 
     // Find all matching category IDs from database categories list
     const matchedCategoryIds = categories
       .filter(c => {
         const cName = formatCategoryName(c.categoryName).toLowerCase();
-        return cName === targetName || c.categoryName.toLowerCase() === targetName || (!isNaN(numId) && c.categoryId === numId);
+        return cName === targetCatName || c.categoryName.toLowerCase() === targetCatName || (!isNaN(numId) && c.categoryId === numId);
       })
       .map(c => c.categoryId);
 
     prods = prods.filter(p => {
       if (!p) return false;
-      if (!isNaN(numId) && p.categoryId === numId) return true;
-      if (matchedCategoryIds.includes(p.categoryId)) return true;
-      if (p.categoryName) {
-        const cleanPName = formatCategoryName(p.categoryName).toLowerCase();
-        const rawPName = p.categoryName.toLowerCase();
-        if (cleanPName === targetName || rawPName === targetName) return true;
-        if (cleanPName.includes(targetName) || targetName.includes(cleanPName)) return true;
+      const pCatId = p.categoryId || p.category?.categoryId;
+      const pCatName = p.categoryName || p.category?.categoryName || '';
+      const formattedPCatName = formatCategoryName(pCatName).toLowerCase();
+
+      // 1. Direct numeric ID match
+      if (!isNaN(numId) && pCatId && Number(pCatId) === numId) return true;
+
+      // 2. Direct string ID or categoryId array match
+      if (pCatId && matchedCategoryIds.includes(Number(pCatId))) return true;
+
+      // 3. Formatted Category Name match (e.g. "skin care" === "skin care")
+      if (formattedPCatName && targetCatName && formattedPCatName === targetCatName) return true;
+
+      // 4. Raw Category Name comparison
+      if (pCatName && targetCatName) {
+        const rawLower = pCatName.toLowerCase();
+        if (rawLower.includes(targetCatName) || targetCatName.includes(rawLower)) return true;
       }
+
+      // 5. Keyword match for slug aliases
+      if (rawParam.includes('skin') || rawParam.includes('dermo')) {
+        return formattedPCatName === 'skin care' || pCatName.toLowerCase().includes('skin') || pCatName.toLowerCase().includes('dermo');
+      }
+      if (rawParam.includes('nutrition') || rawParam.includes('supplement')) {
+        return formattedPCatName === 'nutrition & health' || pCatName.toLowerCase().includes('nutrition');
+      }
+      if (rawParam.includes('device') || rawParam.includes('equipment')) {
+        return formattedPCatName === 'medical devices' || pCatName.toLowerCase().includes('device');
+      }
+      if (rawParam.includes('baby') || rawParam.includes('kid')) {
+        return formattedPCatName === 'baby & kids' || pCatName.toLowerCase().includes('baby') || pCatName.toLowerCase().includes('kid');
+      }
+      if (rawParam.includes('medicine') || rawParam.includes('prescription') || rawParam.includes('pharmacy')) {
+        return formattedPCatName === 'prescriptions & pharmacy' || pCatName.toLowerCase().includes('medicine') || pCatName.toLowerCase().includes('pharmacy');
+      }
+
       return false;
     });
 

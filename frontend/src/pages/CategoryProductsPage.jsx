@@ -67,7 +67,7 @@ export function CategoryProductsPage() {
   const [sortBy, setSortBy] = useState('recommended');
   const [inStockOnly, setInStockOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 8;
+  const ITEMS_PER_PAGE = 10;
 
   // Cart, Favorites & Drawers state
   const [cartItems, setCartItems] = useState([]);
@@ -310,7 +310,7 @@ export function CategoryProductsPage() {
   }
 
   return (
-    <div className="dashboard-page light" style={{ minHeight: '100vh', background: '#f8fafc' }}>
+    <div className="dashboard-page light" style={{ minHeight: '100vh', backgroundImage: "linear-gradient(180deg, rgba(248, 250, 252, 0.88) 0%, rgba(241, 245, 249, 0.94) 100%), url('/custom_medical_bg_light.jpg')", backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
       {/* Navbar */}
       <Navbar
         user={user}
@@ -475,26 +475,8 @@ export function CategoryProductsPage() {
               </button>
             </div>
           ) : (
-            <section className="cat-section" style={{ background: '#ffffff', borderRadius: '1.25rem', padding: '1.5rem', border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.02)' }}>
-              <div className="cat-section__header" style={{ borderLeftColor: currentCatMeta.color || '#059669', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div className="cat-section__title-group">
-                  <div className="cat-section__icon-wrap" style={{ background: `${currentCatMeta.color || '#059669'}20` }}>
-                    <span style={{ fontSize: '1.2rem' }}>{currentCatMeta.icon || '✨'}</span>
-                  </div>
-                  <div>
-                    <h2 className="cat-section__title">{currentCatMeta.name}</h2>
-                  </div>
-                </div>
-
-                {totalPages > 1 && (
-                  <span style={{ fontSize: '0.78rem', color: currentCatMeta.color || '#047857', fontWeight: 800, background: '#f0fdf4', padding: '0.25rem 0.75rem', borderRadius: 99, border: '1px solid #a7f3d0' }}>
-                    Page {currentPage} of {totalPages} ({categoryProducts.length} Total Items)
-                  </span>
-                )}
-              </div>
-              <div className="cat-section__divider" style={{ background: `linear-gradient(90deg, ${currentCatMeta.color || '#059669'}40, transparent)` }} />
-
-              {/* Exact Dashboard Grid Layout */}
+            <div>
+              {/* Exact Product Grid directly on background */}
               <div className="cat-section__grid">
                 {paginatedCategoryProducts.map((prod, i) => (
                   <ProductCard
@@ -577,7 +559,7 @@ export function CategoryProductsPage() {
                   </motion.button>
                 </div>
               )}
-            </section>
+            </div>
           )}
         </div>
       </main>

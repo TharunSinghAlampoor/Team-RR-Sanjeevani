@@ -327,33 +327,33 @@ export function CategoryProductsPage() {
       />
 
       <main className="dashboard-main" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
-        {/* Top-Left Corner Back Button & Title Header */}
-        <div style={{ maxWidth: 1280, margin: '0 auto 1.25rem auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <motion.div whileHover={{ x: -3 }} whileTap={{ scale: 0.96 }}>
+        {/* Absolute Far-Left Corner Back Button Header */}
+        <div style={{ width: '100%', padding: '0 1.5rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <motion.div whileHover={{ x: -4 }} whileTap={{ scale: 0.95 }} style={{ marginLeft: 0 }}>
             <Link
               to="/dashboard"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.45rem',
-                padding: '0.45rem 0.9rem',
+                padding: '0.45rem 1rem',
                 borderRadius: '0.65rem',
                 background: '#ffffff',
                 border: '1.5px solid #a7f3d0',
                 color: '#047857',
                 fontWeight: 800,
-                fontSize: '0.82rem',
+                fontSize: '0.84rem',
                 textDecoration: 'none',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 transition: 'all 0.2s ease',
               }}
             >
-              <ArrowLeft style={{ width: 16, height: 16, color: '#059669' }} />
+              <ArrowLeft style={{ width: 18, height: 18, color: '#059669' }} />
               <span>Back</span>
             </Link>
           </motion.div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', padding: '0.35rem 0.95rem', borderRadius: 99, border: '1px solid #cbd5e1' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)', padding: '0.35rem 0.95rem', borderRadius: 99, border: '1px solid #cbd5e1', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}>
             <span style={{ fontSize: '1rem' }}>{currentCatMeta.icon || '✨'}</span>
             <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>{currentCatMeta.name}</span>
           </div>

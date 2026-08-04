@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronDown, Pill, Baby, Stethoscope, Sparkles, Activity } from 'lucide-react';
 import ProductCard from './ProductCard';
 
-import { formatCategoryName } from './CategoryCard';
+import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 
 export const CATEGORY_META = {
   'Prescriptions & Medicines': {
@@ -186,7 +186,7 @@ export const CategorySection = ({
         <motion.button
           className="cat-section__toggle"
           style={{ color: meta.color, borderColor: `${meta.color}40`, background: meta.bg }}
-          onClick={() => navigate(`/category/${category.categoryId || category.categoryName}`)}
+          onClick={() => navigate(`/category/${toCategorySlug(category.categoryName || category.categoryId)}`)}
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
         >

@@ -19,6 +19,7 @@ import BrandLoader from '../components/BrandLoader';
 import ToastNotification from '../components/ToastNotification';
 import { useAuth } from '../context/AuthContext';
 import shopService from '../api/shopService';
+import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 
 const API_BASE = 'http://localhost:8080/api';
 
@@ -30,28 +31,7 @@ const CATEGORY_META = {
   5: { name: 'Skin Care', icon: '✨', desc: 'Dermatologist-tested face washes, hydration serums, sunscreens & lotions.', color: '#7c3aed', bgGrad: 'linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%)' },
 };
 
-function formatCategoryName(rawName) {
-  if (!rawName) return 'Healthcare Category';
-  const name = String(rawName).trim();
-  const lower = name.toLowerCase();
 
-  if (lower.includes('baby') || lower.includes('pediatric') || lower.includes("kid's")) {
-    return 'Baby & Kids';
-  }
-  if (lower.includes('dermo') || lower.includes('skin')) {
-    return 'Skin Care';
-  }
-  if (lower.includes('device') || lower.includes('equipment')) {
-    return 'Medical Devices';
-  }
-  if (lower.includes('nutrition') || lower.includes('supplement') || lower.includes('health')) {
-    return 'Nutrition & Health';
-  }
-  if (lower.includes('medicine') || lower.includes('prescription') || lower.includes('pharmacy')) {
-    return 'Prescriptions & Pharmacy';
-  }
-  return name;
-}
 
 export function CategoryProductsPage() {
   const { categoryId } = useParams();
@@ -157,6 +137,16 @@ export function CategoryProductsPage() {
       bgGrad: 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
     };
   }, [categoryId, categories]);
+
+  // Auto replace numeric ID or un-slugified string in browser URL bar with clean category slug (e.g. /category/skin-care)
+  useEffect(() => {
+    if (currentCatMeta && currentCatMeta.name) {
+      const targetSlug = toCategorySlug(currentCatMeta.name);
+      if (categoryId && String(categoryId).trim() !== targetSlug) {
+        navigate(`/category/${targetSlug}`, { replace: true });
+      }
+    }
+  }, [currentCatMeta, categoryId, navigate]);
 
   // Filter & sort products for this category page
   const categoryProducts = useMemo(() => {

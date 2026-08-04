@@ -5,7 +5,7 @@ import {
   Search, Heart, ShoppingCart, Truck, LogOut, Key,
   X, Home, LayoutGrid, ChevronDown, UserCheck, ShieldCheck
 } from 'lucide-react';
-import { formatCategoryName } from './CategoryCard';
+import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 
 export const Navbar = ({
   user,
@@ -44,7 +44,8 @@ export const Navbar = ({
       e.stopPropagation();
     }
     setShowCategoriesDropdown(false);
-    navigate(`/category/${catId || catName}`);
+    const slug = toCategorySlug(catName || catId);
+    navigate(`/category/${slug}`);
   };
 
   return (

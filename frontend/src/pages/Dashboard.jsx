@@ -8,7 +8,8 @@ import shopService from '../api/shopService';
 import Navbar from '../components/Navbar';
 import HeroBanner from '../components/HeroBanner';
 import CategorySection from '../components/CategorySection';
-import CategoryCard, { formatCategoryName } from '../components/CategoryCard';
+import CategoryCard from '../components/CategoryCard';
+import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 import ProductCard from '../components/ProductCard';
 import DashboardFooter from '../components/DashboardFooter';
 import BrandLoader from '../components/BrandLoader';
@@ -271,11 +272,13 @@ export const Dashboard = () => {
     return Array.from(map.values());
   }, [categories, allProducts]);
 
-  const handleSelectCategory = useCallback((catId) => {
+  const handleSelectCategory = useCallback((catIdOrName) => {
     setIsFavoritesOpen(false);
     setIsCartOpen(false);
     setIsOrdersOpen(false);
-    navigate(`/category/${catId}`);
+    if (!catIdOrName) return;
+    const slug = toCategorySlug(catIdOrName);
+    navigate(`/category/${slug}`);
   }, [navigate]);
 
   const handleSearchChange = useCallback((query) => {

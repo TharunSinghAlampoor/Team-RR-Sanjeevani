@@ -201,6 +201,7 @@ export const BuyNowModal = ({
 
   const handleApplyCoupon = (codeToApply) => {
     const code = (codeToApply || couponCode).toUpperCase().trim();
+    setCouponCode(code);
     setCouponError('');
     if (!code) return;
 

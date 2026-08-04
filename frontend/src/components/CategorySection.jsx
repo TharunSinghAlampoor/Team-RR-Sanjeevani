@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronDown, Pill, Baby, Stethoscope, Sparkles, Activity } from 'lucide-react';
 import ProductCard from './ProductCard';
@@ -151,6 +152,7 @@ export const CategorySection = ({
   onOpenDetails,
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
 
   const meta = CATEGORY_META[category.categoryName] || CATEGORY_META[formatCategoryName(category.categoryName)] || {
     icon: Activity,
@@ -181,21 +183,16 @@ export const CategorySection = ({
           </div>
         </div>
 
-        {hasMore && (
-          <motion.button
-            className="cat-section__toggle"
-            style={{ color: meta.color, borderColor: `${meta.color}40`, background: meta.bg }}
-            onClick={() => setExpanded(!expanded)}
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            {expanded ? (
-              <><ChevronDown className="w-4 h-4" /> Show Less</>
-            ) : (
-              <><ChevronRight className="w-4 h-4" /> See All</>
-            )}
-          </motion.button>
-        )}
+        <motion.button
+          className="cat-section__toggle"
+          style={{ color: meta.color, borderColor: `${meta.color}40`, background: meta.bg }}
+          onClick={() => navigate(`/category/${category.categoryId || category.categoryName}`)}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          <ChevronRight className="w-4 h-4" />
+          <span>See All</span>
+        </motion.button>
       </div>
 
       {/* Divider */}

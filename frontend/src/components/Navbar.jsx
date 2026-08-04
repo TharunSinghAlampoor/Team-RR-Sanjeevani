@@ -44,9 +44,7 @@ export const Navbar = ({
       e.stopPropagation();
     }
     setShowCategoriesDropdown(false);
-    if (onScrollToCategory) {
-      onScrollToCategory(catId || catName);
-    }
+    navigate(`/category/${catId || catName}`);
   };
 
   return (

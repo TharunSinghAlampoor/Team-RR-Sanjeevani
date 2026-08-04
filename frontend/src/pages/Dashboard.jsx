@@ -275,16 +275,8 @@ export const Dashboard = () => {
     setIsFavoritesOpen(false);
     setIsCartOpen(false);
     setIsOrdersOpen(false);
-    setLoadingProducts(true);
-    setSelectedCategory(catId);
-    setTimeout(() => {
-      setLoadingProducts(false);
-      const el = document.getElementById('products-catalog-section');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 450);
-  }, []);
+    navigate(`/category/${catId}`);
+  }, [navigate]);
 
   const handleSearchChange = useCallback((query) => {
     setSearchQuery(query);

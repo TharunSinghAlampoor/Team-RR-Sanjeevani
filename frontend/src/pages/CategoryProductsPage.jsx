@@ -327,37 +327,35 @@ export function CategoryProductsPage() {
       />
 
       <main className="dashboard-main" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
-        {/* Top Header Bar: Row 1 Back Button, Row 2 Category Title */}
-        <div style={{ maxWidth: 1280, margin: '0 auto 1.5rem auto', padding: '0 1.5rem' }}>
-          {/* Row 1: Back Button Aligned to Far Left Corner */}
-          <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-start' }}>
-            <motion.div whileHover={{ x: -4 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                to="/dashboard"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  padding: '0.5rem 1.1rem',
-                  borderRadius: '0.75rem',
-                  background: '#ffffff',
-                  border: '1.5px solid #a7f3d0',
-                  color: '#047857',
-                  fontWeight: 800,
-                  fontSize: '0.85rem',
-                  textDecoration: 'none',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <ArrowLeft style={{ width: 18, height: 18, color: '#059669' }} />
-                <span>Back</span>
-              </Link>
-            </motion.div>
-          </div>
+        {/* Row 1: Back Button Pinned to Far-Left Screen Corner */}
+        <div style={{ width: '100%', padding: '0 2rem', marginBottom: '1rem', display: 'flex', justifyContent: 'flex-start' }}>
+          <motion.div whileHover={{ x: -4 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              to="/dashboard"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                padding: '0.5rem 1.1rem',
+                borderRadius: '0.75rem',
+                background: '#ffffff',
+                border: '1.5px solid #a7f3d0',
+                color: '#047857',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                textDecoration: 'none',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <ArrowLeft style={{ width: 18, height: 18, color: '#059669' }} />
+              <span>Back</span>
+            </Link>
+          </motion.div>
+        </div>
 
-          {/* Row 2: Category Title & Items Badge */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+        {/* Row 2: Category Title Banner */}
+        <div style={{ maxWidth: 1280, margin: '0 auto 1.5rem auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div
                 style={{
@@ -388,7 +386,6 @@ export function CategoryProductsPage() {
               📦 {categoryProducts.length} Items Available
             </div>
           </div>
-        </div>
 
         {/* Product Grid Catalog */}
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 1.5rem' }}>

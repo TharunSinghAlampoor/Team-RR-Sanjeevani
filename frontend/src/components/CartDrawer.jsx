@@ -301,7 +301,7 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
               <span style={{ color: '#059669' }}>₹{(subtotal + shipping).toLocaleString('en-IN')}</span>
             </div>
 
-            <button style={s.checkoutBtn} onClick={onCheckout}>
+            <button style={s.checkoutBtn} onClick={onCheckout || onProceedToCheckout}>
               Proceed to Checkout
               <ArrowRight style={{ width: 16, height: 16 }} />
             </button>

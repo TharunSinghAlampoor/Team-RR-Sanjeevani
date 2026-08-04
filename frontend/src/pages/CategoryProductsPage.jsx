@@ -36,7 +36,7 @@ const CATEGORY_META = {
 export function CategoryProductsPage() {
   const { categoryId } = useParams();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, updateShoppingState } = useAuth();
 
   const [allProducts, setAllProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -84,6 +84,49 @@ export function CategoryProductsPage() {
     setCurrentPage(1);
   }, [searchQuery, sortBy, inStockOnly]);
 
+  // Fetch cart, favorites & orders
+  const fetchCart = useCallback(async () => {
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!activeToken) return;
+    try {
+      const res = await shopService.getCart();
+      if (res && res.success && Array.isArray(res.data)) {
+        setCartItems(res.data);
+      }
+    } catch (e) { /* Ignore guest sessions */ }
+  }, []);
+
+  const fetchFavorites = useCallback(async () => {
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!activeToken) return;
+    try {
+      const res = await shopService.getFavorites();
+      if (res && res.success && Array.isArray(res.data)) {
+        setFavorites(res.data);
+      }
+    } catch (e) { /* Ignore guest sessions */ }
+  }, []);
+
+  const fetchOrders = useCallback(async () => {
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!activeToken) return;
+    try {
+      const res = await shopService.getOrders();
+      if (res && res.success && Array.isArray(res.data)) {
+        setOrders(res.data);
+      }
+    } catch (e) { /* Ignore guest sessions */ }
+  }, []);
+
+  // Sync shopping counts to AuthContext / cookies
+  useEffect(() => {
+    const safeCartCount = Array.isArray(cartItems) ? cartItems.length : 0;
+    const safeFavCount = Array.isArray(favorites) ? favorites.length : 0;
+    if (typeof updateShoppingState === 'function') {
+      updateShoppingState(safeCartCount, safeFavCount);
+    }
+  }, [cartItems, favorites, updateShoppingState]);
+
   // Fetch products & categories
   useEffect(() => {
     let isMounted = true;
@@ -92,6 +135,9 @@ export function CategoryProductsPage() {
     Promise.all([
       shopService.getProducts({}),
       shopService.getCategories(),
+      fetchCart(),
+      fetchFavorites(),
+      fetchOrders(),
     ])
       .then(([prodsRes, catsRes]) => {
         if (isMounted) {
@@ -113,7 +159,7 @@ export function CategoryProductsPage() {
       });
 
     return () => { isMounted = false; };
-  }, []);
+  }, [fetchCart, fetchFavorites, fetchOrders]);
 
   // Determine current active category meta
   const currentCatMeta = useMemo(() => {
@@ -232,59 +278,87 @@ export function CategoryProductsPage() {
   // Cart & Favorites handlers
   const favoritesMap = useMemo(() => {
     const map = {};
-    favorites.forEach(f => { map[f.productId] = true; });
+    (favorites || []).forEach(f => {
+      const pId = f.productId || f.product?.productId;
+      if (pId) map[pId] = true;
+    });
     return map;
   }, [favorites]);
 
-  const handleToggleFavorite = (prod) => {
-    const pId = prod?.productId || prod;
-    const isFav = favorites.some(f => f.productId === pId);
-    setFavorites(prev => {
-      const exists = prev.some(f => f.productId === pId);
-      if (exists) return prev.filter(f => f.productId !== pId);
-      return [...prev, prod];
-    });
-    setToast({
-      type: isFav ? 'fav-remove' : 'fav-add',
-      title: isFav ? 'Removed from Wishlist' : 'Saved to Wishlist!',
-      message: isFav ? `${prod?.name || 'Product'} removed from your wishlist.` : `${prod?.name || 'Product'} saved to your wishlist.`
-    });
-  };
+  const handleToggleFavorite = async (prod) => {
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!activeToken) {
+      navigate('/login');
+      return;
+    }
+    const targetPId = typeof prod === 'object' ? prod.productId : prod;
+    const targetProd = typeof prod === 'object' ? prod : allProducts.find(p => p.productId === targetPId);
+    const prodName = targetProd?.name || 'Product';
+    const isFav = !!favoritesMap[targetPId];
 
-  const handleAddToCart = (prod) => {
-    const targetProd = typeof prod === 'object' ? prod : allProducts.find(p => p.productId === prod);
-    setCartItems(prev => {
-      const existingIndex = prev.findIndex(item => item.product?.productId === (targetProd?.productId || prod));
-      if (existingIndex > -1) {
-        const updated = [...prev];
-        updated[existingIndex] = {
-          ...updated[existingIndex],
-          quantity: updated[existingIndex].quantity + 1,
-        };
-        return updated;
+    try {
+      if (isFav) {
+        await shopService.removeFavorite(targetPId);
+      } else {
+        await shopService.addFavorite(targetPId);
       }
-      return [...prev, { product: targetProd || { productId: prod, name: 'Product' }, quantity: 1 }];
-    });
-    setToast({
-      type: 'cart-add',
-      title: 'Added to Cart!',
-      message: `${targetProd?.name || 'Product'} added to your cart.`
-    });
+      await fetchFavorites();
+      setToast({
+        type: isFav ? 'fav-remove' : 'fav-add',
+        title: isFav ? 'Removed from Wishlist' : 'Saved to Wishlist!',
+        message: isFav ? `${prodName} removed from your wishlist.` : `${prodName} saved to your wishlist.`
+      });
+    } catch (err) {
+      console.error('Toggle favorite error:', err);
+    }
   };
 
-  const handleUpdateQuantity = (cartItemId, newQty) => {
-    setCartItems(prev => prev.map(item => {
-      const idMatches = item.cartItemId === cartItemId || item.product?.productId === cartItemId;
-      if (idMatches) {
-        return { ...item, quantity: Math.max(1, newQty) };
+  const handleAddToCart = async (prod, quantity = 1) => {
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!activeToken) {
+      navigate('/login');
+      return;
+    }
+    const targetPId = typeof prod === 'object' ? prod.productId : prod;
+    const targetProd = typeof prod === 'object' ? prod : allProducts.find(p => p.productId === targetPId);
+    const prodName = targetProd?.name || 'Product';
+    try {
+      const res = await shopService.addToCart(targetPId, quantity);
+      if (res && res.success) {
+        await fetchCart();
+        setToast({
+          type: 'cart-add',
+          title: 'Added to Cart!',
+          message: `${prodName} added to your cart.`
+        });
       }
-      return item;
-    }));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to add item to cart.');
+    }
   };
 
-  const handleRemoveFromCart = (prodId) => {
-    setCartItems(prev => prev.filter(item => item.product?.productId !== prodId));
-    setToast({ type: 'cart-remove', title: 'Removed from Cart', message: 'Item removed from your cart.' });
+  const handleUpdateQuantity = async (cartItemId, newQty) => {
+    if (newQty < 1) return;
+    try {
+      const res = await shopService.updateCartItem(cartItemId, newQty);
+      if (res && res.success) {
+        fetchCart();
+      }
+    } catch (err) {
+      console.error('Update cart item error:', err);
+    }
+  };
+
+  const handleRemoveFromCart = async (cartItemId) => {
+    try {
+      const res = await shopService.removeCartItem(cartItemId);
+      if (res && res.success) {
+        fetchCart();
+        setToast({ type: 'cart-remove', title: 'Removed from Cart', message: 'Item removed from your cart.' });
+      }
+    } catch (err) {
+      console.error('Remove cart item error:', err);
+    }
   };
 
   const handleStartBuyNow = (prod) => {
@@ -470,25 +544,38 @@ export function CategoryProductsPage() {
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
       {/* Drawers & Modals */}
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cartItems={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveFromCart}
-        onProceedToCheckout={() => {
-          setIsCartOpen(false);
-          setIsCheckoutOpen(true);
-        }}
-      />
+      {isCartOpen && (
+        <CartDrawer
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          cartItems={cartItems}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemoveItem={handleRemoveFromCart}
+          onCheckout={() => {
+            setIsCartOpen(false);
+            setIsCheckoutOpen(true);
+          }}
+          onProceedToCheckout={() => {
+            setIsCartOpen(false);
+            setIsCheckoutOpen(true);
+          }}
+        />
+      )}
 
-      <FavoritesDrawer
-        isOpen={isFavoritesOpen}
-        onClose={() => setIsFavoritesOpen(false)}
-        favorites={favorites}
-        onRemoveFavorite={(prodId) => setFavorites(prev => prev.filter(f => f.productId !== prodId))}
-        onAddToCart={handleAddToCart}
-      />
+      {isFavoritesOpen && (
+        <FavoritesDrawer
+          isOpen={isFavoritesOpen}
+          onClose={() => setIsFavoritesOpen(false)}
+          favorites={favorites}
+          onRemoveFavorite={async (prodId) => {
+            try {
+              await shopService.removeFavorite(prodId);
+              fetchFavorites();
+            } catch (e) { console.error(e); }
+          }}
+          onAddToCart={handleAddToCart}
+        />
+      )}
 
       {isOrdersOpen && (
         <OrdersModal
@@ -514,7 +601,8 @@ export function CategoryProductsPage() {
           cartItems={cartItems}
           onClose={() => setIsCheckoutOpen(false)}
           onOrderComplete={() => {
-            setCartItems([]);
+            fetchCart();
+            fetchOrders();
             setIsCheckoutOpen(false);
           }}
         />

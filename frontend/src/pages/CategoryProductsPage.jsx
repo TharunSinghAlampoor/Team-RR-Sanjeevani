@@ -65,27 +65,21 @@ export function CategoryProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('recommended');
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
 
-  // Cart & Drawers state
-  const [cartItems, setCartItems] = useState([]);
-  const [favorites, setFavorites] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
-  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
-  const [toast, setToast] = useState(null);
-  const [buyNowProduct, setBuyNowProduct] = useState(null);
-  const [selectedProductDetails, setSelectedProductDetails] = useState(null);
-
-  // Reset drawers on route change
+  // Reset drawers & pagination on route/filter change
   useEffect(() => {
     setIsFavoritesOpen(false);
     setIsCartOpen(false);
     setIsOrdersOpen(false);
     setSearchQuery('');
+    setCurrentPage(1);
   }, [categoryId]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortBy, inStockOnly]);
 
   // Fetch products & categories
   useEffect(() => {
@@ -202,6 +196,12 @@ export function CategoryProductsPage() {
 
     return prods;
   }, [allProducts, categoryId, currentCatMeta.name, searchQuery, inStockOnly, sortBy]);
+
+  const totalPages = Math.ceil(categoryProducts.length / ITEMS_PER_PAGE) || 1;
+  const paginatedCategoryProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return categoryProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [categoryProducts, currentPage]);
 
   // Cart & Favorites handlers
   const favoritesMap = useMemo(() => {
@@ -438,19 +438,89 @@ export function CategoryProductsPage() {
               </button>
             </div>
           ) : (
-            <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '1.25rem' }}>
-              {categoryProducts.map((prod) => (
-                <ProductCard
-                  key={prod.productId}
-                  product={prod}
-                  isFavorite={!!favoritesMap[prod.productId]}
-                  onToggleFavorite={handleToggleFavorite}
-                  onAddToCart={handleAddToCart}
-                  onBuyNow={handleStartBuyNow}
-                  onOpenDetails={(p) => setSelectedProductDetails(p)}
-                />
-              ))}
-            </div>
+            <>
+              <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '1.25rem' }}>
+                {paginatedCategoryProducts.map((prod) => (
+                  <ProductCard
+                    key={prod.productId}
+                    product={prod}
+                    isFavorite={!!favoritesMap[prod.productId]}
+                    onToggleFavorite={handleToggleFavorite}
+                    onAddToCart={handleAddToCart}
+                    onBuyNow={handleStartBuyNow}
+                    onOpenDetails={(p) => setSelectedProductDetails(p)}
+                  />
+                ))}
+              </div>
+
+              {/* Pagination Controls for Separate Pages */}
+              {totalPages > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', marginTop: '2.5rem', paddingBottom: '1.5rem' }}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={currentPage === 1}
+                    onClick={() => {
+                      setCurrentPage(prev => Math.max(1, prev - 1));
+                      window.scrollTo({ top: 350, behavior: 'smooth' });
+                    }}
+                    style={{
+                      padding: '0.45rem 0.95rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1',
+                      background: currentPage === 1 ? '#f8fafc' : '#ffffff', color: currentPage === 1 ? '#cbd5e1' : '#0f172a',
+                      fontWeight: 800, fontSize: '0.8rem', cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.03)', transition: 'all 0.2s',
+                    }}
+                  >
+                    ‹ Prev Page
+                  </motion.button>
+
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNum = idx + 1;
+                    const isActive = pageNum === currentPage;
+                    return (
+                      <motion.button
+                        key={pageNum}
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          setCurrentPage(pageNum);
+                          window.scrollTo({ top: 350, behavior: 'smooth' });
+                        }}
+                        style={{
+                          width: 36, height: 36, borderRadius: '0.65rem',
+                          border: isActive ? 'none' : '1.5px solid #cbd5e1',
+                          background: isActive ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : '#ffffff',
+                          color: isActive ? '#ffffff' : '#0f172a',
+                          fontWeight: 900, fontSize: '0.84rem', cursor: 'pointer',
+                          boxShadow: isActive ? '0 4px 12px rgba(16, 185, 129, 0.35)' : '0 1px 3px rgba(0,0,0,0.02)',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {pageNum}
+                      </motion.button>
+                    );
+                  })}
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={currentPage === totalPages}
+                    onClick={() => {
+                      setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                      window.scrollTo({ top: 350, behavior: 'smooth' });
+                    }}
+                    style={{
+                      padding: '0.45rem 0.95rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1',
+                      background: currentPage === totalPages ? '#f8fafc' : '#ffffff', color: currentPage === totalPages ? '#cbd5e1' : '#0f172a',
+                      fontWeight: 800, fontSize: '0.8rem', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.03)', transition: 'all 0.2s',
+                    }}
+                  >
+                    Next Page ›
+                  </motion.button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

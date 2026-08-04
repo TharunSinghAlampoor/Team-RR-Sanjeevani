@@ -347,6 +347,20 @@ export const Dashboard = () => {
   const isSearchActive = searchQuery.trim() !== '' || inStockOnly || selectedCategory !== null;
   const totalFiltered = filteredProducts.length;
 
+  // ─── Pagination for Separate Product Pages ─────────────────────────
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, inStockOnly]);
+
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
   // ─── Cart Handlers ────────────────────────────────────────────────
   const handleAddToCart = async (productId, quantity = 1) => {
     const targetPId = typeof productId === 'object' ? productId.productId : productId;
@@ -564,9 +578,9 @@ export const Dashboard = () => {
         {/* ── Category-wise Product Sections ───────── */}
         <div id="products-catalog-section">
         {isSearchActive ? (
-          /* When searching/filtering: flat grid with all matched results */
+          /* When searching/filtering: flat grid with matched results paginated across separate pages */
           <section className="cat-section">
-            <div className="cat-section__header" style={{ borderLeftColor: '#059669' }}>
+            <div className="cat-section__header" style={{ borderLeftColor: '#059669', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div className="cat-section__title-group">
                 <div className="cat-section__icon-wrap" style={{ background: '#d1fae5' }}>
                   <Search style={{ color: '#059669', width: 22, height: 22 }} />
@@ -579,12 +593,18 @@ export const Dashboard = () => {
                   </h2>
                 </div>
               </div>
+
+              {totalPages > 1 && (
+                <span style={{ fontSize: '0.78rem', color: '#047857', fontWeight: 800, background: '#ecfdf5', padding: '0.25rem 0.75rem', borderRadius: 99, border: '1px solid #a7f3d0' }}>
+                  Page {currentPage} of {totalPages} ({filteredProducts.length} Total Items)
+                </span>
+              )}
             </div>
             <div className="cat-section__divider" style={{ background: 'linear-gradient(90deg, #05966940, transparent)' }} />
             <div className="cat-section__grid" style={{ minHeight: loadingProducts ? 300 : 'auto', display: loadingProducts ? 'flex' : 'grid', alignItems: 'center', justifyContent: 'center' }}>
               {loadingProducts
                 ? <BrandLoader fullScreen={false} message="Loading Healthcare Essentials..." />
-                : filteredProducts.map((product, i) => (
+                : paginatedProducts.map((product, i) => (
                     <ProductCard
                       key={product.productId}
                       product={product}
@@ -602,6 +622,77 @@ export const Dashboard = () => {
               <div className="cat-section__empty">
                 <Search style={{ color: '#94a3b8', width: 44, height: 44, opacity: 0.4 }} />
                 <p>No products found{searchQuery ? ` matching "${searchQuery}"` : ' in this category'}.</p>
+              </div>
+            )}
+
+            {/* Pagination Controls for Separate Pages */}
+            {!loadingProducts && totalPages > 1 && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', marginTop: '2rem', padding: '1rem 0' }}>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={currentPage === 1}
+                  onClick={() => {
+                    setCurrentPage(prev => Math.max(1, prev - 1));
+                    const el = document.getElementById('products-catalog-section');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  style={{
+                    padding: '0.45rem 0.95rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1',
+                    background: currentPage === 1 ? '#f8fafc' : '#ffffff', color: currentPage === 1 ? '#cbd5e1' : '#0f172a',
+                    fontWeight: 800, fontSize: '0.8rem', cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.03)', transition: 'all 0.2s',
+                  }}
+                >
+                  ‹ Prev Page
+                </motion.button>
+
+                {Array.from({ length: totalPages }).map((_, idx) => {
+                  const pageNum = idx + 1;
+                  const isActive = pageNum === currentPage;
+                  return (
+                    <motion.button
+                      key={pageNum}
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setCurrentPage(pageNum);
+                        const el = document.getElementById('products-catalog-section');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      style={{
+                        width: 36, height: 36, borderRadius: '0.65rem',
+                        border: isActive ? 'none' : '1.5px solid #cbd5e1',
+                        background: isActive ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : '#ffffff',
+                        color: isActive ? '#ffffff' : '#0f172a',
+                        fontWeight: 900, fontSize: '0.84rem', cursor: 'pointer',
+                        boxShadow: isActive ? '0 4px 12px rgba(16, 185, 129, 0.35)' : '0 1px 3px rgba(0,0,0,0.02)',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {pageNum}
+                    </motion.button>
+                  );
+                })}
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={currentPage === totalPages}
+                  onClick={() => {
+                    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                    const el = document.getElementById('products-catalog-section');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  style={{
+                    padding: '0.45rem 0.95rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1',
+                    background: currentPage === totalPages ? '#f8fafc' : '#ffffff', color: currentPage === totalPages ? '#cbd5e1' : '#0f172a',
+                    fontWeight: 800, fontSize: '0.8rem', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.03)', transition: 'all 0.2s',
+                  }}
+                >
+                  Next Page ›
+                </motion.button>
               </div>
             )}
           </section>

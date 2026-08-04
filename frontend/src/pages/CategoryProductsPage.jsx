@@ -18,6 +18,7 @@ import BuyNowModal from '../components/BuyNowModal';
 import BrandLoader from '../components/BrandLoader';
 import ToastNotification from '../components/ToastNotification';
 import { useAuth } from '../context/AuthContext';
+import shopService from '../api/shopService';
 
 const API_BASE = 'http://localhost:8080/api';
 
@@ -100,17 +101,25 @@ export function CategoryProductsPage() {
     setLoading(true);
 
     Promise.all([
-      fetch(`${API_BASE}/products`).then(r => r.ok ? r.json() : []),
-      fetch(`${API_BASE}/categories`).then(r => r.ok ? r.json() : []),
+      shopService.getProducts({}),
+      shopService.getCategories(),
     ])
-      .then(([prodsData, catsData]) => {
+      .then(([prodsRes, catsRes]) => {
         if (isMounted) {
-          setAllProducts(Array.isArray(prodsData) ? prodsData : []);
-          setCategories(Array.isArray(catsData) ? catsData : []);
+          const prodsList = prodsRes && prodsRes.success && Array.isArray(prodsRes.data)
+            ? prodsRes.data
+            : Array.isArray(prodsRes) ? prodsRes : [];
+          const catsList = catsRes && catsRes.success && Array.isArray(catsRes.data)
+            ? catsRes.data
+            : Array.isArray(catsRes) ? catsRes : [];
+
+          setAllProducts(prodsList);
+          setCategories(catsList);
           setLoading(false);
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('Fetch category products error:', err);
         if (isMounted) setLoading(false);
       });
 

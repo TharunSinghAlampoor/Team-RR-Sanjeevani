@@ -354,38 +354,7 @@ export function CategoryProductsPage() {
           </motion.div>
         </div>
 
-        {/* Row 2: Category Title Banner */}
-        <div style={{ maxWidth: 1280, margin: '0 auto 1.5rem auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: '0.75rem',
-                  background: currentCatMeta.bgGrad || 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justify: 'center',
-                  fontSize: '1.3rem',
-                  boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)',
-                }}
-              >
-                {currentCatMeta.icon || '✨'}
-              </div>
-              <div>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                  {currentCatMeta.name}
-                </h1>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, margin: 0 }}>
-                  Showing all genuine {currentCatMeta.name} products
-                </p>
-              </div>
-            </div>
 
-            <div style={{ background: '#ecfdf5', border: '1.5px solid #a7f3d0', padding: '0.4rem 0.9rem', borderRadius: '0.75rem', fontSize: '0.82rem', fontWeight: 800, color: '#047857' }}>
-              📦 {categoryProducts.length} Items Available
-            </div>
-          </div>
 
         {/* Product Grid Catalog */}
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 1.5rem' }}>

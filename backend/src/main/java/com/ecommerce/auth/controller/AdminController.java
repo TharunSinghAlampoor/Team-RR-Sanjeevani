@@ -31,7 +31,6 @@ public class AdminController {
     private final ProductImageRepository productImageRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final PaymentRepository paymentRepository;
 
     public AdminController(
             UserRepository userRepository,
@@ -39,15 +38,13 @@ public class AdminController {
             CategoryRepository categoryRepository,
             ProductImageRepository productImageRepository,
             OrderRepository orderRepository,
-            OrderItemRepository orderItemRepository,
-            PaymentRepository paymentRepository) {
+            OrderItemRepository orderItemRepository) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.productImageRepository = productImageRepository;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
-        this.paymentRepository = paymentRepository;
     }
 
     private void verifyAdmin(Integer userId) {
@@ -137,7 +134,8 @@ public class AdminController {
 
         // Recent orders (latest 5)
         List<Map<String, Object>> recentOrders = allOrders.stream()
-                .sorted(Comparator.comparing(Order::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                .filter(o -> o != null && o.getCreatedAt() != null)
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
                 .limit(5)
                 .map(o -> {
                     Map<String, Object> m = new HashMap<>();
@@ -153,7 +151,8 @@ public class AdminController {
 
         // Recent users (latest 5)
         List<Map<String, Object>> recentUsers = allUsers.stream()
-                .sorted(Comparator.comparing(User::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                .filter(u -> u != null && u.getCreatedAt() != null)
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
                 .limit(5)
                 .map(u -> {
                     Map<String, Object> m = new HashMap<>();

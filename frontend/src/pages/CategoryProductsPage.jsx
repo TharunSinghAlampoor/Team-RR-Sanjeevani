@@ -327,16 +327,35 @@ export function CategoryProductsPage() {
       />
 
       <main className="dashboard-main" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
-        {/* Breadcrumb Navigation */}
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 1.5rem 1rem 1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', color: '#64748b' }}>
-            <Link to="/dashboard" style={{ color: '#059669', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <ArrowLeft size={16} /> Back to Dashboard
+        {/* Top-Left Corner Back Button & Title Header */}
+        <div style={{ maxWidth: 1280, margin: '0 auto 1.25rem auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <motion.div whileHover={{ x: -3 }} whileTap={{ scale: 0.96 }}>
+            <Link
+              to="/dashboard"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                padding: '0.45rem 0.9rem',
+                borderRadius: '0.65rem',
+                background: '#ffffff',
+                border: '1.5px solid #a7f3d0',
+                color: '#047857',
+                fontWeight: 800,
+                fontSize: '0.82rem',
+                textDecoration: 'none',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <ArrowLeft style={{ width: 16, height: 16, color: '#059669' }} />
+              <span>Back</span>
             </Link>
-            <ChevronRight size={14} style={{ color: '#94a3b8' }} />
-            <span>Categories</span>
-            <ChevronRight size={14} style={{ color: '#94a3b8' }} />
-            <span style={{ color: '#0f172a', fontWeight: 700 }}>{currentCatMeta.name}</span>
+          </motion.div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', padding: '0.35rem 0.95rem', borderRadius: 99, border: '1px solid #cbd5e1' }}>
+            <span style={{ fontSize: '1rem' }}>{currentCatMeta.icon || '✨'}</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>{currentCatMeta.name}</span>
           </div>
         </div>
 

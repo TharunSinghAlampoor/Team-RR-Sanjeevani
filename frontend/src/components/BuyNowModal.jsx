@@ -240,9 +240,12 @@ export const BuyNowModal = ({
     setTimeout(() => setCopiedVpa(false), 2000);
   };
 
+  const [showAddressPopup, setShowAddressPopup] = useState(false);
+
   const handlePayWithRazorpay = async () => {
-    if (!shippingAddress.trim()) {
-      setError('Please enter your Ship To address to proceed.');
+    if (!shippingAddress || !shippingAddress.trim()) {
+      setError('⚠️ Delivery Address Required: Please enter your complete shipping address to place the order.');
+      setShowAddressPopup(true);
       return;
     }
 
@@ -637,6 +640,28 @@ export const BuyNowModal = ({
             )}
           </button>
 
+          {/* Address Warning Pop-up Banner */}
+          {showAddressPopup && (
+            <div style={{
+              position: 'sticky', bottom: '10px', zIndex: 99,
+              background: '#fef2f2', border: '2px solid #ef4444', borderRadius: '0.85rem', padding: '0.85rem 1rem',
+              boxShadow: '0 8px 24px rgba(239, 68, 68, 0.25)', display: 'flex', alignItems: 'center', gap: '0.75rem',
+              color: '#991b1b', marginTop: '0.75rem'
+            }}>
+              <AlertTriangle style={{ width: 22, height: 22, color: '#ef4444', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontWeight: 900, fontSize: '0.88rem' }}>⚠️ Delivery Address Required!</p>
+                <p style={{ margin: '2px 0 0 0', fontWeight: 600, fontSize: '0.75rem', color: '#b91c1c' }}>Please enter or detect your address above to place the order.</p>
+              </div>
+              <button
+                onClick={() => setShowAddressPopup(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 900, fontSize: '1rem', padding: '0 0.2rem' }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {/* Secure Note */}
           <div style={s.secureNote}>
             <Shield style={{ width: 13, height: 13, color: '#10b981', flexShrink: 0 }} />
@@ -645,7 +670,7 @@ export const BuyNowModal = ({
         </div>
       </div>
 
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -657,7 +682,7 @@ export const BuyNowModal = ({
             border-radius: 1.25rem 1.25rem 0 0 !important;
           }
         }
-      `}</style>
+      ` }} />
     </div>
   );
 };

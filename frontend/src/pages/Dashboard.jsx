@@ -6,7 +6,6 @@ import authService from '../api/authService';
 import shopService from '../api/shopService';
 
 import Navbar from '../components/Navbar';
-import HeroBanner from '../components/HeroBanner';
 import CategorySection from '../components/CategorySection';
 import CategoryCard from '../components/CategoryCard';
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
@@ -520,14 +519,6 @@ export const Dashboard = () => {
 
       {/* ── Main content ──────────────────────────── */}
       <main className="dashboard-main">
-
-        {/* ── Offers & Special Promotional Hero Banners ──────────────── */}
-        <HeroBanner onExploreOffers={() => {
-          setSelectedCategory(null);
-          setSearchQuery('');
-          const el = document.getElementById('shop-categories-section');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }} />
 
         {/* ── Shop by Category Row ────────────────────── */}
         <div id="shop-categories-section">

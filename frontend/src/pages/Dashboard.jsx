@@ -338,15 +338,6 @@ export const Dashboard = () => {
     return map;
   }, [displayCategories, filteredProducts]);
 
-  const favoritesMap = useMemo(() => {
-    const map = {};
-    (favorites || []).forEach(fav => {
-      const pId = fav.productId || fav.product?.productId;
-      if (pId) map[pId] = true;
-    });
-    return map;
-  }, [favorites]);
-
   const cartItemsMap = useMemo(() => {
     const map = {};
     (cartItems || []).forEach(item => {

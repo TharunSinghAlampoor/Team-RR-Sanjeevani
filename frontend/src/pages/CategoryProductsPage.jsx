@@ -68,6 +68,19 @@ export function CategoryProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
 
+  // Cart, Favorites & Drawers state
+  const [cartItems, setCartItems] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [buyNowProduct, setBuyNowProduct] = useState(null);
+  const [selectedProductDetails, setSelectedProductDetails] = useState(null);
+
   // Reset drawers & pagination on route/filter change
   useEffect(() => {
     setIsFavoritesOpen(false);

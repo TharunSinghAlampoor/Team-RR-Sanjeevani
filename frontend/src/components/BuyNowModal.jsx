@@ -179,11 +179,55 @@ export const BuyNowModal = ({
   const [successOrderId, setSuccessOrderId] = useState('');
   const [copiedVpa, setCopiedVpa] = useState(false);
 
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+
   if (!product) return null;
 
   const itemTotal = Number(product.price || 0) * quantity;
-  const deliveryFee = 0;
-  const grandTotal = itemTotal + deliveryFee;
+  const deliveryFee = itemTotal >= 500 || (appliedCoupon && appliedCoupon.code === 'FREESHIP') ? 0 : 40;
+
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.type === 'flat') {
+      discountAmount = appliedCoupon.value;
+    } else if (appliedCoupon.type === 'percentage') {
+      discountAmount = Math.min(appliedCoupon.maxDiscount || 150, (itemTotal * appliedCoupon.value) / 100);
+    }
+  }
+
+  const grandTotal = Math.max(0, itemTotal + deliveryFee - discountAmount);
+
+  const handleApplyCoupon = (codeToApply) => {
+    const code = (codeToApply || couponCode).toUpperCase().trim();
+    setCouponError('');
+    if (!code) return;
+
+    if (code === 'SANJEEVANI50') {
+      if (itemTotal < 400) {
+        setCouponError('Requires min order of ₹400');
+        return;
+      }
+      setAppliedCoupon({ code: 'SANJEEVANI50', type: 'flat', value: 50, desc: '₹50 OFF Applied' });
+    } else if (code === 'HEALTH10') {
+      if (itemTotal < 300) {
+        setCouponError('Requires min order of ₹300');
+        return;
+      }
+      setAppliedCoupon({ code: 'HEALTH10', type: 'percentage', value: 10, maxDiscount: 150, desc: '10% OFF Applied' });
+    } else if (code === 'FIRST100') {
+      if (itemTotal < 750) {
+        setCouponError('Requires min order of ₹750');
+        return;
+      }
+      setAppliedCoupon({ code: 'FIRST100', type: 'flat', value: 100, desc: '₹100 OFF Applied' });
+    } else if (code === 'FREESHIP') {
+      setAppliedCoupon({ code: 'FREESHIP', type: 'flat', value: 0, desc: 'Free Delivery Applied' });
+    } else {
+      setCouponError('Invalid Coupon Code');
+    }
+  };
 
   const upiVpa = 'sanjeevani.health@razorpay';
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
@@ -480,6 +524,66 @@ export const BuyNowModal = ({
             </div>
           )}
 
+          {/* Coupons & Promo Section */}
+          <div style={{ marginBottom: '1rem', padding: '0.85rem 0.95rem', borderRadius: '0.85rem', background: '#fffbeb', border: '1.5px solid #fde68a' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#78350f' }}>🎟️ Apply Medical Coupon</span>
+              {appliedCoupon && (
+                <button
+                  onClick={() => setAppliedCoupon(null)}
+                  style={{ fontSize: '0.72rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+                >
+                  Remove Coupon
+                </button>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                placeholder="Enter coupon (e.g. SANJEEVANI50)"
+                style={{
+                  flex: 1, padding: '0.5rem 0.75rem', borderRadius: '0.55rem', border: '1.5px solid #fcd34d',
+                  fontSize: '0.8rem', fontWeight: 800, outline: 'none', letterSpacing: '0.04em', textTransform: 'uppercase', background: '#ffffff'
+                }}
+              />
+              <button
+                onClick={() => handleApplyCoupon()}
+                style={{
+                  padding: '0.5rem 1rem', borderRadius: '0.55rem', border: 'none',
+                  background: '#d97706', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer'
+                }}
+              >
+                Apply
+              </button>
+            </div>
+
+            {couponError && (
+              <p style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 700, margin: '0 0 0.4rem 0' }}>{couponError}</p>
+            )}
+
+            {/* Quick Coupon Chips */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {['SANJEEVANI50', 'HEALTH10', 'FIRST100'].map(code => (
+                <button
+                  key={code}
+                  onClick={() => handleApplyCoupon(code)}
+                  style={{
+                    fontSize: '0.68rem', fontWeight: 800, padding: '0.2rem 0.55rem', borderRadius: 99,
+                    background: appliedCoupon?.code === code ? '#fef3c7' : '#ffffff',
+                    color: appliedCoupon?.code === code ? '#b45309' : '#475569',
+                    border: appliedCoupon?.code === code ? '1px solid #fde68a' : '1px solid #cbd5e1',
+                    cursor: 'pointer'
+                  }}
+                >
+                  🏷️ {code}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Order Summary */}
           <div style={s.summaryBox}>
             <div style={s.summaryRow}>
@@ -487,12 +591,20 @@ export const BuyNowModal = ({
               <span style={{ fontWeight: 700, color: '#0f172a' }}>₹{itemTotal.toFixed(2)}</span>
             </div>
             <div style={s.summaryRow}>
-              <span>Express Delivery</span>
-              <span style={{ fontWeight: 700, color: '#059669' }}>FREE</span>
+              <span>Delivery Fee {itemTotal >= 500 ? '(Orders ≥ ₹500 Free)' : '(Standard Rate)'}</span>
+              <span style={{ fontWeight: 800, color: deliveryFee === 0 ? '#059669' : '#0f172a' }}>
+                {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}.00`}
+              </span>
             </div>
+            {discountAmount > 0 && (
+              <div style={s.summaryRow}>
+                <span style={{ color: '#d97706', fontWeight: 800 }}>Coupon Discount ({appliedCoupon.code})</span>
+                <span style={{ fontWeight: 900, color: '#d97706' }}>-₹{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             <div style={s.grandRow}>
               <span>Total Payable</span>
-              <span style={{ color: '#059669' }}>₹{grandTotal.toFixed(2)}</span>
+              <span style={{ color: '#059669', fontSize: '1.1rem' }}>₹{grandTotal.toFixed(2)}</span>
             </div>
           </div>
 

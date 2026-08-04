@@ -174,7 +174,7 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
   const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.itemTotal) || 0), 0);
   const FREE_THRESHOLD = 500;
   const progress = Math.min(100, (subtotal / FREE_THRESHOLD) * 100);
-  const shipping = subtotal >= FREE_THRESHOLD ? 0 : 49;
+  const shipping = subtotal >= FREE_THRESHOLD ? 0 : 40;
 
   return (
     <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>

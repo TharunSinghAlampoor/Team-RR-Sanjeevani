@@ -548,17 +548,14 @@ export const CheckoutModal = ({
                 </div>
                 <span style={s.itemTotal}>₹{(Number(item.itemTotal) || 0).toFixed(2)}</span>
               </div>
-            ))}
-          </div>
-
-          {/* Coupons & Promo Section */}
-          <div style={{ marginBottom: '1rem', padding: '0.85rem 0.95rem', borderRadius: '0.85rem', background: '#f8fafc', border: '1.5px solid #e2e8f0' }}>
+            ))}          {/* Coupons & Promo Section */}
+          <div style={{ marginBottom: '1rem', padding: '0.85rem 1rem', borderRadius: '0.85rem', background: 'linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%)', border: '1.5px solid #a7f3d0' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>🎟️ Apply Medical Coupon</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#047857' }}>🏷️ Apply Promo Coupon</span>
               {appliedCoupon && (
                 <button
                   onClick={() => setAppliedCoupon(null)}
-                  style={{ fontSize: '0.72rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+                  style={{ fontSize: '0.72rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800 }}
                 >
                   Remove Coupon
                 </button>
@@ -570,17 +567,18 @@ export const CheckoutModal = ({
                 type="text"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                placeholder="Enter coupon (e.g. SANJEEVANI50)"
+                placeholder="ENTER COUPON CODE"
                 style={{
-                  flex: 1, padding: '0.5rem 0.75rem', borderRadius: '0.55rem', border: '1.5px solid #cbd5e1',
-                  fontSize: '0.8rem', fontWeight: 800, outline: 'none', letterSpacing: '0.04em', textTransform: 'uppercase'
+                  flex: 1, padding: '0.55rem 0.75rem', borderRadius: '0.55rem', border: '1.5px solid #a7f3d0',
+                  fontSize: '0.8rem', fontWeight: 900, outline: 'none', letterSpacing: '0.05em', textTransform: 'uppercase', background: '#ffffff'
                 }}
               />
               <button
                 onClick={() => handleApplyCoupon()}
                 style={{
-                  padding: '0.5rem 1rem', borderRadius: '0.55rem', border: 'none',
-                  background: '#059669', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer'
+                  padding: '0.55rem 1.1rem', borderRadius: '0.55rem', border: 'none',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontSize: '0.8rem', fontWeight: 900, cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.2)'
                 }}
               >
                 Apply
@@ -598,11 +596,11 @@ export const CheckoutModal = ({
                   key={code}
                   onClick={() => handleApplyCoupon(code)}
                   style={{
-                    fontSize: '0.68rem', fontWeight: 800, padding: '0.2rem 0.55rem', borderRadius: 99,
-                    background: appliedCoupon?.code === code ? '#ecfdf5' : '#ffffff',
-                    color: appliedCoupon?.code === code ? '#047857' : '#475569',
-                    border: appliedCoupon?.code === code ? '1px solid #a7f3d0' : '1px solid #cbd5e1',
-                    cursor: 'pointer'
+                    fontSize: '0.68rem', fontWeight: 800, padding: '0.22rem 0.6rem', borderRadius: 99,
+                    background: appliedCoupon?.code === code ? '#10b981' : '#ffffff',
+                    color: appliedCoupon?.code === code ? '#ffffff' : '#047857',
+                    border: appliedCoupon?.code === code ? '1px solid #059669' : '1px solid #a7f3d0',
+                    cursor: 'pointer', transition: 'all 0.15s'
                   }}
                 >
                   🏷️ {code}
@@ -611,31 +609,29 @@ export const CheckoutModal = ({
             </div>
           </div>
 
-          {/* Order Summary */}
-          <div style={s.summaryBox}>
+          {/* Order Summary — Invoice Format */}
+          <div style={{ ...s.summaryBox, background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: '1rem', padding: '1rem' }}>
             <div style={s.summaryRow}>
               <span>Subtotal ({cartItems.length} items)</span>
-              <span style={{ fontWeight: 700, color: '#0f172a' }}>₹{subtotal.toFixed(2)}</span>
+              <span style={{ fontWeight: 800, color: '#0f172a' }}>₹{subtotal.toFixed(2)}</span>
             </div>
             <div style={s.summaryRow}>
-              <span>Delivery Fee {subtotal >= 500 ? '(Orders ≥ ₹500 Free)' : '(Standard Rate)'}</span>
-              <span style={{ fontWeight: 800, color: deliveryFee === 0 ? '#059669' : '#0f172a' }}>
-                {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}.00`}
+              <span>Delivery Charge</span>
+              <span style={{ fontWeight: 900, color: deliveryFee === 0 ? '#047857' : '#0f172a', background: deliveryFee === 0 ? '#ecfdf5' : 'transparent', padding: deliveryFee === 0 ? '0.1rem 0.5rem' : '0', borderRadius: 99 }}>
+                {deliveryFee === 0 ? 'FREE (Orders ≥ ₹500)' : `₹${deliveryFee}.00`}
               </span>
             </div>
             {discountAmount > 0 && (
               <div style={s.summaryRow}>
-                <span style={{ color: '#047857', fontWeight: 800 }}>Coupon Discount ({appliedCoupon.code})</span>
+                <span style={{ color: '#047857', fontWeight: 800 }}>Promo Discount ({appliedCoupon.code})</span>
                 <span style={{ fontWeight: 900, color: '#047857' }}>-₹{discountAmount.toFixed(2)}</span>
               </div>
             )}
-            <div style={s.grandRow}>
-              <span>Total Amount</span>
-              <span style={{ color: '#059669', fontSize: '1.1rem' }}>₹{grandTotal.toFixed(2)}</span>
+            <div style={{ ...s.grandRow, borderTop: '1.5px solid #e2e8f0', paddingTop: '0.6rem', marginTop: '0.5rem' }}>
+              <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>Total Amount</span>
+              <span style={{ color: '#047857', fontSize: '1.18rem', fontWeight: 900 }}>₹{grandTotal.toFixed(2)}</span>
             </div>
           </div>
-
-
 
           {/* Action Button */}
           <button
@@ -650,17 +646,17 @@ export const CheckoutModal = ({
             {isProcessing ? (
               <>
                 <Loader2 style={{ width: 18, height: 18, animation: 'spin 1s linear infinite' }} />
-                <span>Opening Razorpay...</span>
+                <span>Processing Payment...</span>
               </>
             ) : paymentMode === 'qr' ? (
               <>
                 <QrCode style={{ width: 18, height: 18 }} />
-                <span>Pay ₹{grandTotal.toFixed(2)} via UPI QR Code</span>
+                <span>Pay ₹{grandTotal.toFixed(2)} via UPI QR</span>
               </>
             ) : (
               <>
                 <CreditCard style={{ width: 18, height: 18 }} />
-                <span>Pay ₹{grandTotal.toFixed(2)} via Razorpay Modal</span>
+                <span>Pay ₹{grandTotal.toFixed(2)} • Complete Order</span>
               </>
             )}
           </button>

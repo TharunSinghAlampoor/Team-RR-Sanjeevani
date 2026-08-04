@@ -259,6 +259,16 @@ export function CategoryProductsPage() {
     });
   };
 
+  const handleUpdateQuantity = (cartItemId, newQty) => {
+    setCartItems(prev => prev.map(item => {
+      const idMatches = item.cartItemId === cartItemId || item.product?.productId === cartItemId;
+      if (idMatches) {
+        return { ...item, quantity: Math.max(1, newQty) };
+      }
+      return item;
+    }));
+  };
+
   const handleRemoveFromCart = (prodId) => {
     setCartItems(prev => prev.filter(item => item.product?.productId !== prodId));
     setToast({ type: 'cart-remove', title: 'Removed from Cart', message: 'Item removed from your cart.' });

@@ -339,6 +339,24 @@ export const Dashboard = () => {
     return map;
   }, [displayCategories, filteredProducts]);
 
+  const favoritesMap = useMemo(() => {
+    const map = {};
+    (favorites || []).forEach(fav => {
+      const pId = fav.productId || fav.product?.productId;
+      if (pId) map[pId] = true;
+    });
+    return map;
+  }, [favorites]);
+
+  const cartItemsMap = useMemo(() => {
+    const map = {};
+    (cartItems || []).forEach(item => {
+      const pId = item.productId || item.product?.productId;
+      if (pId) map[pId] = true;
+    });
+    return map;
+  }, [cartItems]);
+
   const isSearchActive = searchQuery.trim() !== '' || inStockOnly || selectedCategory !== null;
   const totalFiltered = filteredProducts.length;
 

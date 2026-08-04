@@ -62,6 +62,15 @@ export function CategoryProductsPage() {
   const [buyNowProduct, setBuyNowProduct] = useState(null);
   const [selectedProductDetails, setSelectedProductDetails] = useState(null);
 
+  const cartItemsMap = useMemo(() => {
+    const map = {};
+    (cartItems || []).forEach(item => {
+      const pId = item.productId || item.product?.productId;
+      if (pId) map[pId] = true;
+    });
+    return map;
+  }, [cartItems]);
+
   // Reset drawers & pagination on route/filter change
   useEffect(() => {
     setIsFavoritesOpen(false);
@@ -375,6 +384,7 @@ export function CategoryProductsPage() {
                     product={prod}
                     index={i}
                     isFavorite={!!favoritesMap[prod.productId]}
+                    isInCart={!!cartItemsMap[prod.productId]}
                     onToggleFavorite={handleToggleFavorite}
                     onAddToCart={handleAddToCart}
                     onBuyNow={handleStartBuyNow}

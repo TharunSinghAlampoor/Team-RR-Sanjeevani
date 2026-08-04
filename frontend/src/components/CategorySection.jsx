@@ -145,7 +145,8 @@ export const CategorySection = ({
   category,
   products,
   loading,
-  favoritesMap,
+  favoritesMap = {},
+  cartItemsMap = {},
   onToggleFavorite,
   onAddToCart,
   onBuyNow,
@@ -208,6 +209,7 @@ export const CategorySection = ({
                 product={product}
                 index={i}
                 isFavorite={!!favoritesMap[product.productId]}
+                isInCart={!!cartItemsMap[product.productId]}
                 onToggleFavorite={onToggleFavorite}
                 onAddToCart={onAddToCart}
                 onBuyNow={onBuyNow}

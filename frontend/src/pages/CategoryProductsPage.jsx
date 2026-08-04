@@ -310,7 +310,7 @@ export function CategoryProductsPage() {
   }
 
   return (
-    <div className="dashboard-page light" style={{ minHeight: '100vh', backgroundImage: "linear-gradient(180deg, rgba(248, 250, 252, 0.88) 0%, rgba(241, 245, 249, 0.94) 100%), url('/custom_medical_bg_light.jpg')", backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
+    <div className="dashboard-page light" style={{ minHeight: '100vh', backgroundImage: "linear-gradient(180deg, rgba(248, 250, 252, 0.45) 0%, rgba(241, 245, 249, 0.55) 100%), url('/custom_medical_bg_light.jpg')", backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
       {/* Navbar */}
       <Navbar
         user={user}
@@ -340,46 +340,7 @@ export function CategoryProductsPage() {
           </div>
         </div>
 
-        {/* Category Hero Banner */}
-        <div style={{ maxWidth: 1280, margin: '0 auto 2rem auto', padding: '0 1.5rem' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            style={{
-              background: currentCatMeta.bgGrad,
-              borderRadius: '20px',
-              padding: '2.5rem 2rem',
-              color: '#ffffff',
-              boxShadow: '0 12px 30px rgba(5, 150, 105, 0.18)',
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ position: 'relative', zIndex: 2, maxWidth: '750px' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', padding: '0.35rem 0.9rem', borderRadius: '999px', fontSize: '0.85rem', fontWeight: 600, marginBottom: '1rem' }}>
-                <span>{currentCatMeta.icon}</span> Official Medical Category
-              </div>
-              <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 0.5rem 0', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                {currentCatMeta.name}
-              </h1>
-              <p style={{ fontSize: '1.02rem', opacity: 0.92, margin: 0, lineHeight: 1.6, maxWidth: '620px' }}>
-                {currentCatMeta.desc}
-              </p>
-              <div style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.88rem', fontWeight: 600 }}>
-                <span style={{ background: 'rgba(255,255,255,0.22)', padding: '0.4rem 0.8rem', borderRadius: '8px' }}>
-                  📦 {categoryProducts.length} Products Available
-                </span>
-                <span style={{ background: 'rgba(255,255,255,0.22)', padding: '0.4rem 0.8rem', borderRadius: '8px' }}>
-                  ⚡ 100% Genuine Healthcare Guaranteed
-                </span>
-              </div>
-            </div>
 
-            {/* Decorative background circle */}
-            <div style={{ position: 'absolute', right: '-40px', bottom: '-40px', width: '260px', height: '260px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', pointerEvents: 'none' }} />
-          </motion.div>
-        </div>
 
         {/* Filter Controls Bar */}
         <div style={{ maxWidth: 1280, margin: '0 auto 1.5rem auto', padding: '0 1.5rem' }}>

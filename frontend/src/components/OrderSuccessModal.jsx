@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Copy, Check, Download, Truck, ShoppingBag, MapPin, Calendar, Clock, ShieldCheck, ChevronRight } from 'lucide-react';
 import ProductImage from './ProductImage';
@@ -122,6 +123,7 @@ export const OrderSuccessModal = ({
   onClose,
   onOpenOrders,
 }) => {
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
   if (!order) return null;
@@ -238,7 +240,7 @@ export const OrderSuccessModal = ({
               <Download style={{ width: 16, height: 16 }} />
               <span>Download Invoice</span>
             </button>
-            <button style={s.primaryBtn} onClick={() => { onClose(); if (onOpenOrders) onOpenOrders(); }}>
+            <button style={s.primaryBtn} onClick={() => { onClose(); navigate(`/track-order/${orderId}`); }}>
               <Truck style={{ width: 16, height: 16 }} />
               <span>Track Order</span>
             </button>

@@ -1,24 +1,31 @@
 import React from 'react';
-import { FileSpreadsheet, Download, FileText, Package, ShoppingBag, Users } from 'lucide-react';
+import { FileSpreadsheet, Download, FileText, Package, ShoppingBag, Users, DollarSign, Pill } from 'lucide-react';
 import adminService from '../../api/adminService';
 
 export function AdminReports() {
-  const handleExport = (type) => {
-    adminService.exportReport(type);
+  const handleExport = async (type) => {
+    try {
+      await adminService.exportReport(type);
+    } catch (err) {
+      alert('Report export failed. Please try again.');
+    }
   };
 
   const reports = [
-    { title: 'Sales & Revenue Report', type: 'sales', desc: 'Complete breakdown of all customer orders, total amounts, dates, and order statuses.', icon: DollarSignIcon, color: '#059669', bg: '#ecfdf5' },
-    { title: 'Inventory & Medicine Report', type: 'inventory', desc: 'Full medicine catalog list containing prices, current stock levels, descriptions, and categories.', icon: Package, color: '#0284c7', bg: '#f0f9ff' },
-    { title: 'Customer Account Report', type: 'customers', desc: 'Registered user profiles, email addresses, phone numbers, and registration dates.', icon: Users, color: '#7c3aed', bg: '#f5f3ff' },
+    { title: 'Sales Report', type: 'sales', desc: 'Complete breakdown of all customer orders, total amounts, dates, and order statuses.', icon: ShoppingBag, color: '#059669', bg: '#ecfdf5' },
+    { title: 'Revenue Report', type: 'revenue', desc: 'Financial transaction details, tax totals, and daily revenue streams.', icon: DollarSign, color: '#0284c7', bg: '#f0f9ff' },
+    { title: 'Inventory & Stock Report', type: 'inventory', desc: 'Full medicine stock audit containing prices, current stock levels, descriptions, and categories.', icon: Package, color: '#7c3aed', bg: '#f5f3ff' },
+    { title: 'Medicine Catalog Report', type: 'medicine', desc: 'Detailed catalog list with generic names, brands, batch numbers, and expiry dates.', icon: Pill, color: '#d97706', bg: '#fffbeb' },
+    { title: 'Order History Report', type: 'order', desc: 'Fulfillment times, shipping addresses, delivery statuses, and customer names.', icon: FileText, color: '#2563eb', bg: '#eff6ff' },
+    { title: 'Customer Account Report', type: 'customer', desc: 'Registered user profiles, email addresses, phone numbers, role privileges, and account status.', icon: Users, color: '#0891b2', bg: '#ecfeff' },
   ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div>
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>Reports & Data Export Center</h2>
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>Reports & Export Center</h2>
         <p style={{ color: '#64748b', fontSize: '0.88rem', margin: 0, fontWeight: 500 }}>
-          Generate downloadable CSV & Excel spreadsheets for sales, inventory, and customer activity.
+          Generate and download instant CSV/Excel spreadsheets for sales, revenue, inventory, medicines, orders, and customer data.
         </p>
       </div>
 
@@ -35,23 +42,21 @@ export function AdminReports() {
                 <p style={{ fontSize: '0.88rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>{r.desc}</p>
               </div>
 
-              <button
-                onClick={() => handleExport(r.type)}
-                style={{ padding: '0.75rem 1.25rem', borderRadius: '0.75rem', border: 'none', background: r.color, color: '#ffffff', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: `0 4px 14px ${r.color}35` }}
-              >
-                <Download size={16} />
-                <span>Export CSV Report</span>
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={() => handleExport(r.type)}
+                  style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '0.75rem', border: 'none', background: r.color, color: '#ffffff', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: `0 4px 14px ${r.color}35` }}
+                >
+                  <Download size={16} />
+                  <span>Download CSV</span>
+                </button>
+              </div>
             </div>
           );
         })}
       </div>
     </div>
   );
-}
-
-function DollarSignIcon(props) {
-  return <FileSpreadsheet {...props} />;
 }
 
 export default AdminReports;

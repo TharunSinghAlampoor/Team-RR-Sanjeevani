@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  Pill, Plus, Search, Filter, Edit, Trash2, X, Check, AlertCircle,
-  Package, ShieldAlert, Sparkles, ChevronLeft, ChevronRight
+  Pill, Plus, Search, Edit, Trash2, X, AlertCircle,
+  Package, ShieldAlert, ChevronLeft, ChevronRight, Filter, RefreshCw
 } from 'lucide-react';
-import shopService from '../../api/shopService';
 import adminService from '../../api/adminService';
+import shopService from '../../api/shopService';
 import BrandLoader from '../../components/BrandLoader';
 import ToastNotification from '../../components/ToastNotification';
 
@@ -25,6 +25,7 @@ export function AdminProducts() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [deletingProductId, setDeletingProductId] = useState(null);
+  const [validationError, setValidationError] = useState('');
 
   // Toast
   const [toast, setToast] = useState(null);
@@ -32,28 +33,38 @@ export function AdminProducts() {
   // Form State
   const [formData, setFormData] = useState({
     name: '',
+    genericName: '',
     brand: '',
+    manufacturer: '',
+    batchNumber: '',
     description: '',
     categoryId: '',
     price: '',
+    discountPrice: '',
     stock: '',
+    expiryDate: '',
     imageUrl: '',
     prescriptionRequired: false,
+    status: 'ACTIVE',
   });
 
   const loadData = async () => {
     try {
       const [prodsRes, catsRes] = await Promise.all([
-        shopService.getProducts({}),
-        shopService.getCategories(),
+        adminService.getProducts(),
+        adminService.getCategories(),
       ]);
-      const prods = (prodsRes && prodsRes.success && Array.isArray(prodsRes.data)) ? prodsRes.data : Array.isArray(prodsRes) ? prodsRes : [];
-      const cats = (catsRes && catsRes.success && Array.isArray(catsRes.data)) ? catsRes.data : Array.isArray(catsRes) ? catsRes : [];
-
+      const prods = prodsRes?.data || [];
+      const cats = catsRes?.data || [];
       setProducts(prods);
       setCategories(cats);
     } catch (err) {
-      console.error('Error loading products:', err);
+      console.error('Error loading admin products:', err);
+      // Fallback
+      try {
+        const fallbackProds = await shopService.getProducts({});
+        if (fallbackProds?.data) setProducts(fallbackProds.data);
+      } catch (e) {}
     } finally {
       setLoading(false);
     }
@@ -63,7 +74,6 @@ export function AdminProducts() {
     loadData();
   }, []);
 
-  // Filtered Products
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
@@ -71,7 +81,9 @@ export function AdminProducts() {
       const kw = searchQuery.toLowerCase().trim();
       result = result.filter(p =>
         (p.name && p.name.toLowerCase().includes(kw)) ||
+        (p.genericName && p.genericName.toLowerCase().includes(kw)) ||
         (p.brand && p.brand.toLowerCase().includes(kw)) ||
+        (p.batchNumber && p.batchNumber.toLowerCase().includes(kw)) ||
         (p.description && p.description.toLowerCase().includes(kw))
       );
     }
@@ -84,6 +96,9 @@ export function AdminProducts() {
       result = result.filter(p => p.stock > 0 && p.stock < 10);
     } else if (stockFilter === 'OUT') {
       result = result.filter(p => !p.stock || p.stock === 0);
+    } else if (stockFilter === 'EXPIRED') {
+      const today = new Date().toISOString().split('T')[0];
+      result = result.filter(p => p.expiryDate && p.expiryDate < today);
     }
 
     return result;
@@ -95,17 +110,28 @@ export function AdminProducts() {
     return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredProducts, currentPage]);
 
-  const handleOpenAddModal = () => {
+  const resetForm = () => {
     setFormData({
       name: '',
+      genericName: '',
       brand: '',
+      manufacturer: '',
+      batchNumber: '',
       description: '',
       categoryId: categories.length > 0 ? categories[0].categoryId : '',
       price: '',
+      discountPrice: '',
       stock: '',
+      expiryDate: '',
       imageUrl: '',
       prescriptionRequired: false,
+      status: 'ACTIVE',
     });
+    setValidationError('');
+  };
+
+  const handleOpenAddModal = () => {
+    resetForm();
     setIsAddModalOpen(true);
   };
 
@@ -113,42 +139,56 @@ export function AdminProducts() {
     setEditingProduct(prod);
     setFormData({
       name: prod.name || '',
+      genericName: prod.genericName || '',
       brand: prod.brand || '',
+      manufacturer: prod.manufacturer || '',
+      batchNumber: prod.batchNumber || '',
       description: prod.description || '',
       categoryId: prod.categoryId || (categories.length > 0 ? categories[0].categoryId : ''),
       price: prod.price || '',
+      discountPrice: prod.discountPrice || '',
       stock: prod.stock !== undefined ? prod.stock : '',
+      expiryDate: prod.expiryDate || '',
       imageUrl: prod.imageUrl || '',
       prescriptionRequired: !!prod.prescriptionRequired,
+      status: prod.status || 'ACTIVE',
     });
+    setValidationError('');
   };
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
+    setValidationError('');
 
     if (!formData.name.trim()) {
-      alert('Medicine Name is required.');
+      setValidationError('Medicine Name is required.');
       return;
     }
     if (Number(formData.price) <= 0) {
-      alert('Price must be greater than 0.');
+      setValidationError('Price must be greater than 0.');
       return;
     }
     if (Number(formData.stock) < 0) {
-      alert('Stock cannot be negative.');
+      setValidationError('Stock quantity cannot be negative.');
       return;
     }
 
     try {
       const payload = {
         name: formData.name.trim(),
+        genericName: formData.genericName.trim(),
         brand: formData.brand.trim(),
+        manufacturer: formData.manufacturer.trim(),
+        batchNumber: formData.batchNumber.trim(),
         description: formData.description.trim(),
         categoryId: formData.categoryId,
         price: Number(formData.price),
+        discountPrice: formData.discountPrice ? Number(formData.discountPrice) : null,
         stock: Number(formData.stock),
+        expiryDate: formData.expiryDate || null,
         imageUrl: formData.imageUrl.trim(),
         prescriptionRequired: formData.prescriptionRequired,
+        status: formData.status,
       };
 
       if (editingProduct) {
@@ -163,7 +203,7 @@ export function AdminProducts() {
       setEditingProduct(null);
       loadData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to save medicine.');
+      setValidationError(err.response?.data?.message || 'Failed to save medicine.');
     }
   };
 
@@ -184,7 +224,7 @@ export function AdminProducts() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Action Header */}
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>Medicine & Product Catalog</h2>
@@ -193,26 +233,35 @@ export function AdminProducts() {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAddModal}
-          style={{
-            padding: '0.75rem 1.25rem',
-            borderRadius: '0.75rem',
-            background: 'linear-gradient(135deg, #059669 0%, #0284c7 100%)',
-            color: '#ffffff',
-            fontWeight: 800,
-            fontSize: '0.9rem',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            boxShadow: '0 4px 14px rgba(5, 150, 105, 0.35)'
-          }}
-        >
-          <Plus size={18} />
-          <span>Add New Medicine</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button
+            onClick={loadData}
+            style={{ padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer', color: '#475569' }}
+            title="Refresh List"
+          >
+            <RefreshCw size={18} />
+          </button>
+          <button
+            onClick={handleOpenAddModal}
+            style={{
+              padding: '0.75rem 1.25rem',
+              borderRadius: '0.75rem',
+              background: 'linear-gradient(135deg, #059669 0%, #0284c7 100%)',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.9rem',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              boxShadow: '0 4px 14px rgba(5, 150, 105, 0.35)'
+            }}
+          >
+            <Plus size={18} />
+            <span>Add New Medicine</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters Toolbar */}
@@ -232,7 +281,7 @@ export function AdminProducts() {
             <Search size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
             <input
               type="text"
-              placeholder="Search by Medicine Name, Brand, or Generic Name..."
+              placeholder="Search by Medicine Name, Brand, Batch No, Generic Name..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               style={{
@@ -267,6 +316,7 @@ export function AdminProducts() {
             <option value="ALL">All Stock Status</option>
             <option value="LOW">Low Stock (&lt; 10)</option>
             <option value="OUT">Out of Stock (= 0)</option>
+            <option value="EXPIRED">Expired Batches</option>
           </select>
         </div>
       </div>
@@ -283,88 +333,110 @@ export function AdminProducts() {
           <div style={{ padding: '3.5rem 1rem', textAlign: 'center', color: '#94a3b8' }}>
             <Package size={48} style={{ margin: '0 auto 1rem auto', color: '#cbd5e1' }} />
             <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.4rem 0' }}>No Medicines Found</h4>
-            <p style={{ fontSize: '0.88rem', margin: 0 }}>Try clearing filters or search query.</p>
+            <p style={{ fontSize: '0.88rem', margin: 0 }}>Try clearing search or filter selections.</p>
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
-            <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', textAlign: 'left', color: '#475569', fontSize: '0.78rem', textTransform: 'uppercase' }}>
-                <th style={{ padding: '1rem' }}>Medicine</th>
-                <th style={{ padding: '1rem' }}>Category</th>
-                <th style={{ padding: '1rem' }}>Price</th>
-                <th style={{ padding: '1rem' }}>Stock</th>
-                <th style={{ padding: '1rem' }}>Rx Req.</th>
-                <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedProducts.map(p => (
-                <tr key={p.productId} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', textAlign: 'left', color: '#475569', fontSize: '0.78rem', textTransform: 'uppercase' }}>
+                  <th style={{ padding: '1rem' }}>Image</th>
+                  <th style={{ padding: '1rem' }}>Medicine Details</th>
+                  <th style={{ padding: '1rem' }}>Category</th>
+                  <th style={{ padding: '1rem' }}>Price</th>
+                  <th style={{ padding: '1rem' }}>Stock</th>
+                  <th style={{ padding: '1rem' }}>Expiry Date</th>
+                  <th style={{ padding: '1rem' }}>Rx Required</th>
+                  <th style={{ padding: '1rem' }}>Status</th>
+                  <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedProducts.map(p => (
+                  <tr key={p.productId} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '1rem' }}>
                       <img
                         src={p.imageUrl || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=120&q=80'}
                         alt={p.name}
                         style={{ width: 44, height: 44, borderRadius: '0.65rem', objectFit: 'contain', border: '1px solid #e2e8f0', background: '#f8fafc', padding: 2 }}
                       />
+                    </td>
+                    <td style={{ padding: '1rem' }}>
                       <div>
                         <div style={{ fontWeight: 900, color: '#0f172a', fontSize: '0.92rem' }}>{p.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 800, textTransform: 'uppercase' }}>{p.brand || 'GENERIC'}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 800 }}>
+                          Brand: {p.brand || 'Generic'} {p.batchNumber ? `• Batch: ${p.batchNumber}` : ''}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td style={{ padding: '1rem', fontWeight: 700, color: '#334155' }}>
-                    {p.categoryName || 'General Care'}
-                  </td>
-                  <td style={{ padding: '1rem', fontWeight: 900, color: '#059669' }}>
-                    ₹{Number(p.price || 0).toLocaleString('en-IN')}
-                  </td>
-                  <td style={{ padding: '1rem' }}>
-                    <span style={{
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: 99,
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      background: !p.stock || p.stock === 0 ? '#fee2e2' : p.stock < 10 ? '#fef3c7' : '#d1fae5',
-                      color: !p.stock || p.stock === 0 ? '#b91c1c' : p.stock < 10 ? '#b45309' : '#047857'
-                    }}>
-                      {!p.stock || p.stock === 0 ? 'Out of Stock' : `${p.stock} units`}
-                    </span>
-                  </td>
-                  <td style={{ padding: '1rem' }}>
-                    <span style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      color: p.prescriptionRequired ? '#7c3aed' : '#64748b',
-                      background: p.prescriptionRequired ? '#f5f3ff' : '#f1f5f9',
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: 6
-                    }}>
-                      {p.prescriptionRequired ? 'Yes (Rx)' : 'No'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '1rem', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <button
-                        onClick={() => handleOpenEditModal(p)}
-                        style={{ padding: '0.45rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', background: '#ffffff', color: '#0284c7', cursor: 'pointer' }}
-                        title="Edit Medicine"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        onClick={() => setDeletingProductId(p.productId)}
-                        style={{ padding: '0.45rem', borderRadius: '0.5rem', border: '1px solid #fca5a5', background: '#fef2f2', color: '#dc2626', cursor: 'pointer' }}
-                        title="Delete Medicine"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td style={{ padding: '1rem', fontWeight: 700, color: '#334155' }}>
+                      {p.categoryName || 'General Care'}
+                    </td>
+                    <td style={{ padding: '1rem', fontWeight: 900, color: '#059669' }}>
+                      ₹{Number(p.price || 0).toLocaleString('en-IN')}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{
+                        padding: '0.25rem 0.65rem',
+                        borderRadius: 99,
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        background: !p.stock || p.stock === 0 ? '#fee2e2' : p.stock < 10 ? '#fef3c7' : '#d1fae5',
+                        color: !p.stock || p.stock === 0 ? '#b91c1c' : p.stock < 10 ? '#b45309' : '#047857'
+                      }}>
+                        {!p.stock || p.stock === 0 ? 'Out of Stock' : `${p.stock} units`}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem', fontSize: '0.82rem', fontWeight: 700, color: '#475569' }}>
+                      {p.expiryDate || 'N/A'}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        color: p.prescriptionRequired ? '#7c3aed' : '#64748b',
+                        background: p.prescriptionRequired ? '#f5f3ff' : '#f1f5f9',
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: 6
+                      }}>
+                        {p.prescriptionRequired ? 'Yes (Rx)' : 'No'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 800,
+                        padding: '0.2rem 0.55rem',
+                        borderRadius: 99,
+                        background: p.status === 'ACTIVE' ? '#d1fae5' : '#fee2e2',
+                        color: p.status === 'ACTIVE' ? '#047857' : '#dc2626'
+                      }}>
+                        {p.status || 'ACTIVE'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        <button
+                          onClick={() => handleOpenEditModal(p)}
+                          style={{ padding: '0.45rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', background: '#ffffff', color: '#0284c7', cursor: 'pointer' }}
+                          title="Edit Medicine"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => setDeletingProductId(p.productId)}
+                          style={{ padding: '0.45rem', borderRadius: '0.5rem', border: '1px solid #fca5a5', background: '#fef2f2', color: '#dc2626', cursor: 'pointer' }}
+                          title="Delete Medicine"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {/* Pagination */}
@@ -402,7 +474,7 @@ export function AdminProducts() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             style={{
-              width: '100%', maxWidth: 560, background: '#ffffff',
+              width: '100%', maxWidth: 640, background: '#ffffff',
               borderRadius: '1.25rem', padding: '2rem', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
               maxHeight: '90vh', overflowY: 'auto'
             }}
@@ -416,22 +488,40 @@ export function AdminProducts() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Medicine Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Dolo 650 Tablet"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 600 }}
-                />
+            {validationError && (
+              <div style={{ padding: '0.75rem 1rem', borderRadius: '0.65rem', background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', fontSize: '0.85rem', fontWeight: 700, marginBottom: '1rem' }}>
+                {validationError}
               </div>
+            )}
 
+            <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Brand / Manufacturer</label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Medicine Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Dolo 650 Tablet"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 600 }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Generic Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Paracetamol"
+                    value={formData.genericName}
+                    onChange={(e) => setFormData({ ...formData, genericName: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 600 }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Brand</label>
                   <input
                     type="text"
                     placeholder="e.g. Micro Labs"
@@ -441,20 +531,28 @@ export function AdminProducts() {
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Category</label>
-                  <select
-                    value={formData.categoryId}
-                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 700 }}
-                  >
-                    {categories.map(c => (
-                      <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>
-                    ))}
-                  </select>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Manufacturer</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Cipla Pharma"
+                    value={formData.manufacturer}
+                    onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 600 }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Batch Number</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. BATCH-99201"
+                    value={formData.batchNumber}
+                    onChange={(e) => setFormData({ ...formData, batchNumber: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 600 }}
+                  />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Price (₹) *</label>
                   <input
@@ -468,6 +566,17 @@ export function AdminProducts() {
                   />
                 </div>
                 <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Discount Price (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="179.00"
+                    value={formData.discountPrice}
+                    onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 600 }}
+                  />
+                </div>
+                <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Stock Quantity *</label>
                   <input
                     type="number"
@@ -477,6 +586,42 @@ export function AdminProducts() {
                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                     style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 600 }}
                   />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Category</label>
+                  <select
+                    value={formData.categoryId}
+                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 700 }}
+                  >
+                    {categories.map(c => (
+                      <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Expiry Date</label>
+                  <input
+                    type="date"
+                    value={formData.expiryDate}
+                    onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 600 }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 700 }}
+                  >
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                    <option value="DISCONTINUED">DISCONTINUED</option>
+                  </select>
                 </div>
               </div>
 
@@ -495,11 +640,24 @@ export function AdminProducts() {
                 <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.3rem' }}>Description</label>
                 <textarea
                   rows={3}
-                  placeholder="Enter medical usage details, formulation, and warnings..."
+                  placeholder="Enter medical formulation details, dosages, and safety precautions..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   style={{ width: '100%', padding: '0.75rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontWeight: 600, fontFamily: 'inherit' }}
                 />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', padding: '0.75rem', borderRadius: '0.65rem', border: '1px solid #e2e8f0' }}>
+                <input
+                  type="checkbox"
+                  id="rxReq"
+                  checked={formData.prescriptionRequired}
+                  onChange={(e) => setFormData({ ...formData, prescriptionRequired: e.target.checked })}
+                  style={{ width: 18, height: 18 }}
+                />
+                <label htmlFor="rxReq" style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', cursor: 'pointer' }}>
+                  Doctor Prescription Required (Rx)
+                </label>
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1rem' }}>

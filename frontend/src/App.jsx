@@ -25,6 +25,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ChangePassword = lazy(() => import('./pages/ChangePassword'));
 const CategoryProductsPage = lazy(() => import('./pages/CategoryProductsPage'));
+const TrackOrderPage = lazy(() => import('./pages/TrackOrderPage'));
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -106,6 +107,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/track-order" element={<TrackOrderPage />} />
+              <Route path="/track-order/:orderId" element={<TrackOrderPage />} />
               <Route
                 path="/change-password"
                 element={

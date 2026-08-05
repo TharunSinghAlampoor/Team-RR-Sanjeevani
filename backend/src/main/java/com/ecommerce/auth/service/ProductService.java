@@ -283,19 +283,30 @@ public class ProductService {
                                 product.getName().toLowerCase().contains("pen") ||
                                 product.getName().toLowerCase().contains("syrup");
 
-        return new ProductDto(
-                product.getProductId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getStock(),
-                product.getCategory() != null ? product.getCategory().getCategoryId() : null,
-                product.getCategory() != null ? product.getCategory().getCategoryName() : "General Healthcare",
-                imageUrl,
-                brand,
-                rating,
-                prescription,
-                product.getCreatedAt()
-        );
+        ProductDto dto = new ProductDto();
+        dto.setProductId(product.getProductId());
+        dto.setName(product.getName());
+        dto.setGenericName(product.getGenericName());
+        dto.setBrand(brand);
+        dto.setManufacturer(product.getManufacturer());
+        dto.setBatchNumber(product.getBatchNumber());
+        dto.setDescription(product.getDescription());
+        dto.setPrice(product.getPrice());
+        dto.setDiscountPrice(product.getDiscountPrice());
+        dto.setStock(product.getStock());
+        dto.setExpiryDate(product.getExpiryDate());
+        if (product.getCategory() != null) {
+            dto.setCategoryId(product.getCategory().getCategoryId());
+            dto.setCategoryName(product.getCategory().getCategoryName());
+        } else {
+            dto.setCategoryName("General Healthcare");
+        }
+        dto.setImageUrl(imageUrl);
+        dto.setRating(rating);
+        dto.setPrescriptionRequired(product.getPrescriptionRequired() != null ? product.getPrescriptionRequired() : prescription);
+        dto.setStatus(product.getStatus() != null ? product.getStatus() : "ACTIVE");
+        dto.setCreatedAt(product.getCreatedAt());
+
+        return dto;
     }
 }

@@ -120,6 +120,15 @@ public class ProductSeeder implements CommandLineRunner {
                 }
             } else {
                 Product product = new Product(name, description, price, stock, cat);
+
+                // Set medical fields
+                product.setBrand(extractBrand(name));
+                product.setManufacturer("Sanjeevani Healthcare Pharma");
+                product.setBatchNumber("BATCH-" + (100000 + (int)(Math.random() * 899999)));
+                product.setExpiryDate(java.time.LocalDate.now().plusMonths(6 + (int)(Math.random() * 18)));
+                product.setPrescriptionRequired(rawCatName.toLowerCase().contains("prescription") || name.toLowerCase().contains("mg") || name.toLowerCase().contains("tablet") || name.toLowerCase().contains("inhaler") || name.toLowerCase().contains("syrup"));
+                product.setStatus("ACTIVE");
+
                 Product savedProduct = productRepository.save(product);
 
                 ProductImage productImage = new ProductImage(savedProduct, imageUrl);
@@ -346,5 +355,11 @@ public class ProductSeeder implements CommandLineRunner {
         list.add(new String[]{"CPAP Medical Machine", "Continuous positive airway pressure therapy machine for sleep apnea.", "14999", "10", catDev, "https://ik.imagekit.io/stringstackpharmacy/Images/Crap%20Machine.jpg"});
 
         return list;
+    }
+
+    private String extractBrand(String name) {
+        if (name == null || name.isEmpty()) return "Sanjeevani Care";
+        String[] parts = name.trim().split("\\s+");
+        return parts[0];
     }
 }

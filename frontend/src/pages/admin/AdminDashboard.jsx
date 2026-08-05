@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
   DollarSign, ShoppingBag, Users, Pill, FolderTree, AlertTriangle,
   Clock, CheckCircle2, TrendingUp, Sparkles, ArrowRight, ShieldCheck,
-  PlusCircle, FileText
+  PlusCircle, FileText, PackageX, Activity, BarChart2, PieChart
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import adminService from '../../api/adminService';
@@ -42,7 +42,11 @@ export function AdminDashboard() {
     { title: "Total Customers", value: stats?.totalUsers || 0, icon: Users, color: '#0891b2', bg: '#ecfeff', note: 'Registered user accounts' },
     { title: "Total Medicines", value: stats?.totalMedicines || 0, icon: Pill, color: '#059669', bg: '#ecfdf5', note: 'Cataloged products' },
     { title: "Total Categories", value: stats?.totalCategories || 0, icon: FolderTree, color: '#4f46e5', bg: '#eef2ff', note: 'Healthcare categories' },
-    { title: "Low / Out of Stock", value: (stats?.lowStockMedicines || 0) + (stats?.outOfStockMedicines || 0), icon: AlertTriangle, color: '#ea580c', bg: '#fff7ed', note: 'Requires restocking' },
+    { title: "Out of Stock", value: stats?.outOfStockMedicines || 0, icon: PackageX, color: '#dc2626', bg: '#fef2f2', note: 'Needs immediate restock' },
+    { title: "Low Stock Alert", value: stats?.lowStockMedicines || 0, icon: AlertTriangle, color: '#ea580c', bg: '#fff7ed', note: 'Stock < 10 units' },
+    { title: "Prescription Medicines", value: stats?.prescriptionMedicines || 0, icon: ShieldCheck, color: '#0284c7', bg: '#f0f9ff', note: 'Rx Required' },
+    { title: "Non-Prescription", value: stats?.nonPrescriptionMedicines || 0, icon: Pill, color: '#16a34a', bg: '#f0fdf4', note: 'OTC Medicines' },
+    { title: "Expiring Soon / Expired", value: (stats?.expiredMedicines || 0) + (stats?.expiringSoonMedicines || 0), icon: Clock, color: '#d97706', bg: '#fffbeb', note: 'Batch expiry monitor' },
   ];
 
   return (
@@ -52,7 +56,7 @@ export function AdminDashboard() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          background: 'linear-gradient(135deg, #0f172a 0%, #0f766e 50%, #059669 100%)',
           borderRadius: '1.25rem',
           padding: '2rem 2.25rem',
           color: '#ffffff',
@@ -65,15 +69,15 @@ export function AdminDashboard() {
         }}
       >
         <div style={{ position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(5, 150, 105, 0.2)', border: '1px solid #10b981', padding: '0.35rem 0.85rem', borderRadius: 99, fontSize: '0.78rem', fontWeight: 800, color: '#34d399', marginBottom: '0.8rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255, 255, 255, 0.15)', border: '1px solid rgba(255, 255, 255, 0.3)', padding: '0.35rem 0.85rem', borderRadius: 99, fontSize: '0.78rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.8rem', backdropFilter: 'blur(8px)' }}>
             <Sparkles size={14} />
-            <span>Healthcare Operations Control</span>
+            <span>Sanjeevani Medical Operations Control</span>
           </div>
           <h2 style={{ fontSize: '1.85rem', fontWeight: 900, margin: '0 0 0.5rem 0' }}>
-            Sanjeevani Administrator Command Center
+            Administrator Command Center
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.95rem', margin: 0, fontWeight: 500 }}>
-            Real-time management of medicines, inventory, customer orders, and financial metrics.
+          <p style={{ color: '#e2e8f0', fontSize: '0.95rem', margin: 0, fontWeight: 500, maxWidth: 650 }}>
+            Manage medicines, customer orders, inventory stock alerts, category hierarchy, and real-time business performance metrics.
           </p>
         </div>
 
@@ -83,15 +87,15 @@ export function AdminDashboard() {
             style={{
               padding: '0.75rem 1.25rem',
               borderRadius: '0.75rem',
-              background: '#059669',
-              color: '#fff',
+              background: '#ffffff',
+              color: '#059669',
               fontWeight: 800,
               fontSize: '0.88rem',
               textDecoration: 'none',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
-              boxShadow: '0 4px 14px rgba(5, 150, 105, 0.4)'
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.15)'
             }}
           >
             <PlusCircle size={18} />
@@ -102,14 +106,16 @@ export function AdminDashboard() {
             style={{
               padding: '0.75rem 1.25rem',
               borderRadius: '0.75rem',
-              background: '#334155',
+              background: 'rgba(255, 255, 255, 0.15)',
               color: '#fff',
               fontWeight: 800,
               fontSize: '0.88rem',
               textDecoration: 'none',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              border: '1px solid rgba(255,255,255,0.3)',
+              backdropFilter: 'blur(8px)'
             }}
           >
             <FileText size={18} />
@@ -121,7 +127,7 @@ export function AdminDashboard() {
       {/* KPI Cards Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
         gap: '1.25rem'
       }}>
         {statCards.map((card, i) => {
@@ -131,38 +137,88 @@ export function AdminDashboard() {
               key={card.title}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
+              transition={{ delay: i * 0.03 }}
               style={{
                 background: '#ffffff',
                 borderRadius: '1rem',
-                padding: '1.35rem 1.25rem',
+                padding: '1.25rem 1.15rem',
                 border: '1.5px solid #e2e8f0',
                 boxShadow: '0 4px 16px rgba(0, 0, 0, 0.03)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem'
+                gap: '0.9rem'
               }}
             >
               <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: '0.85rem',
+                width: 44,
+                height: 44,
+                borderRadius: '0.75rem',
                 background: card.bg,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <Icon style={{ width: 24, height: 24, color: card.color }} />
+                <Icon style={{ width: 22, height: 22, color: card.color }} />
               </div>
               <div style={{ minWidth: 0 }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{card.title}</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: '0.1rem 0' }}>{card.value}</div>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>{card.note}</span>
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{card.title}</span>
+                <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0f172a', margin: '0.1rem 0' }}>{card.value}</div>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>{card.note}</span>
               </div>
             </motion.div>
           );
         })}
+      </div>
+
+      {/* Visual Analytics Chart Widget */}
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '1.25rem',
+        padding: '1.75rem',
+        border: '1.5px solid #e2e8f0',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.03)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <BarChart2 size={20} style={{ color: '#059669' }} />
+              Revenue & Orders Growth Breakdown
+            </h3>
+            <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Comparative distribution by revenue stream and order status</span>
+          </div>
+          <Link to="/admin/analytics" style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            Full Analytics <ArrowRight size={14} />
+          </Link>
+        </div>
+
+        {/* SVG Custom Revenue Chart */}
+        <div style={{ background: '#f8fafc', borderRadius: '1rem', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', height: 180, gap: '1rem', paddingBottom: '1rem', borderBottom: '2px solid #cbd5e1' }}>
+            {[
+              { label: 'Total Revenue', value: stats?.totalRevenue || 12500, color: '#059669' },
+              { label: 'Yearly Revenue', value: stats?.yearlyRevenue || 8400, color: '#0284c7' },
+              { label: 'Monthly Revenue', value: stats?.monthlyRevenue || 3200, color: '#7c3aed' },
+              { label: "Today's Sales", value: stats?.todayRevenue || 950, color: '#d97706' },
+            ].map((bar, idx) => {
+              const maxVal = Math.max(stats?.totalRevenue || 1, 15000);
+              const heightPct = Math.min(Math.max((Number(bar.value) / maxVal) * 100, 15), 100);
+              return (
+                <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', height: '100%', justifyContent: 'flex-end' }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 800, color: bar.color }}>₹{Number(bar.value).toLocaleString('en-IN')}</span>
+                  <div style={{
+                    width: '60%',
+                    height: `${heightPct}%`,
+                    background: `linear-gradient(180deg, ${bar.color} 0%, ${bar.color}dd 100%)`,
+                    borderRadius: '0.5rem 0.5rem 0 0',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }} />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#475569' }}>{bar.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Recent Orders & Users Grid */}
@@ -230,7 +286,7 @@ export function AdminDashboard() {
           boxShadow: '0 4px 16px rgba(0,0,0,0.03)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>New Registered Users</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>Registered Users</h3>
             <Link to="/admin/users" style={{ fontSize: '0.84rem', fontWeight: 800, color: '#059669', textDecoration: 'none' }}>
               Manage
             </Link>

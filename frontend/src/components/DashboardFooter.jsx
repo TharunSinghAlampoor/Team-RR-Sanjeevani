@@ -6,6 +6,7 @@ const FOOTER_LINKS = {
   'Quick Links': [
     { label: 'Home', action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
     { label: 'Shop by Category', action: () => document.querySelector('.cat-hero-row')?.scrollIntoView({ behavior: 'smooth' }) },
+    { label: 'Track Orders', href: '/track-order' },
   ],
   'Services': [
     { label: '24/7 Pharmacist Support', href: '#' },

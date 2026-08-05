@@ -4,6 +4,7 @@ D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\DataInitializer.ja
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\ProductSeeder.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\RateLimitConfig.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\SecurityConfig.java
+D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\controller\AdminController.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\controller\AuthController.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\controller\CartController.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\controller\CategoryController.java
@@ -29,6 +30,7 @@ D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\dto\ResetPasswordRequest.
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\dto\UpdateCartRequest.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\dto\VerifyOtpRequest.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\dto\WishlistItemDto.java
+D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\entity\AuditLog.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\entity\CartItem.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\entity\Category.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\entity\Favorite.java
@@ -47,6 +49,7 @@ D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\entity\WishlistItem.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\exception\AuthException.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\exception\GlobalExceptionHandler.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\filter\JwtAuthenticationFilter.java
+D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\repository\AuditLogRepository.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\repository\CartItemRepository.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\repository\CategoryRepository.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\repository\FavoriteRepository.java

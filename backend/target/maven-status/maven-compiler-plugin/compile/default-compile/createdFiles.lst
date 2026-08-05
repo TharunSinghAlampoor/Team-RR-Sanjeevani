@@ -60,7 +60,9 @@ com\ecommerce\auth\entity\Otp.class
 com\ecommerce\auth\repository\SessionRepository.class
 com\ecommerce\auth\dto\PaymentDto.class
 com\ecommerce\auth\repository\ProductRepository.class
+com\ecommerce\auth\entity\AuditLog.class
 com\ecommerce\auth\config\SecurityConfig.class
+com\ecommerce\auth\repository\AuditLogRepository.class
 com\ecommerce\auth\entity\WishlistItem.class
 com\ecommerce\auth\repository\OrderRepository.class
 com\ecommerce\auth\repository\FavoriteRepository.class
@@ -73,5 +75,6 @@ com\ecommerce\auth\config\RateLimitConfig$RateBucket.class
 com\ecommerce\auth\controller\AuthController.class
 com\ecommerce\auth\repository\ProductImageRepository.class
 com\ecommerce\auth\config\CorsConfig.class
+com\ecommerce\auth\controller\AdminController.class
 com\ecommerce\auth\dto\AddToCartRequest.class
 com\ecommerce\auth\service\SmsService.class

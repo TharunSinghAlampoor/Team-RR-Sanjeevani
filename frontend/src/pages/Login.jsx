@@ -213,11 +213,21 @@ export const Login = () => {
         </form>
 
         <div className="auth-footer">
-          Don't have an account?
-          <Link to="/register" className="auth-link">
-            Sign Up
-          </Link>
+          <div>
+            Don't have an account?
+            <Link to="/register" className="auth-link">
+              Sign Up
+            </Link>
+          </div>
+          <div style={{ marginTop: '12px' }}>
+            Are you an Admin?
+            <Link to="/admin/login" className="auth-link">
+              Admin Login
+            </Link>
+          </div>
         </div>
+
+
       </div>
     </div>
   );

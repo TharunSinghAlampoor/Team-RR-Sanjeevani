@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, PackageCheck, CheckCircle2, Calendar, Clock, MapPin, User, Download, Truck, AlertCircle, FileText, ChevronRight, Navigation, Phone, Mail, Send, Check, Copy, Sparkles, ShieldCheck } from 'lucide-react';
 import ProductImage from './ProductImage';
@@ -800,43 +801,35 @@ export const SelectedOrderDetailModal = ({ order, onClose }) => {
           </div>
         </div>
 
-        {/* 4. Tracking */}
-        <div style={detailStyles.amazonCard}>
-          <div style={detailStyles.amazonCardTitle}>
-            <span style={{ color: isFailed ? '#dc2626' : '#059669', fontSize: '1.05rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              {isFailed ? <AlertCircle style={{ width: 20, height: 20 }} /> : <CheckCircle2 style={{ width: 20, height: 20 }} />}
-              {isFailed ? 'Payment Failed — Order Suspended' : 'Order Tracking & Delivery Status'}
-            </span>
-            <span style={isFailed ? detailStyles.badgeFailed : detailStyles.badgeSuccess}>
-              {order.status || 'SUCCESS'}
-            </span>
+        {/* 4. Realtime Tracking Action CTA */}
+        <div style={{ background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', border: '1.5px solid #a7f3d0', borderRadius: '1rem', padding: '1.1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+          <div>
+            <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 900, color: '#047857', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <Truck style={{ width: 18, height: 18, color: '#059669' }} />
+              Live Real-time Order GPS Tracking
+            </h4>
+            <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: '#065f46', fontWeight: 600 }}>
+              Track live GPS vehicle movement, ETA countdown, and driver details on a full page.
+            </p>
           </div>
-
-          {!isFailed && (
-            <div style={{ position: 'relative', margin: '1rem 0' }}>
-              <div style={{ position: 'absolute', top: 14, left: '8%', right: '8%', height: 3, background: '#cbd5e1', zIndex: 1 }} />
-              <div style={{ position: 'absolute', top: 14, left: '8%', width: '60%', height: 3, background: '#10b981', zIndex: 2 }} />
-
-              <div style={{ position: 'relative', zIndex: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={detailStyles.stepItem}>
-                  <div style={detailStyles.stepActive}>✓</div>
-                  <span style={detailStyles.stepText}>Ordered</span>
-                </div>
-                <div style={detailStyles.stepItem}>
-                  <div style={detailStyles.stepActive}>✓</div>
-                  <span style={detailStyles.stepText}>Paid</span>
-                </div>
-                <div style={detailStyles.stepItem}>
-                  <div style={detailStyles.stepActive}>✓</div>
-                  <span style={detailStyles.stepText}>Packed</span>
-                </div>
-                <div style={detailStyles.stepItem}>
-                  <div style={detailStyles.stepPending}>4</div>
-                  <span style={{ ...detailStyles.stepText, color: '#94a3b8' }}>Out for Delivery</span>
-                </div>
-              </div>
-            </div>
-          )}
+          <button
+            style={{
+              padding: '0.6rem 1.1rem', borderRadius: '0.75rem',
+              border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#ffffff', fontWeight: 900, fontSize: '0.82rem',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+            }}
+            onClick={() => {
+              onClose();
+              if (window.location.pathname !== `/track-order/${order.orderId}`) {
+                window.location.href = `/track-order/${order.orderId}`;
+              }
+            }}
+          >
+            <span>Track Order Page</span>
+            <ChevronRight style={{ width: 14, height: 14 }} />
+          </button>
         </div>
       </div>
 
@@ -890,6 +883,7 @@ const drawerStyles = {
 };
 
 export const OrdersModal = ({ orders = [], onClose, initialOrderId = null }) => {
+  const navigate = useNavigate();
   // Filter out FAILED orders so only successful/valid orders are listed
   const validOrders = orders.filter(o => o && o.status !== 'FAILED');
 
@@ -1074,16 +1068,33 @@ export const OrdersModal = ({ orders = [], onClose, initialOrderId = null }) => 
                         <span style={{ color: '#1e293b', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>{deliveryAddress}</span>
                       </div>
 
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', padding: '0.28rem 0.7rem', borderRadius: '0.5rem', color: '#ffffff', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0, boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)' }}
-                        onClick={(e) => downloadOrderInvoice(order, e)}
-                        title="Download Tax Invoice"
-                      >
-                        <Download style={{ width: 12, height: 12 }} />
-                        <span>Invoice PDF</span>
-                      </motion.button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', border: 'none', padding: '0.28rem 0.65rem', borderRadius: '0.5rem', color: '#ffffff', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onClose();
+                            navigate(`/track-order/${order.orderId}`);
+                          }}
+                          title="Open Realtime Order GPS Tracking"
+                        >
+                          <Truck style={{ width: 12, height: 12 }} />
+                          <span>Track Order</span>
+                        </motion.button>
+
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', padding: '0.28rem 0.65rem', borderRadius: '0.5rem', color: '#ffffff', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)' }}
+                          onClick={(e) => downloadOrderInvoice(order, e)}
+                          title="Download Tax Invoice"
+                        >
+                          <Download style={{ width: 12, height: 12 }} />
+                          <span>Invoice PDF</span>
+                        </motion.button>
+                      </div>
                     </div>
                   </motion.div>
                 );

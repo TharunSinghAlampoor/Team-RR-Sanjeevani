@@ -20,7 +20,7 @@ public class Order {
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, length = 50)
     private OrderStatus status = OrderStatus.PENDING;
 
     @Column(name = "shipping_address", length = 512)

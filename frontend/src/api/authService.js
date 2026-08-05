@@ -49,7 +49,13 @@ export const authService = {
     return response.data;
   },
 
-  login: async (identifier, password) => {
+  login: async (identifierOrData, passwordArg) => {
+    let identifier = identifierOrData;
+    let password = passwordArg;
+    if (typeof identifierOrData === 'object' && identifierOrData !== null) {
+      identifier = identifierOrData.identifier || identifierOrData.email || identifierOrData.username;
+      password = identifierOrData.password;
+    }
     const response = await apiClient.post('/login', {
       identifier,
       password,

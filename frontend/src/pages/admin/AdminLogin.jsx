@@ -37,7 +37,7 @@ export function AdminLogin() {
     setErrorMsg('');
 
     try {
-      const response = await authService.login({ email: email.trim(), password });
+      const response = await authService.login(email.trim(), password);
       if (response && response.success && response.data) {
         const { token, user: userProfile } = response.data;
 

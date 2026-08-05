@@ -29,6 +29,11 @@ export const adminService = {
   },
 
   // Product CRUD
+  getProducts: async () => {
+    const response = await adminClient.get('/admin/products');
+    return response.data;
+  },
+
   createProduct: async (productData) => {
     const response = await adminClient.post('/admin/products', productData);
     return response.data;
@@ -45,6 +50,11 @@ export const adminService = {
   },
 
   // Category CRUD
+  getCategories: async () => {
+    const response = await adminClient.get('/admin/categories');
+    return response.data;
+  },
+
   createCategory: async (categoryName) => {
     const response = await adminClient.post('/admin/categories', { categoryName });
     return response.data;
@@ -71,6 +81,16 @@ export const adminService = {
     return response.data;
   },
 
+  updateUserStatus: async (id, status) => {
+    const response = await adminClient.put(`/admin/users/${id}/status`, { status });
+    return response.data;
+  },
+
+  resetUserPassword: async (id, newPassword) => {
+    const response = await adminClient.put(`/admin/users/${id}/password`, { newPassword });
+    return response.data;
+  },
+
   deleteUser: async (id) => {
     const response = await adminClient.delete(`/admin/users/${id}`);
     return response.data;
@@ -87,10 +107,46 @@ export const adminService = {
     return response.data;
   },
 
-  // Reports
-  exportReport: (type = 'sales') => {
-    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
-    window.open(`${API_BASE_URL}/admin/reports/export?type=${type}&token=${token}`, '_blank');
+  // Inventory
+  getInventorySummary: async () => {
+    const response = await adminClient.get('/admin/inventory/summary');
+    return response.data;
+  },
+
+  quickUpdateStock: async (id, stock) => {
+    const response = await adminClient.put(`/admin/inventory/${id}/stock`, { stock });
+    return response.data;
+  },
+
+  // Analytics
+  getAnalytics: async () => {
+    const response = await adminClient.get('/admin/analytics');
+    return response.data;
+  },
+
+  // Audit Logs
+  getAuditLogs: async () => {
+    const response = await adminClient.get('/admin/audit-logs');
+    return response.data;
+  },
+
+  // Reports Export
+  exportReport: async (type = 'sales') => {
+    try {
+      const response = await adminClient.get(`/admin/reports/export?type=${type}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Sanjeevani_${type}_report.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Report export failed:', err);
+      throw err;
+    }
   },
 };
 

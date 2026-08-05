@@ -288,6 +288,21 @@ export const Navbar = ({
                     </div>
                   </div>
 
+
+                  {/* Track Order */}
+                  <button
+                    onClick={() => { setShowProfileDropdown(false); navigate('/track-order'); }}
+                    className="dropdown-item"
+                  >
+                    <div
+                      className="item-icon-wrap"
+                      style={{ background: '#e0f2fe', border: '1px solid #7dd3fc' }}
+                    >
+                      <Truck style={{ width: 14, height: 14, color: '#0284c7' }} />
+                    </div>
+                    <span>Track Order (Realtime)</span>
+                  </button>
+
                   {/* Change Password */}
                   <button
                     onClick={() => { setShowProfileDropdown(false); navigate('/change-password'); }}

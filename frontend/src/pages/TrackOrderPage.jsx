@@ -47,10 +47,10 @@ const getFlipkartAppStageInfo = (statusRaw, orderId, createdAt, updatedAt) => {
 
   // Numerical stage index from DB status
   let currentStageIndex = 1; // 1 = Placed
-  if (status === 'CONFIRMED') currentStageIndex = 2;
+  if (status === 'CONFIRMED' || status === 'SUCCESS' || status === 'COMPLETED') currentStageIndex = 2;
   else if (status === 'PACKED') currentStageIndex = 3;
   else if (status === 'SHIPPED' || status === 'OUT_FOR_DELIVERY' || status === 'IN_TRANSIT') currentStageIndex = 4;
-  else if (status === 'DELIVERED' || status === 'SUCCESS' || status === 'COMPLETED') currentStageIndex = 5;
+  else if (status === 'DELIVERED') currentStageIndex = 5;
   else if (status === 'CANCELLED') currentStageIndex = -1;
 
   // Exact step timestamp assignment

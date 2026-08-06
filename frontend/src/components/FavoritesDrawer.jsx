@@ -120,7 +120,7 @@ const s = {
   },
 };
 
-export const FavoritesDrawer = ({ isOpen = true, favorites = [], onClose, onRemoveFavorite, onAddToCart }) => {
+export const FavoritesDrawer = ({ isOpen = true, favorites = [], onClose, onRemoveFavorite, onAddToCart, onOpenDetails }) => {
   if (isOpen === false) return null;
 
   return (
@@ -164,12 +164,18 @@ export const FavoritesDrawer = ({ isOpen = true, favorites = [], onClose, onRemo
                 return (
                   <motion.div
                     key={pId || item.id}
-                    style={s.card}
+                    style={{...s.card, cursor: onOpenDetails ? 'pointer' : 'default'}}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: 40 }}
                     transition={{ duration: 0.2 }}
                     layout
+                    onClick={() => {
+                      if (onOpenDetails) {
+                        onOpenDetails(product);
+                        onClose();
+                      }
+                    }}
                   >
                     {/* Image */}
                     <div style={s.imgWrap}>

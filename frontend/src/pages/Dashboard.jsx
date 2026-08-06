@@ -751,6 +751,7 @@ export const Dashboard = () => {
             onClose={() => setIsFavoritesOpen(false)}
             onRemoveFavorite={handleRemoveFavorite}
             onAddToCart={handleAddToCart}
+            onOpenDetails={handleOpenDetails}
           />
         )}
 

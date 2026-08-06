@@ -297,11 +297,7 @@ export function CategoryProductsPage() {
     const isFav = !!favoritesMap[targetPId];
 
     try {
-      if (isFav) {
-        await shopService.removeFavorite(targetPId);
-      } else {
-        await shopService.addFavorite(targetPId);
-      }
+      await shopService.toggleFavorite(targetPId);
       await fetchFavorites();
       setToast({
         type: isFav ? 'fav-remove' : 'fav-add',
@@ -574,6 +570,7 @@ export function CategoryProductsPage() {
             } catch (e) { console.error(e); }
           }}
           onAddToCart={handleAddToCart}
+          onOpenDetails={(p) => setSelectedProductDetails(p)}
         />
       )}
 

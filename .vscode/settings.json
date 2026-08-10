@@ -1,4 +1,12 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "interactive"
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "files.associations": {
+    "*.md": "markdown",
+    "*.txt": "plaintext"
+  },
+  "java.compile.nullAnalysis.mode": "automatic"
 }

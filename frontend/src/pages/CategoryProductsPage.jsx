@@ -8,7 +8,6 @@ import {
 
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-import DashboardFooter from '../components/DashboardFooter';
 import CartDrawer from '../components/CartDrawer';
 import FavoritesDrawer from '../components/FavoritesDrawer';
 import OrdersModal from '../components/OrdersModal';
@@ -17,26 +16,32 @@ import CheckoutModal from '../components/CheckoutModal';
 import BuyNowModal from '../components/BuyNowModal';
 import BrandLoader from '../components/BrandLoader';
 import ToastNotification from '../components/ToastNotification';
+import ProfileSidebar from '../components/ProfileSidebar';
+import SanjeevaniBot from '../components/SanjeevaniBot';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { getCookie } from '../utils/cookieUtils';
 import shopService from '../api/shopService';
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 
 const API_BASE = 'http://localhost:8080/api';
 
 const CATEGORY_META = {
-  1: { name: 'Prescriptions & Pharmacy', icon: '💊', desc: 'Authentic prescription medicines, antibiotics, cardiac & healthcare treatments.', color: '#059669', bgGrad: 'linear-gradient(135deg, #064e3b 0%, #047857 100%)' },
-  2: { name: 'Nutrition & Health', icon: '🥗', desc: 'Daily vitamins, protein supplements, mineral boosters & wellness drinks.', color: '#0d9488', bgGrad: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)' },
-  3: { name: 'Medical Devices', icon: '🩺', desc: 'Certified BP monitors, oximeters, thermometers, nebulizers & surgical equipment.', color: '#2563eb', bgGrad: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)' },
-  4: { name: "Baby & Kids", icon: '👶', desc: 'Gentle baby skincare, diapers, wipes, pediatric nutrition & infant care.', color: '#ec4899', bgGrad: 'linear-gradient(135deg, #831843 0%, #db2777 100%)' },
-  5: { name: 'Skin Care', icon: '✨', desc: 'Dermatologist-tested face washes, hydration serums, sunscreens & lotions.', color: '#7c3aed', bgGrad: 'linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%)' },
+  1: { name: 'Prescriptions & Pharmacy', icon: '💊', desc: 'Authentic prescription medicines, antibiotics, cardiac & healthcare treatments.', color: '#0D5C75', bgGrad: 'linear-gradient(135deg, #09475B 0%, #0D5C75 100%)' },
+  2: { name: 'Nutrition & Health', icon: '🥗', desc: 'Daily vitamins, protein supplements, mineral boosters & wellness drinks.', color: '#4D8B31', bgGrad: 'linear-gradient(135deg, #386723 0%, #4D8B31 100%)' },
+  3: { name: 'Medical Devices', icon: '🩺', desc: 'Certified BP monitors, oximeters, thermometers, nebulizers & surgical equipment.', color: '#2A7697', bgGrad: 'linear-gradient(135deg, #1D546C 0%, #2A7697 100%)' },
+  4: { name: "Baby & Kids", icon: '👶', desc: 'Gentle baby skincare, diapers, wipes, pediatric nutrition & infant care.', color: '#A4C3D2', bgGrad: 'linear-gradient(135deg, #6B8B9B 0%, #A4C3D2 100%)' },
+  5: { name: 'Skin Care', icon: '✨', desc: 'Dermatologist-tested face washes, hydration serums, sunscreens & lotions.', color: '#907AA9', bgGrad: 'linear-gradient(135deg, #5D4D71 0%, #907AA9 100%)' },
 };
 
 
 
 export function CategoryProductsPage() {
-  const { categoryId } = useParams();
+  const params = useParams();
+  const categoryId = params.categorySlug || params.categoryId;
   const navigate = useNavigate();
   const { user, logout, updateShoppingState } = useAuth();
+  const { language, t, translateData } = useLanguage();
 
   const [allProducts, setAllProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -56,6 +61,7 @@ export function CategoryProductsPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isBuyNowOpen, setIsBuyNowOpen] = useState(false);
   const [toast, setToast] = useState(null);
@@ -86,7 +92,7 @@ export function CategoryProductsPage() {
 
   // Fetch cart, favorites & orders
   const fetchCart = useCallback(async () => {
-    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
     if (!activeToken) return;
     try {
       const res = await shopService.getCart();
@@ -97,7 +103,7 @@ export function CategoryProductsPage() {
   }, []);
 
   const fetchFavorites = useCallback(async () => {
-    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
     if (!activeToken) return;
     try {
       const res = await shopService.getFavorites();
@@ -108,12 +114,14 @@ export function CategoryProductsPage() {
   }, []);
 
   const fetchOrders = useCallback(async () => {
-    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
     if (!activeToken) return;
     try {
       const res = await shopService.getOrders();
       if (res && res.success && Array.isArray(res.data)) {
         setOrders(res.data);
+      } else if (Array.isArray(res)) {
+        setOrders(res);
       }
     } catch (e) { /* Ignore guest sessions */ }
   }, []);
@@ -132,33 +140,43 @@ export function CategoryProductsPage() {
     let isMounted = true;
     setLoading(true);
 
-    Promise.all([
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 1200);
+
+    Promise.allSettled([
       shopService.getProducts({}),
       shopService.getCategories(),
       fetchCart(),
       fetchFavorites(),
       fetchOrders(),
     ])
-      .then(([prodsRes, catsRes]) => {
-        if (isMounted) {
-          const prodsList = prodsRes && prodsRes.success && Array.isArray(prodsRes.data)
-            ? prodsRes.data
-            : Array.isArray(prodsRes) ? prodsRes : [];
-          const catsList = catsRes && catsRes.success && Array.isArray(catsRes.data)
-            ? catsRes.data
-            : Array.isArray(catsRes) ? catsRes : [];
+      .then((results) => {
+        if (!isMounted) return;
+        const prodsRes = results[0]?.status === 'fulfilled' ? results[0].value : [];
+        const catsRes = results[1]?.status === 'fulfilled' ? results[1].value : [];
 
-          setAllProducts(prodsList);
-          setCategories(catsList);
-          setLoading(false);
-        }
+        const prodsList = prodsRes && prodsRes.success && Array.isArray(prodsRes.data)
+          ? prodsRes.data
+          : Array.isArray(prodsRes) ? prodsRes : [];
+        const catsList = catsRes && catsRes.success && Array.isArray(catsRes.data)
+          ? catsRes.data
+          : Array.isArray(catsRes) ? catsRes : [];
+
+        setAllProducts(prodsList);
+        setCategories(catsList);
       })
       .catch((err) => {
         console.error('Fetch category products error:', err);
+      })
+      .finally(() => {
         if (isMounted) setLoading(false);
       });
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+      clearTimeout(safetyTimer);
+    };
   }, [fetchCart, fetchFavorites, fetchOrders]);
 
   // Determine current active category meta
@@ -193,15 +211,10 @@ export function CategoryProductsPage() {
     };
   }, [categoryId, categories]);
 
-  // Auto replace numeric ID or un-slugified string in browser URL bar with clean category slug (e.g. /category/skin-care)
+  // Active category slug synchronization
   useEffect(() => {
-    if (currentCatMeta && currentCatMeta.name) {
-      const targetSlug = toCategorySlug(currentCatMeta.name);
-      if (categoryId && String(categoryId).trim() !== targetSlug) {
-        navigate(`/category/${targetSlug}`, { replace: true });
-      }
-    }
-  }, [currentCatMeta, categoryId, navigate]);
+    // Keep category state in sync without forcing route re-navigation
+  }, [currentCatMeta]);
 
   // Filter & sort products for this category page
   const categoryProducts = useMemo(() => {
@@ -390,9 +403,27 @@ export function CategoryProductsPage() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenFavorites={() => setIsFavoritesOpen(true)}
         onOpenOrders={() => setIsOrdersOpen(true)}
+        onOpenChatbot={() => {
+          const botEl = document.querySelector('.sanjeevani-bot-fab');
+          if (botEl) botEl.click();
+        }}
+        onOpenProfile={() => setIsProfileOpen(v => !v)}
         onLogout={handleLogout}
         categories={categories}
         onScrollToCategory={(catTarget) => navigate(`/category/${catTarget}`)}
+      />
+
+      {/* Profile Left Push Sidebar */}
+      <ProfileSidebar
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        onOpenOrders={() => setIsOrdersOpen(true)}
+        onOpenWishlist={() => setIsFavoritesOpen(true)}
+        onOpenChatbot={() => {
+          const botEl = document.querySelector('.sanjeevani-bot-fab');
+          if (botEl) botEl.click();
+        }}
+        onChangePassword={() => navigate('/change-password')}
       />
 
       <main className="dashboard-main" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
@@ -458,7 +489,7 @@ export function CategoryProductsPage() {
                     onToggleFavorite={handleToggleFavorite}
                     onAddToCart={handleAddToCart}
                     onBuyNow={handleStartBuyNow}
-                    onOpenDetails={(p) => setSelectedProductDetails(p)}
+                    onOpenDetails={(p) => navigate(`/product/${p.productId}`)}
                   />
                 ))}
               </div>
@@ -535,8 +566,6 @@ export function CategoryProductsPage() {
         </div>
       </main>
 
-      <DashboardFooter />
-
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
       {/* Drawers & Modals */}
@@ -574,22 +603,23 @@ export function CategoryProductsPage() {
         />
       )}
 
+      {selectedProductDetails && (
+        <ProductDetailsModal
+          product={selectedProductDetails}
+          relatedProducts={allProducts.filter(p => p.categoryName === selectedProductDetails.categoryName && (p.productId || p.id) !== (selectedProductDetails.productId || selectedProductDetails.id))}
+          isFavorite={favorites.some(f => (f.productId || f.id) === (selectedProductDetails.productId || selectedProductDetails.id))}
+          onClose={() => setSelectedProductDetails(null)}
+          onToggleFavorite={handleToggleFavorite}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleStartBuyNow}
+          onSelectProduct={(p) => setSelectedProductDetails(p)}
+        />
+      )}
+
       {isOrdersOpen && (
         <OrdersModal
           orders={orders}
           onClose={() => setIsOrdersOpen(false)}
-        />
-      )}
-
-      {selectedProductDetails && (
-        <ProductDetailsModal
-          product={selectedProductDetails}
-          relatedProducts={relatedProducts}
-          isFavorite={!!favoritesMap[selectedProductDetails.productId]}
-          onClose={() => setSelectedProductDetails(null)}
-          onAddToCart={handleAddToCart}
-          onBuyNow={handleStartBuyNow}
-          onToggleFavorite={handleToggleFavorite}
         />
       )}
 
@@ -618,6 +648,19 @@ export function CategoryProductsPage() {
           }}
         />
       )}
+
+      {isOrdersOpen && (
+        <OrdersModal
+          isOpen={isOrdersOpen}
+          orders={orders}
+          onClose={() => setIsOrdersOpen(false)}
+        />
+      )}
+
+      <SanjeevaniBot
+        onOpenCart={() => setIsCartOpen(true)}
+        onOpenOrders={() => setIsOrdersOpen(true)}
+      />
     </div>
   );
 }

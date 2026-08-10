@@ -9,6 +9,7 @@ public class OrderDto {
     private BigDecimal totalAmount;
     private String status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String customerName;
     private String customerEmail;
     private String customerPhone;
@@ -56,6 +57,9 @@ public class OrderDto {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public List<OrderItemDto> getItems() { return items; }
     public void setItems(List<OrderItemDto> items) { this.items = items; }

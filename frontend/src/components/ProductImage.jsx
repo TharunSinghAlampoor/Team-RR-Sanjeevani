@@ -13,6 +13,8 @@ const getCleanUrl = (url) => {
   }
 };
 
+const DEFAULT_FALLBACK = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80';
+
 export const ProductImage = ({
   src,
   alt = 'Product image',
@@ -32,7 +34,12 @@ export const ProductImage = ({
     if (onError) onError(e);
   };
 
-  const finalSrc = hasError || !safeSrc ? (fallbackSrc || safeSrc) : safeSrc;
+  const finalSrc = (hasError || !safeSrc) ? (fallbackSrc || DEFAULT_FALLBACK) : safeSrc;
+
+  const mergedStyle = {
+    mixBlendMode: 'multiply',
+    ...(props.style || {})
+  };
 
   return (
     <img
@@ -41,8 +48,14 @@ export const ProductImage = ({
       loading={loading}
       decoding={decoding}
       draggable={draggable}
-      onError={handleImageError}
+      onError={(e) => {
+        if (!hasError) {
+          setHasError(true);
+          e.target.src = DEFAULT_FALLBACK;
+        }
+      }}
       className={className}
+      style={mergedStyle}
       {...props}
     />
   );

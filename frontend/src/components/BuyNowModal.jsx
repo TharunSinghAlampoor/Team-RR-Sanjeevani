@@ -4,6 +4,7 @@ import shopService from '../api/shopService';
 import ProductImage from './ProductImage';
 import { loadRazorpayScript } from '../utils/razorpayUtils';
 import LocationAddressInput from './LocationAddressInput';
+import { useLanguage } from '../context/LanguageContext';
 
 const s = {
   overlay: {
@@ -171,6 +172,7 @@ export const BuyNowModal = ({
   onClose,
   onPaymentSuccess,
 }) => {
+  const { t, translateData } = useLanguage();
   const [quantity, setQuantity] = useState(1);
   const [shippingAddress, setShippingAddress] = useState('');
   const [paymentMode, setPaymentMode] = useState('razorpay'); // 'razorpay' | 'qr'
@@ -428,7 +430,7 @@ export const BuyNowModal = ({
           {error && (
             <div style={s.errorBanner}>
               <AlertTriangle style={{ width: 16, height: 16, flexShrink: 0 }} />
-              <span>{error}</span>
+              <span>{translateData(error)}</span>
             </div>
           )}
 
@@ -442,10 +444,10 @@ export const BuyNowModal = ({
               />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</h4>
+              <h4 style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{translateData(product.name)}</h4>
               <p style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669', margin: '0.2rem 0' }}>₹{product.price}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#64748b' }}>
-                <span>Qty:</span>
+                <span>{translateData('Qty')}:</span>
                 <select
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
@@ -470,7 +472,7 @@ export const BuyNowModal = ({
           {/* Payment Method Tabs */}
           <div style={s.sectionLabel}>
             <CreditCard style={{ width: 14, height: 14, color: '#d97706' }} />
-            <span>Choose Payment Option</span>
+            <span>{translateData('Choose Payment Option')}</span>
           </div>
           <div style={s.tabContainer}>
             <button
@@ -481,7 +483,7 @@ export const BuyNowModal = ({
               }}
             >
               <Smartphone style={{ width: 16, height: 16 }} />
-              <span>UPI Apps & Cards</span>
+              <span>{translateData('UPI Apps & Cards')}</span>
             </button>
 
             <button
@@ -492,7 +494,7 @@ export const BuyNowModal = ({
               }}
             >
               <QrCode style={{ width: 16, height: 16 }} />
-              <span>Scan UPI QR Code</span>
+              <span>{translateData('Scan UPI QR Code')}</span>
             </button>
           </div>
 
@@ -508,7 +510,7 @@ export const BuyNowModal = ({
               </div>
 
               <span style={{ fontSize: '0.88rem', fontWeight: 900, color: '#d97706' }}>
-                Scan & Pay ₹{grandTotal.toFixed(2)}
+                {translateData('Scan & Pay')} ₹{grandTotal.toFixed(2)}
               </span>
 
               <div style={s.vpaBadge}>
@@ -523,7 +525,7 @@ export const BuyNowModal = ({
               </div>
 
               <p style={{ fontSize: '0.7rem', color: '#64748b', margin: '0.15rem 0 0' }}>
-                Scan with PhonePe, Google Pay, Paytm, BHIM or Amazon Pay
+                {translateData('Scan with PhonePe, Google Pay, Paytm, BHIM or Amazon Pay')}
               </p>
             </div>
           )}
@@ -531,13 +533,13 @@ export const BuyNowModal = ({
           {/* Coupons & Promo Section */}
           <div style={{ marginBottom: '1rem', padding: '0.85rem 1rem', borderRadius: '0.85rem', background: 'linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%)', border: '1.5px solid #a7f3d0' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#047857' }}>🏷️ Apply Promo Coupon</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#047857' }}>🏷️ {translateData('Apply Promo Coupon')}</span>
               {appliedCoupon && (
                 <button
                   onClick={() => setAppliedCoupon(null)}
                   style={{ fontSize: '0.72rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800 }}
                 >
-                  Remove Coupon
+                  {translateData('Remove Coupon')}
                 </button>
               )}
             </div>
@@ -547,7 +549,7 @@ export const BuyNowModal = ({
                 type="text"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                placeholder="ENTER COUPON CODE"
+                placeholder={translateData('ENTER COUPON CODE')}
                 style={{
                   flex: 1, padding: '0.55rem 0.75rem', borderRadius: '0.55rem', border: '1.5px solid #a7f3d0',
                   fontSize: '0.8rem', fontWeight: 900, outline: 'none', letterSpacing: '0.05em', textTransform: 'uppercase', background: '#ffffff'
@@ -561,12 +563,12 @@ export const BuyNowModal = ({
                   boxShadow: '0 2px 8px rgba(16, 185, 129, 0.2)'
                 }}
               >
-                Apply
+                {translateData('Apply')}
               </button>
             </div>
 
             {couponError && (
-              <p style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 700, margin: '0 0 0.4rem 0' }}>{couponError}</p>
+              <p style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 700, margin: '0 0 0.4rem 0' }}>{translateData(couponError)}</p>
             )}
 
             {/* Quick Coupon Chips */}
@@ -592,23 +594,23 @@ export const BuyNowModal = ({
           {/* Order Summary — Invoice Format */}
           <div style={{ ...s.summaryBox, background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: '1rem', padding: '1rem' }}>
             <div style={s.summaryRow}>
-              <span>Subtotal ({quantity} item)</span>
+              <span>{translateData('Subtotal')} ({quantity} {translateData('item')})</span>
               <span style={{ fontWeight: 800, color: '#0f172a' }}>₹{itemTotal.toFixed(2)}</span>
             </div>
             <div style={s.summaryRow}>
-              <span>Delivery Charge</span>
+              <span>{translateData('Delivery Charge')}</span>
               <span style={{ fontWeight: 900, color: deliveryFee === 0 ? '#047857' : '#0f172a', background: deliveryFee === 0 ? '#ecfdf5' : 'transparent', padding: deliveryFee === 0 ? '0.1rem 0.5rem' : '0', borderRadius: 99 }}>
-                {deliveryFee === 0 ? 'FREE (Orders ≥ ₹500)' : `₹${deliveryFee}.00`}
+                {deliveryFee === 0 ? translateData('FREE (Orders ≥ ₹500)') : `₹${deliveryFee}.00`}
               </span>
             </div>
             {discountAmount > 0 && (
               <div style={s.summaryRow}>
-                <span style={{ color: '#047857', fontWeight: 800 }}>Promo Discount ({appliedCoupon.code})</span>
+                <span style={{ color: '#047857', fontWeight: 800 }}>{translateData('Promo Discount')} ({appliedCoupon.code})</span>
                 <span style={{ fontWeight: 900, color: '#047857' }}>-₹{discountAmount.toFixed(2)}</span>
               </div>
             )}
             <div style={{ ...s.grandRow, borderTop: '1.5px solid #e2e8f0', paddingTop: '0.6rem', marginTop: '0.5rem' }}>
-              <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>Total Amount</span>
+              <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>{translateData('Total Amount')}</span>
               <span style={{ color: '#047857', fontSize: '1.18rem', fontWeight: 900 }}>₹{grandTotal.toFixed(2)}</span>
             </div>
           </div>
@@ -626,17 +628,17 @@ export const BuyNowModal = ({
             {isProcessing ? (
               <>
                 <Loader2 style={{ width: 18, height: 18, animation: 'spin 1s linear infinite' }} />
-                <span>Processing Payment...</span>
+                <span>{translateData('Processing Payment...')}</span>
               </>
             ) : paymentMode === 'qr' ? (
               <>
                 <QrCode style={{ width: 18, height: 18 }} />
-                <span>Pay ₹{grandTotal.toFixed(2)} via UPI QR</span>
+                <span>{translateData('Pay')} ₹{grandTotal.toFixed(2)} {translateData('via UPI QR')}</span>
               </>
             ) : (
               <>
                 <CreditCard style={{ width: 18, height: 18 }} />
-                <span>Pay ₹{grandTotal.toFixed(2)} • Complete Order</span>
+                <span>{translateData('Pay')} ₹{grandTotal.toFixed(2)} • {translateData('Complete Order')}</span>
               </>
             )}
           </button>
@@ -651,8 +653,8 @@ export const BuyNowModal = ({
             }}>
               <AlertTriangle style={{ width: 24, height: 24, color: '#ef4444', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontWeight: 900, fontSize: '0.9rem' }}>⚠️ Delivery Address Required!</p>
-                <p style={{ margin: '2px 0 0 0', fontWeight: 700, fontSize: '0.78rem', color: '#b91c1c' }}>Please enter or detect your address to complete the order.</p>
+                <p style={{ margin: 0, fontWeight: 900, fontSize: '0.9rem' }}>⚠️ {translateData('Delivery Address Required!')}</p>
+                <p style={{ margin: '2px 0 0 0', fontWeight: 700, fontSize: '0.78rem', color: '#b91c1c' }}>{translateData('Please enter or detect your address to complete the order.')}</p>
               </div>
               <button
                 onClick={() => setShowAddressPopup(false)}
@@ -666,7 +668,7 @@ export const BuyNowModal = ({
           {/* Secure Note */}
           <div style={s.secureNote}>
             <Shield style={{ width: 13, height: 13, color: '#10b981', flexShrink: 0 }} />
-            <span>Encrypted by Razorpay • Works seamlessly on Mobile, Tablet & Laptop</span>
+            <span>{translateData('100% Encrypted & Safe Healthcare Checkout')}</span>
           </div>
         </div>
       </div>

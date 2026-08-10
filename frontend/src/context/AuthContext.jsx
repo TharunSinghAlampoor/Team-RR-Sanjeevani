@@ -7,11 +7,13 @@ import {
   saveShoppingState,
   loadShoppingState,
 } from '../utils/cookieUtils';
+import { cleanLocalStorage } from '../utils/localStorageUtils';
 
 const AuthContext = createContext(null);
 
 // ── Force immediate clean up of localStorage ─────────────────────
 (function cleanLocalStorageOnModuleLoad() {
+  cleanLocalStorage();
   if (typeof window !== 'undefined' && window.localStorage) {
     const raw = localStorage.getItem('user');
     if (raw && (raw.startsWith('{') || raw.startsWith('['))) {
@@ -36,6 +38,8 @@ export const AuthProvider = ({ children }) => {
   const [cachedFavoritesCount, setCachedFavoritesCount] = useState(0);
 
   useEffect(() => {
+    cleanLocalStorage();
+    const interval = setInterval(cleanLocalStorage, 2000);
     const loadSession = async () => {
       // 1. Try loading from sessionStorage first, then localStorage
       let localToken = sessionStorage.getItem('token') || localStorage.getItem('token');
@@ -113,6 +117,7 @@ export const AuthProvider = ({ children }) => {
 
     window.addEventListener('auth-unauthorized', handleUnauthorized);
     return () => {
+      clearInterval(interval);
       window.removeEventListener('auth-unauthorized', handleUnauthorized);
     };
   }, []);
@@ -165,8 +170,14 @@ export const AuthProvider = ({ children }) => {
     saveSession(userData, jwtToken);
   };
 
-  const logout = () => {
-    clearSession();
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (e) {
+      console.warn("Backend logout notification failed:", e);
+    } finally {
+      clearSession();
+    }
   };
 
   const value = {

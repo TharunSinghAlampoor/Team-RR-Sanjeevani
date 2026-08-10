@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, String> {
     List<Order> findByUserUserId(Integer userId);
+    List<Order> findByUserUserIdOrderByCreatedAtDesc(Integer userId);
 }

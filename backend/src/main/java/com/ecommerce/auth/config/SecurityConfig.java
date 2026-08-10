@@ -55,7 +55,17 @@ public class SecurityConfig {
                                 "/categories",
                                 "/categories/**",
                                 "/products",
-                                "/products/**"
+                                "/products/**",
+                                "/orders",
+                                "/orders/**",
+                                "/cart",
+                                "/cart/**",
+                                "/favorites",
+                                "/favorites/**",
+                                "/wishlist",
+                                "/wishlist/**",
+                                "/order-support/**",
+                                "/payment/**"
                         ).permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated()

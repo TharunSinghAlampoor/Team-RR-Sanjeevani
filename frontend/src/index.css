@@ -1,34 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --bg-primary: #f4faf8;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #e6f4f0;
-  --primary: #10b981;       /* Emerald Green */
-  --primary-hover: #059669;
-  --accent-cyan: #06b6d4;   /* Cyan */
-  --accent-pink: #22c55e;   /* Green accent */
-  --text-primary: #0f362e;  /* Dark forest teal */
-  --text-secondary: #276b5d; /* Medium forest teal */
-  --text-muted: #6b7280;
-  --border-color: rgba(16, 185, 129, 0.15);
-  --border-focus: rgba(16, 185, 129, 0.6);
+  /* ── USER DEFINED EXACT COLOR SYSTEM ── */
+  --bg-main: #F8FAFC;            /* Main page background */
+  --bg-navbar: #F0FDF4;          /* Navbar header */
+  --bg-card: #FFFFFF;            /* Cards / product sections */
+  --primary-emerald: #059669;    /* Primary emerald buttons, active icons, links */
+  --dark-emerald: #047857;       /* Dark emerald hover/active states */
+  --light-emerald: #ECFDF5;      /* Light emerald selected cards, badges, highlights */
+  --text-main: #1F2937;          /* Main text headings */
+  --text-secondary: #6B7280;     /* Secondary text descriptions */
+  --border-color: #E5E7EB;        /* Borders for cards, inputs, dividers */
 
-  --error: #ef4444;
-  --success: #10b981;
-  --warning: #f59e0b;
+  /* Legacy variable mappings */
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #ECFDF5;
+  --bg-brand: #F8FAFC;
+  --primary: #059669;
+  --primary-hover: #047857;
+  --secondary-sage: #047857;
+  --header-bg: #F0FDF4;
 
-  --glass-bg: rgba(255, 255, 255, 0.82);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  --glass-shadow: 0 8px 32px 0 rgba(14, 58, 47, 0.08);
+  --accent-coral: #059669;
+  --accent-coral-hover: #047857;
+  --accent-apricot: #ECFDF5;
+  --accent: #059669;
 
-  --bg-brand: #eefaf6; /* Light mint base */
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-muted: #6B7280;
 
-  font-family: 'Outfit', sans-serif;
+  --success: #059669;
+  --error: #EF4444;
+  --warning: #F59E0B;
+
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: #E5E7EB;
+
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color-scheme: light;
 }
 
 html, body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   scroll-behavior: smooth !important;
   scroll-padding-top: 85px; /* Offset for fixed sticky navbar */
   -webkit-font-smoothing: antialiased;
@@ -36,10 +51,11 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
-* {
+*, button, input, select, textarea {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   scroll-behavior: smooth !important;
   -webkit-overflow-scrolling: touch;
 }
@@ -50,27 +66,33 @@ html, body {
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F8FAFC;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #E5E7EB;
   border-radius: 99px;
-  border: 1.5px solid #f1f5f9;
+  border: 1.5px solid #F8FAFC;
   transition: background 0.25s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #10b981;
+  background: #059669;
 }
 
 /* Firefox Scrollbar Styling */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
+  scrollbar-color: #E5E7EB #F8FAFC;
 }
 
-body {
-  background-color: var(--bg-brand);
-  color: var(--text-primary);
+body,
+.dashboard-page,
+.product-details-page,
+.track-order-page,
+.category-page-container,
+.app-container {
+  background: linear-gradient(135deg, #e0f2fe 0%, #d1fae5 50%, #f0fdf4 100%) !important;
+  background-attachment: fixed !important;
+  color: #1F2937 !important;
   min-height: 100vh;
   display: block;
   overflow-x: hidden;
@@ -84,19 +106,6 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url('/bg_clean_teal.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: -10;
-  pointer-events: none;
-  transform: translateZ(0);
 }
 
 
@@ -2095,11 +2104,7 @@ body:has(.dashboard-page) {
   --glass-border: rgba(6, 182, 212, 0.25);
   --glass-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
 
-  background-image: url('/custom_medical_bg_dark.jpg') !important;
-  background-size: cover !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
-  background-attachment: fixed !important;
+  background-image: none !important;
   color: #f0fdf4;
   transition: all 0.3s ease;
 }
@@ -2472,8 +2477,10 @@ body:has(.dashboard-page) {
 /* ============================================================ */
 
 .medical-navbar {
-  background: #ffffff;
-  border-bottom: 1.5px solid #e8f5f0;
+  background: #F0FDF4 !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid #E5E7EB !important;
   padding: 0.85rem 1.75rem;
   min-height: 74px;
   width: 100%;
@@ -2481,7 +2488,7 @@ body:has(.dashboard-page) {
   top: 0;
   z-index: 100;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 12px rgba(15, 118, 110, 0.07);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .medical-navbar.dark {
@@ -2520,8 +2527,8 @@ body:has(.dashboard-page) {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-  border: 1.5px solid #a7f3d0;
+  background: #ffffff;
+  border: 1.5px solid #34d399;
   flex-shrink: 0;
 }
 
@@ -2541,13 +2548,13 @@ body:has(.dashboard-page) {
   font-size: 1rem;
   font-weight: 900;
   letter-spacing: 0.06em;
-  color: #065f46;
+  color: #0D5C75;
   text-transform: uppercase;
 }
 
 .brand-tagline {
   font-size: 0.55rem;
-  color: #059669;
+  color: #709775;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2571,26 +2578,26 @@ body:has(.dashboard-page) {
 .search-input {
   width: 100%;
   height: 42px;
-  background: rgba(241, 245, 249, 0.95);
-  border: 1.5px solid #cbd5e1;
-  color: #0f172a;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  color: #1F2937;
   border-radius: 9999px;
   padding: 0.55rem 2.8rem 0.55rem 2.8rem;
   font-size: 0.88rem;
   font-weight: 500;
   outline: none;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .search-input::placeholder {
-  color: #64748b;
+  color: #6B7280;
   font-weight: 400;
 }
 
 .medical-navbar.dark .search-input {
   background: rgba(30, 41, 59, 0.95) !important;
-  border: 1.5px solid rgba(52, 211, 153, 0.35) !important;
+  border: 1.5px solid rgba(13, 92, 117, 0.35) !important;
   color: #ffffff !important;
 }
 
@@ -2599,14 +2606,14 @@ body:has(.dashboard-page) {
 }
 
 .search-input:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
-  background: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+  background: #FFFFFF;
 }
 
 .medical-navbar.dark .search-input:focus {
-  border-color: #34d399 !important;
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25) !important;
+  border-color: #709775 !important;
+  box-shadow: 0 0 0 3px rgba(112, 151, 117, 0.25) !important;
   background: rgba(30, 41, 59, 1) !important;
 }
 
@@ -2615,13 +2622,13 @@ body:has(.dashboard-page) {
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #0f766e;
+  color: #0D5C75;
   pointer-events: none;
   transition: color 0.2s;
 }
 
 .medical-navbar.dark .search-icon {
-  color: #34d399 !important;
+  color: #709775 !important;
 }
 
 .clear-search {
@@ -2642,7 +2649,7 @@ body:has(.dashboard-page) {
 }
 
 .clear-search:hover {
-  color: #0f172a;
+  color: #1A2E35;
 }
 
 .medical-navbar.dark .clear-search:hover {
@@ -2664,13 +2671,13 @@ body:has(.dashboard-page) {
   border: none;
   background: transparent;
   border-radius: 0.65rem;
-  transition: background 0.18s ease;
+  transition: all 0.18s ease;
   position: relative;
   padding: 0.5rem;
 }
 
 .action-btn:hover {
-  background: #f1f5f9;
+  background: #E8F3EF;
 }
 
 .pdf-upload-btn {
@@ -2678,19 +2685,19 @@ body:has(.dashboard-page) {
   padding: 0.45rem 0.75rem;
   gap: 0.35rem;
   font-weight: 600;
-  color: #047857;
-  background: rgba(209, 250, 229, 0.7);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #0D5C75;
+  background: #E8F3EF;
+  border: 1px solid rgba(13, 92, 117, 0.3);
 }
 
 .pdf-upload-btn:hover {
-  background: rgba(167, 243, 208, 0.9);
+  background: #d4e8e1;
 }
 
 .dark .pdf-upload-btn {
-  color: #6ee7b7;
-  background: rgba(6, 78, 59, 0.4);
-  border-color: rgba(16, 185, 129, 0.3);
+  color: #709775;
+  background: rgba(13, 92, 117, 0.4);
+  border-color: rgba(13, 92, 117, 0.3);
 }
 
 .theme-toggle {
@@ -2711,6 +2718,8 @@ body:has(.dashboard-page) {
   justify-content: center;
   line-height: 1;
   padding: 0 2px;
+  background: #FF725E;
+  color: #ffffff;
 }
 
 .profile-avatar-btn {
@@ -2720,14 +2729,14 @@ body:has(.dashboard-page) {
   padding: 0.3rem 0.7rem 0.3rem 0.35rem;
   border-radius: 9999px;
   cursor: pointer;
-  background: #f8fffe;
-  border: 1.5px solid #a7f3d0;
+  background: #F4F9F6;
+  border: 1.5px solid #0D5C75;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 6px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 1px 6px rgba(13, 92, 117, 0.1);
 }
 
 .profile-avatar-btn:hover {
-  background: #ecfdf5;
+  background: #E8F3EF;
   border-color: #059669;
   box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
 }
@@ -3701,10 +3710,10 @@ body:has(.dashboard-page) {
 /* ============================================================ */
 
 .pcard {
-  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
-  border-radius: 1rem;
-  border: 1.5px solid #a7f3d0;
-  box-shadow: 0 4px 16px rgba(15, 118, 110, 0.07);
+  background: #ffffff !important;
+  border-radius: 1.15rem;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -3717,8 +3726,8 @@ body:has(.dashboard-page) {
 }
 
 .pcard:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
-  box-shadow: 0 16px 36px rgba(16, 185, 129, 0.2), 0 0 0 2px rgba(16, 185, 129, 0.4);
+  background: #ffffff !important;
+  box-shadow: 0 18px 38px -4px rgba(16, 185, 129, 0.18), 0 6px 16px -2px rgba(15, 23, 42, 0.06);
   border-color: #10b981;
   transform: translateY(-6px) scale(1.02);
 }
@@ -4358,26 +4367,35 @@ body:has(.dashboard-page) {
   width: 100%;
   display: flex;
   flex-direction: column;
-  /* ── User-provided Light Theme Background Image ── */
-  background-color: #edfaf6;
-  background-image: url('/custom_medical_bg_light.jpg');
+  background:
+    radial-gradient(ellipse at 12% 10%, rgba(16, 185, 129, 0.13) 0%, transparent 45%),
+    radial-gradient(ellipse at 88% 22%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 75%, rgba(99, 102, 241, 0.08) 0%, transparent 55%),
+    linear-gradient(180deg, #F0F9FF 0%, #E6F4F1 38%, #F4FAF8 100%);
   background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(ellipse at 12% 10%, rgba(16, 185, 129, 0.13) 0%, transparent 45%),
+    radial-gradient(ellipse at 88% 22%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 75%, rgba(99, 102, 241, 0.08) 0%, transparent 55%),
+    linear-gradient(180deg, #F0F9FF 0%, #E6F4F1 38%, #F4FAF8 100%) !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   align-items: unset !important;
 }
 
-/* Dark mode — User-provided Dark Theme Background Image */
+/* Dark mode */
 .dashboard-page.dark {
-  background-color: #020617;
-  background-image: url('/custom_medical_bg_dark.jpg');
+  background:
+    radial-gradient(ellipse at 12% 10%, rgba(16, 185, 129, 0.20) 0%, transparent 45%),
+    radial-gradient(ellipse at 88% 22%, rgba(14, 165, 233, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 75%, rgba(99, 102, 241, 0.16) 0%, transparent 55%),
+    linear-gradient(180deg, #0B1325 0%, #0F172A 50%, #070D19 100%);
   background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(ellipse at 12% 10%, rgba(16, 185, 129, 0.20) 0%, transparent 45%),
+    radial-gradient(ellipse at 88% 22%, rgba(14, 165, 233, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 75%, rgba(99, 102, 241, 0.16) 0%, transparent 55%),
+    linear-gradient(180deg, #0B1325 0%, #0F172A 50%, #070D19 100%) !important;
 }
 
 .dashboard-main {
@@ -5267,4 +5285,307 @@ body:has(.dashboard-page) {
   background: #0f172a !important;
   color: #f8fafc !important;
 }
+
+/* ============================================================ */
+/* RESPONSIVE MOBILE NAVBAR STYLING (PREVENT ELEMENT OVERLAP)  */
+/* ============================================================ */
+
+@media (max-width: 768px) {
+  .medical-navbar {
+    padding: 0.55rem 0.75rem !important;
+    min-height: auto !important;
+  }
+
+  .navbar-container {
+    flex-wrap: wrap !important;
+    gap: 0.45rem 0.35rem !important;
+    justify-content: space-between !important;
+  }
+
+  /* Search bar stacks cleanly on second row on mobile */
+  .navbar-search-wrapper {
+    order: 3 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0.15rem 0 0 0 !important;
+  }
+
+  .search-input {
+    height: 38px !important;
+    font-size: 0.82rem !important;
+    padding-left: 2.5rem !important;
+  }
+
+  .navbar-actions {
+    gap: 0.3rem !important;
+  }
+
+  .action-btn {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0.3rem !important;
+  }
+
+  /* Compact Brand on mobile */
+  .navbar-brand {
+    padding: 0.2rem 0.6rem 0.2rem 0.3rem !important;
+  }
+
+  .brand-logo-wrap {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .brand-text-img {
+    height: 32px !important;
+  }
+
+  /* Hide category text label on mobile screens */
+  .navbar-actions .nav-cat-label {
+    display: none !important;
+  }
+
+  /* Hide username text on mobile profile avatar pill */
+  .profile-avatar-btn .nav-user-name,
+  .profile-avatar-btn .nav-chevron {
+    display: none !important;
+  }
+
+  .profile-avatar-btn {
+    padding: 0.25rem !important;
+    border-radius: 50% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-text-img {
+    height: 28px !important;
+  }
+}
+
+/* ============================================================ */
+/* MOBILE CARD ALIGNMENT & RESPONSIVE COMPACT SCALING          */
+/* (Optimized for Android & iPhone Mobile Screens)              */
+/* ============================================================ */
+
+@media (max-width: 768px) {
+  /* Category Section Grid - 2 Column Alignment */
+  .cat-section__grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.65rem !important;
+    padding: 0.25rem 0 !important;
+  }
+
+  /* Compact Product Card Sizing for Mobile */
+  .pcard {
+    min-height: 240px !important;
+    border-radius: 0.85rem !important;
+    border-width: 1px !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  .pcard__image-wrap {
+    height: 110px !important;
+    min-height: 110px !important;
+    max-height: 110px !important;
+    padding: 6px !important;
+  }
+
+  .pcard__info {
+    padding: 0.35rem 0.45rem 0.3rem !important;
+    gap: 0.15rem !important;
+  }
+
+  .pcard__brand {
+    font-size: 0.6rem !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .pcard__name {
+    font-size: 0.78rem !important;
+    line-height: 1.25 !important;
+    line-clamp: 2 !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .pcard__desc {
+    display: none !important;
+  }
+
+  .pcard__price-row {
+    margin-top: 0.25rem !important;
+  }
+
+  .pcard__price {
+    font-size: 0.85rem !important;
+  }
+
+  .pcard__actions {
+    gap: 0.3rem !important;
+    margin-top: 0.3rem !important;
+  }
+
+  .pcard__btn {
+    height: 32px !important;
+    font-size: 0.72rem !important;
+    padding: 0 0.45rem !important;
+    border-radius: 0.5rem !important;
+  }
+
+  /* Modal Cards & Drawers on Mobile */
+  .modal-content,
+  .checkout-card,
+  .order-card,
+  .track-card {
+    padding: 0.85rem !important;
+    border-radius: 1rem !important;
+    margin: 0.5rem auto !important;
+    width: 95% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ============================================================ */
+/* DEVICE-SPECIFIC CARD RESPONSIVE BREAKPOINTS (Android, iPhone, Tablets, PCs) */
+/* ============================================================ */
+
+/* 1. Android Phones & iPhones (< 480px) */
+@media (max-width: 480px) {
+  .cat-hero-cards {
+    gap: 0.65rem !important;
+    padding-bottom: 0.4rem !important;
+  }
+
+  .cat-hero-card {
+    width: 108px !important;
+    padding: 0.65rem 0.45rem 0.55rem !important;
+    border-radius: 0.85rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .cat-hero-card__icon-wrap {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 0.85rem !important;
+  }
+
+  .cat-hero-card__name {
+    font-size: 0.76rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .cat-section__grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.55rem !important;
+    padding: 0.2rem 0 !important;
+  }
+
+  .pcard {
+    min-height: 240px !important;
+    border-radius: 0.85rem !important;
+    padding: 0.45rem !important;
+  }
+
+  .pcard__image-wrap {
+    height: 110px !important;
+    min-height: 110px !important;
+    max-height: 110px !important;
+    padding: 6px !important;
+  }
+
+  .pcard__info {
+    padding: 0.3rem 0.4rem !important;
+  }
+
+  .pcard__name {
+    font-size: 0.78rem !important;
+    line-height: 1.22 !important;
+  }
+
+  .pcard__price {
+    font-size: 0.84rem !important;
+  }
+
+  .pcard__btn {
+    font-size: 0.7rem !important;
+    height: 32px !important;
+    padding: 0 0.45rem !important;
+  }
+}
+
+/* 2. Large iPhones & Android Phablets (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .cat-hero-cards {
+    gap: 0.85rem !important;
+  }
+
+  .cat-hero-card {
+    width: 125px !important;
+    padding: 0.75rem 0.55rem 0.65rem !important;
+    border-radius: 0.95rem !important;
+  }
+
+  .cat-hero-card__icon-wrap {
+    width: 58px !important;
+    height: 58px !important;
+  }
+
+  .cat-hero-card__name {
+    font-size: 0.82rem !important;
+  }
+
+  .cat-section__grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.8rem !important;
+  }
+
+  .pcard {
+    min-height: 270px !important;
+  }
+
+  .pcard__image-wrap {
+    height: 135px !important;
+  }
+}
+
+/* 3. Tablets & iPads (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .cat-hero-card {
+    width: 135px !important;
+    padding: 0.9rem 0.7rem 0.8rem !important;
+  }
+
+  .cat-hero-card__icon-wrap {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .cat-section__grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 1.1rem !important;
+  }
+
+  .pcard {
+    min-height: 295px !important;
+  }
+}
+
+/* 4. Desktop PCs & Large Screens (> 1025px) */
+@media (min-width: 1025px) {
+  .cat-hero-card {
+    width: 145px !important;
+  }
+
+  .cat-section__grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 1.35rem !important;
+  }
+}
+
+
 

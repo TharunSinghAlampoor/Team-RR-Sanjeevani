@@ -2,6 +2,7 @@ import React from 'react';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductImage from './ProductImage';
+import { useLanguage } from '../context/LanguageContext';
 
 const s = {
   overlay: {
@@ -169,6 +170,7 @@ const s = {
 };
 
 export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQuantity, onRemoveItem, onProceedToCheckout, onCheckout }) => {
+  const { t, translateData } = useLanguage();
   if (isOpen === false) return null;
 
   const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.itemTotal) || 0), 0);
@@ -185,26 +187,24 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
         exit={{ x: '100%' }}
         transition={{ type: 'spring', stiffness: 340, damping: 32 }}
       >
-        {/* Header */}
         <div style={s.header}>
           <div style={s.headerLeft}>
             <ShoppingBag style={{ width: 20, height: 20, color: '#059669' }} />
-            <h3 style={s.headerTitle}>My Cart</h3>
-            <span style={s.headerCount}>{cartItems.length} item{cartItems.length !== 1 ? 's' : ''}</span>
+            <h3 style={s.headerTitle}>{t('cart') || translateData('My Cart')}</h3>
+            <span style={s.headerCount}>{cartItems.length} {translateData('item')}{cartItems.length !== 1 ? 's' : ''}</span>
           </div>
           <button style={s.closeBtn} onClick={onClose}>
             <X style={{ width: 16, height: 16, color: '#64748b' }} />
           </button>
         </div>
 
-        {/* Free Delivery Progress */}
         {cartItems.length > 0 && (
           <div style={s.deliveryBar}>
             <div style={s.deliveryBarRow}>
               <span>
                 {subtotal >= FREE_THRESHOLD
-                  ? '🎉 Free Delivery Unlocked!'
-                  : `Add ₹${(FREE_THRESHOLD - subtotal).toFixed(0)} more for Free Delivery`}
+                  ? `🎉 ${translateData('Free Delivery Unlocked!')}`
+                  : `${translateData('Add')} ₹${(FREE_THRESHOLD - subtotal).toFixed(0)} ${translateData('more for Free Delivery')}`}
               </span>
               <span>{progress.toFixed(0)}%</span>
             </div>
@@ -214,16 +214,15 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
           </div>
         )}
 
-        {/* Items */}
         <div style={s.scrollArea}>
           {cartItems.length === 0 ? (
             <div style={s.emptyState}>
               <Package style={{ width: 52, height: 52, color: '#d1fae5' }} />
-              <p style={s.emptyTitle}>Your cart is empty</p>
+              <p style={s.emptyTitle}>{translateData('Your cart is empty')}</p>
               <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>
-                Browse products and click "Add to Cart"
+                {translateData('Browse products and click "Add to Cart"')}
               </p>
-              <button style={s.emptyBtn} onClick={onClose}>Start Shopping</button>
+              <button style={s.emptyBtn} onClick={onClose}>{translateData('Start Shopping')}</button>
             </div>
           ) : (
             <AnimatePresence initial={false}>
@@ -237,7 +236,6 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
                   transition={{ duration: 0.2 }}
                   layout
                 >
-                  {/* Product Image */}
                   <div style={s.imgWrap}>
                     <ProductImage
                       src={item.product?.imageUrl}
@@ -245,16 +243,12 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
                       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
                   </div>
-
-                  {/* Info */}
                   <div style={s.cardInfo}>
-                    <p style={s.cardName}>{item.product?.name || 'Product'}</p>
-                    <p style={s.cardBrand}>{item.product?.brand || item.product?.categoryName || ''}</p>
+                    <p style={s.cardName}>{translateData(item.product?.name || 'Product')}</p>
+                    <p style={s.cardBrand}>{translateData(item.product?.brand || item.product?.categoryName || '')}</p>
                     <p style={s.cardPrice}>₹{Number(item.product?.price || 0).toLocaleString('en-IN')}</p>
-                    <p style={s.cardItemTotal}>Subtotal: ₹{Number(item.itemTotal || 0).toLocaleString('en-IN')}</p>
-
+                    <p style={s.cardItemTotal}>{translateData('Subtotal')}: ₹{Number(item.itemTotal || 0).toLocaleString('en-IN')}</p>
                     <div style={s.qtyRow}>
-                      {/* Quantity Controls */}
                       <div style={s.qtyBox}>
                         <button
                           style={s.qtyBtn}
@@ -270,8 +264,6 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
                           <Plus style={{ width: 11, height: 11, color: '#475569' }} />
                         </button>
                       </div>
-
-                      {/* Remove */}
                       <button style={s.removeBtn} onClick={() => onRemoveItem(item.id)} title="Remove">
                         <Trash2 style={{ width: 13, height: 13, color: '#ef4444' }} />
                       </button>
@@ -283,32 +275,36 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
           )}
         </div>
 
-        {/* Footer */}
         {cartItems.length > 0 && (
           <div style={s.footer}>
-            <div style={s.totalRow}>
-              <span>Subtotal</span>
-              <span style={{ fontWeight: 700, color: '#0f172a' }}>₹{subtotal.toLocaleString('en-IN')}</span>
+            <div style={s.summaryRow}>
+              <span style={s.summaryLabel}>{translateData('Subtotal')}</span>
+              <span style={s.summaryVal}>₹{subtotal.toFixed(2)}</span>
             </div>
-            <div style={s.totalRow}>
-              <span>Shipping</span>
-              <span style={{ fontWeight: 700, color: '#059669' }}>
-                {shipping === 0 ? 'FREE' : `₹${shipping}`}
+            <div style={s.summaryRow}>
+              <span style={s.summaryLabel}>{translateData('Delivery')}</span>
+              <span style={{ ...s.summaryVal, color: shipping === 0 ? '#059669' : '#0f172a' }}>
+                {shipping === 0 ? translateData('FREE') : `₹${shipping}`}
               </span>
             </div>
-            <div style={s.grandTotal}>
-              <span>Total</span>
-              <span style={{ color: '#059669' }}>₹{(subtotal + shipping).toLocaleString('en-IN')}</span>
+            <div style={s.totalRow}>
+              <span>{translateData('Total')}</span>
+              <span>₹{(subtotal + shipping).toFixed(2)}</span>
             </div>
-
-            <button style={s.checkoutBtn} onClick={onCheckout || onProceedToCheckout}>
-              Proceed to Checkout
+            <button
+              style={s.checkoutBtn}
+              onClick={() => {
+                onClose();
+                if (onProceedToCheckout) onProceedToCheckout();
+                else if (onCheckout) onCheckout();
+              }}
+            >
+              <span>{t('buyNow') || translateData('Proceed to Checkout')}</span>
               <ArrowRight style={{ width: 16, height: 16 }} />
             </button>
-
             <div style={s.secureNote}>
-              <ShieldCheck style={{ width: 12, height: 12, color: '#10b981' }} />
-              <span>Secure & Encrypted Checkout</span>
+              <ShieldCheck style={{ width: 13, height: 13, color: '#059669' }} />
+              <span>{translateData('100% Encrypted & Safe Healthcare Checkout')}</span>
             </div>
           </div>
         )}

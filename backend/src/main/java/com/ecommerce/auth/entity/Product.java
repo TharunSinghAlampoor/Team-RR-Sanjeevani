@@ -50,6 +50,12 @@ public class Product {
     @Column(name = "status", length = 50)
     private String status = "ACTIVE";
 
+    @Column(name = "rating")
+    private Double rating = 4.5;
+
+    @Column(name = "reviews_count")
+    private Integer reviewsCount = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -208,5 +214,21 @@ public class Product {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public Integer getReviewsCount() {
+        return reviewsCount;
+    }
+
+    public void setReviewsCount(Integer reviewsCount) {
+        this.reviewsCount = reviewsCount;
     }
 }

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronDown, Pill, Baby, Stethoscope, Sparkles, Activity } from 'lucide-react';
 import ProductCard from './ProductCard';
 
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
+import { useLanguage } from '../context/LanguageContext';
 
 export const CATEGORY_META = {
   'Prescriptions & Medicines': {
@@ -70,6 +71,14 @@ export const CATEGORY_META = {
     gradient: 'from-violet-500 to-purple-600',
     badgeColor: '#ede9fe',
     badgeText: '#6d28d9',
+  },
+  'Baby & Kids': {
+    icon: Baby,
+    color: '#db2777',
+    bg: '#fdf2f8',
+    gradient: 'from-pink-500 to-rose-600',
+    badgeColor: '#fce7f3',
+    badgeText: '#be185d',
   },
   'Baby & Kids': {
     icon: Baby,
@@ -153,7 +162,15 @@ export const CategorySection = ({
   onOpenDetails,
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
   const navigate = useNavigate();
+  const { translateData } = useLanguage();
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const meta = CATEGORY_META[category.categoryName] || CATEGORY_META[formatCategoryName(category.categoryName)] || {
     icon: Activity,
@@ -165,8 +182,9 @@ export const CategorySection = ({
   };
   const Icon = meta.icon;
 
-  const displayProducts = expanded ? products : products.slice(0, PREVIEW_COUNT);
-  const hasMore = products.length > PREVIEW_COUNT;
+  const previewLimit = isMobile ? 4 : PREVIEW_COUNT;
+  const displayProducts = expanded ? products : products.slice(0, previewLimit);
+  const hasMore = products.length > previewLimit;
 
   return (
     <section className="cat-section">
@@ -175,24 +193,36 @@ export const CategorySection = ({
         <div className="cat-section__title-group">
           <div
             className="cat-section__icon-wrap"
-            style={{ background: `linear-gradient(135deg, ${meta.color}22, ${meta.color}11)`, border: `1.5px solid ${meta.color}33` }}
+            style={{
+              background: `linear-gradient(135deg, ${meta.color}25, ${meta.color}10)`,
+              border: `1.5px solid ${meta.color}40`,
+              boxShadow: `0 4px 12px ${meta.color}20`
+            }}
           >
             <Icon style={{ color: meta.color, width: 22, height: 22 }} />
           </div>
           <div>
-            <h2 className="cat-section__title">{formatCategoryName(category.categoryName)}</h2>
+            <h2 className="cat-section__title" style={{ fontSize: '1.28rem', fontWeight: 900, color: '#0f172a' }}>{translateData(formatCategoryName(category.categoryName))}</h2>
           </div>
         </div>
 
         <motion.button
           className="cat-section__toggle"
-          style={{ color: meta.color, borderColor: `${meta.color}40`, background: meta.bg }}
+          style={{
+            color: meta.color,
+            borderColor: `${meta.color}45`,
+            background: `linear-gradient(135deg, #ffffff 0%, ${meta.bg} 100%)`,
+            boxShadow: `0 2px 8px ${meta.color}15`,
+            fontWeight: 800,
+            borderRadius: '9999px',
+            padding: '0.45rem 1.1rem'
+          }}
           onClick={() => navigate(`/category/${toCategorySlug(category.categoryName || category.categoryId)}`)}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.97 }}
+          whileHover={{ scale: 1.05, boxShadow: `0 4px 14px ${meta.color}30` }}
+          whileTap={{ scale: 0.96 }}
         >
+          <span>{translateData('See All')}</span>
           <ChevronRight className="w-4 h-4" />
-          <span>See All</span>
         </motion.button>
       </div>
 

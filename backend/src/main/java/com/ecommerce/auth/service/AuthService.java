@@ -140,15 +140,54 @@ public class AuthService {
     }
 
     @Transactional
-    public ApiResponse<Object> logout(String token) {
-        sessionRepository.invalidateByToken(token);
-        try {
-            jwtTokenRepository.deleteByToken(token);
-        } catch (Exception e) {
-            logger.warn("Deleting JWT token from database failed during logout: {}", e.getMessage());
+    public ApiResponse<Object> logout(String token, Integer userId) {
+        if (userId == null && token != null && !token.isBlank()) {
+            userId = jwtService.extractUserId(token);
         }
-        logger.info("User logged out, session invalidated, JWT token removed from database");
-        return ApiResponse.success("Logged out successfully");
+
+        logger.info("Executing logout database cleanup for token: {}, userId: {}", token, userId);
+
+        // 1. Remove JWT token and Session record from database by Token
+        if (token != null && !token.isBlank()) {
+            try {
+                int sDel = sessionRepository.deleteByJwtToken(token);
+                logger.info("Deleted {} session record(s) by token from sessions table", sDel);
+            } catch (Exception e) {
+                logger.warn("Deleting session by token failed during logout: {}", e.getMessage());
+            }
+
+            try {
+                int jDel = jwtTokenRepository.deleteByToken(token);
+                logger.info("Deleted {} JWT token record(s) by token from jwt_tokens table", jDel);
+            } catch (Exception e) {
+                logger.warn("Deleting JWT token from jwt_tokens table failed during logout: {}", e.getMessage());
+            }
+        }
+
+        // 2. Remove all JWT tokens and Session records from database by User ID
+        if (userId != null) {
+            try {
+                int sDel = sessionRepository.deleteByUserId(userId);
+                logger.info("Deleted {} session record(s) by userId from sessions table", sDel);
+            } catch (Exception e) {
+                logger.warn("Deleting sessions by userId failed during logout: {}", e.getMessage());
+            }
+
+            try {
+                int jDel = jwtTokenRepository.deleteByUserUserId(userId);
+                logger.info("Deleted {} JWT token record(s) by userId from jwt_tokens table", jDel);
+            } catch (Exception e) {
+                logger.warn("Deleting JWT tokens by userId failed during logout: {}", e.getMessage());
+            }
+        }
+
+        logger.info("User logged out cleanly, JWT tokens removed from database and session table");
+        return ApiResponse.success("Logout successful");
+    }
+
+    @Transactional
+    public ApiResponse<Object> logout(String token) {
+        return logout(token, null);
     }
 
     @Transactional

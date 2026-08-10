@@ -1,6 +1,7 @@
 import React, { Component, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 
@@ -26,6 +27,7 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ChangePassword = lazy(() => import('./pages/ChangePassword'));
 const CategoryProductsPage = lazy(() => import('./pages/CategoryProductsPage'));
 const TrackOrderPage = lazy(() => import('./pages/TrackOrderPage'));
+const ProductDetailsPage = lazy(() => import('./pages/ProductDetailsPage'));
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -89,63 +91,92 @@ class ErrorBoundary extends Component {
   }
 }
 
-import BrandLoader from './components/BrandLoader';
-
-const PageLoader = () => <BrandLoader fullScreen message="Loading Sanjeevani Portal..." />;
-
 function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <Router>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* Customer & Public Routes */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/track-order" element={<TrackOrderPage />} />
-              <Route path="/track-order/:orderId" element={<TrackOrderPage />} />
-              <Route
-                path="/change-password"
-                element={
-                  <ProtectedRoute>
-                    <ChangePassword />
-                  </ProtectedRoute>
-                }
-              />
+      <LanguageProvider>
+        <AuthProvider>
+          <Router>
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-emerald-50"><div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div></div>}>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/change-password" element={<ChangePassword />} />
 
-              {/* Dedicated Admin Routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route
-                path="/admin"
-                element={
-                  <AdminProtectedRoute>
-                    <AdminLayout />
-                  </AdminProtectedRoute>
-                }
-              >
-                <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="products" element={<AdminProducts />} />
-                <Route path="categories" element={<AdminCategories />} />
-                <Route path="inventory" element={<AdminInventory />} />
-                <Route path="orders" element={<AdminOrders />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="reports" element={<AdminReports />} />
-                <Route path="settings" element={<AdminSettings />} />
-              </Route>
+                {/* Protected Customer Routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/category/:categorySlug"
+                  element={
+                    <ProtectedRoute>
+                      <CategoryProductsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/product/:productId"
+                  element={
+                    <ProtectedRoute>
+                      <ProductDetailsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/track-order"
+                  element={
+                    <ProtectedRoute>
+                      <TrackOrderPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/track-order/:orderId"
+                  element={
+                    <ProtectedRoute>
+                      <TrackOrderPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Default Fallback */}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </Suspense>
-        </Router>
-      </AuthProvider>
+                {/* Dedicated Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminLayout />
+                    </AdminProtectedRoute>
+                  }
+                >
+                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="products" element={<AdminProducts />} />
+                  <Route path="categories" element={<AdminCategories />} />
+                  <Route path="inventory" element={<AdminInventory />} />
+                  <Route path="orders" element={<AdminOrders />} />
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="analytics" element={<AdminAnalytics />} />
+                  <Route path="reports" element={<AdminReports />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                </Route>
+
+                {/* Default Fallback */}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+            </Suspense>
+          </Router>
+        </AuthProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   );
 }

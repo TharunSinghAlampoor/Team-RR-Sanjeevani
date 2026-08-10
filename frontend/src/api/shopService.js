@@ -66,6 +66,16 @@ export const shopService = {
     return response.data;
   },
 
+  getProductReviews: async (id) => {
+    const response = await shopClient.get(`/products/${id}/reviews`);
+    return response.data;
+  },
+
+  addProductReview: async (id, payload) => {
+    const response = await shopClient.post(`/products/${id}/reviews`, payload);
+    return response.data;
+  },
+
   // Cart
   getCart: async () => {
     const response = await shopClient.get('/cart');
@@ -146,12 +156,54 @@ export const shopService = {
 
   // Orders
   getOrders: async () => {
-    const response = await shopClient.get('/orders');
+    let apiOrders = [];
+    try {
+      const response = await shopClient.get('/orders');
+      const data = response.data;
+      apiOrders = (data && data.success && Array.isArray(data.data)) ? data.data : (Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.warn('Backend orders API notice:', e.message);
+    }
+
+    let localOrders = [];
+    try {
+      const stored = localStorage.getItem('sanjeevani_local_orders');
+      if (stored) localOrders = JSON.parse(stored);
+    } catch (e) {}
+
+    const combinedMap = new Map();
+    [...apiOrders, ...localOrders].forEach(o => {
+      if (!o) return;
+      if (String(o.status || '').toUpperCase() === 'FAILED') return;
+      const key = String(o.orderId || o.id || Math.random()).trim().toLowerCase();
+      if (!combinedMap.has(key)) {
+        combinedMap.set(key, o);
+      }
+    });
+
+    return { success: true, data: Array.from(combinedMap.values()) };
+  },
+
+  checkoutCart: async (payload = {}) => {
+    const response = await shopClient.post('/orders/checkout', payload);
     return response.data;
   },
 
-  checkoutCart: async () => {
-    const response = await shopClient.post('/orders/checkout');
+  checkout: async (payload = {}) => {
+    try {
+      const response = await shopClient.post('/orders/checkout', payload);
+      return response.data;
+    } catch (e) {
+      if (payload && (payload.productId || payload.items)) {
+        const buyRes = await shopClient.post('/orders/buy-now', payload);
+        return buyRes.data;
+      }
+      throw e;
+    }
+  },
+
+  placeOrder: async (payload = {}) => {
+    const response = await shopClient.post('/orders/checkout', payload);
     return response.data;
   },
 
@@ -160,9 +212,16 @@ export const shopService = {
     return response.data;
   },
 
+  updateOrderStatus: async (orderId, status) => {
+    const response = await shopClient.put(`/orders/${orderId}/status`, { status });
+    return response.data;
+  },
+
   // Razorpay Payment
-  createRazorpayOrder: async () => {
-    const response = await shopClient.post('/payment/create-order');
+  createRazorpayOrder: async (amount = null) => {
+    const response = await shopClient.post('/payment/create-order', null, {
+      params: amount ? { amount } : {}
+    });
     return response.data;
   },
 
@@ -171,9 +230,9 @@ export const shopService = {
     return response.data;
   },
 
-  createBuyNowRazorpayOrder: async (productId, quantity = 1) => {
+  createBuyNowRazorpayOrder: async (productId, quantity = 1, amount = null) => {
     const response = await shopClient.post('/payment/create-buy-now-order', null, {
-      params: { productId, quantity }
+      params: { productId, quantity, ...(amount ? { amount } : {}) }
     });
     return response.data;
   },
@@ -194,6 +253,32 @@ export const shopService = {
 
   sendInvoiceEmail: async (orderId, email = null) => {
     const response = await shopClient.post(`/orders/${orderId}/send-invoice-email`, { email });
+    return response.data;
+  },
+
+  // Order Support & Lifecycle
+  submitFeedback: async (payload) => {
+    const response = await shopClient.post('/order-support/feedback', payload);
+    return response.data;
+  },
+
+  requestRefund: async (payload) => {
+    const response = await shopClient.post('/order-support/refund', payload);
+    return response.data;
+  },
+
+  requestReplacement: async (payload) => {
+    const response = await shopClient.post('/order-support/replace', payload);
+    return response.data;
+  },
+
+  cancelOrderSupport: async (payload) => {
+    const response = await shopClient.post('/order-support/cancel', payload);
+    return response.data;
+  },
+
+  getOrderSupportStatus: async (orderId) => {
+    const response = await shopClient.get(`/order-support/order/${orderId}`);
     return response.data;
   },
 };

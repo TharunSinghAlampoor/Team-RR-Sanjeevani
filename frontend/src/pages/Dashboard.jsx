@@ -10,9 +10,9 @@ import CategorySection from '../components/CategorySection';
 import CategoryCard from '../components/CategoryCard';
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 import ProductCard from '../components/ProductCard';
-import DashboardFooter from '../components/DashboardFooter';
 import BrandLoader from '../components/BrandLoader';
 import ToastNotification from '../components/ToastNotification';
+import { getCookie } from '../utils/cookieUtils';
 
 // Direct modal & drawer imports for instant UI responsiveness
 import ProductDetailsModal from '../components/ProductDetailsModal';
@@ -22,18 +22,22 @@ import BuyNowModal from '../components/BuyNowModal';
 import CheckoutModal from '../components/CheckoutModal';
 import OrdersModal from '../components/OrdersModal';
 import OrderSuccessModal from '../components/OrderSuccessModal';
+import ProfileSidebar from '../components/ProfileSidebar';
+import SanjeevaniBot from '../components/SanjeevaniBot';
 
 import { Search, SlidersHorizontal, RotateCcw, LayoutGrid } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export const Dashboard = () => {
   const { user, logout, updateShoppingState } = useAuth();
+  const { language, t, translateData } = useLanguage();
   const navigate = useNavigate();
 
   // Data States
   const [categories, setCategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
-  const [pageLoading, setPageLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -51,6 +55,7 @@ export const Dashboard = () => {
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [completedOrder, setCompletedOrder] = useState(null);
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
@@ -110,7 +115,7 @@ export const Dashboard = () => {
   }, []);
 
   const fetchCart = useCallback(async () => {
-    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
     if (!activeToken) return;
     try {
       const res = await shopService.getCart();
@@ -121,7 +126,7 @@ export const Dashboard = () => {
   }, []);
 
   const fetchFavorites = useCallback(async () => {
-    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
     if (!activeToken) return;
     try {
       const res = await shopService.getFavorites();
@@ -132,32 +137,68 @@ export const Dashboard = () => {
   }, []);
 
   const fetchOrders = useCallback(async () => {
-    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
     if (!activeToken) return;
     try {
       const res = await shopService.getOrders();
-      if (res && res.success && Array.isArray(res.data)) {
-        setOrders(res.data);
-      }
-    } catch (e) { /* Ignore 401 for guest sessions */ }
+      const rawList = (res && res.success && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);
+      
+      // Deduplicate orders by unique orderId / id
+      const uniqueMap = new Map();
+      rawList.forEach(o => {
+        if (!o) return;
+        if (String(o.status || '').toUpperCase() === 'FAILED') return;
+        const key = String(o.orderId || o.id || Math.random()).trim().toLowerCase();
+        if (!uniqueMap.has(key)) {
+          uniqueMap.set(key, o);
+        }
+      });
+
+      const cleanOrders = Array.from(uniqueMap.values()).sort((a, b) => {
+        const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        if (tA !== tB) return tB - tA; // Newest first
+        const nA = Number(String(a.orderId || a.id || '').replace(/[^0-9]/g, '')) || 0;
+        const nB = Number(String(b.orderId || b.id || '').replace(/[^0-9]/g, '')) || 0;
+        return nB - nA;
+      });
+
+      setOrders(cleanOrders);
+    } catch (e) {
+      console.error('Fetch orders error:', e);
+    }
   }, []);
 
-  // Initial load
+  useEffect(() => {
+    if (isOrdersOpen) {
+      fetchOrders();
+    }
+  }, [isOrdersOpen, fetchOrders]);
+
+  // Initial load on mount
   useEffect(() => {
     let isMounted = true;
-    Promise.all([
+
+    // Safety fallback: max 1.2s loader duration
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) setPageLoading(false);
+    }, 1200);
+
+    Promise.allSettled([
       fetchCategories(),
       fetchAllProducts(),
       fetchCart(),
       fetchFavorites(),
       fetchOrders()
     ]).finally(() => {
-      setTimeout(() => {
-        if (isMounted) setPageLoading(false);
-      }, 600);
+      if (isMounted) setPageLoading(false);
     });
-    return () => { isMounted = false; };
-  }, [fetchCategories, fetchAllProducts, fetchCart, fetchFavorites, fetchOrders]);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(safetyTimer);
+    };
+  }, []);
 
   // Sync shopping counts to cookies whenever cart or favorites change
   useEffect(() => {
@@ -326,9 +367,17 @@ export const Dashboard = () => {
     const map = {};
     displayCategories.forEach(cat => { map[cat.categoryName] = []; });
     filteredProducts.forEach(product => {
+      if (!product) return;
       const formattedCat = formatCategoryName(product.categoryName);
-      if (map[formattedCat]) {
-        map[formattedCat].push(product);
+      let matchedKey = Object.keys(map).find(k => k.toLowerCase() === formattedCat.toLowerCase());
+
+      if (!matchedKey && product.categoryId) {
+        const catObj = displayCategories.find(c => c.categoryIds && c.categoryIds.includes(product.categoryId));
+        if (catObj) matchedKey = catObj.categoryName;
+      }
+
+      if (matchedKey && map[matchedKey]) {
+        map[matchedKey].push(product);
       } else if (displayCategories.length > 0) {
         const fallbackCatName = displayCategories[0].categoryName;
         if (!map[fallbackCatName]) map[fallbackCatName] = [];
@@ -429,13 +478,11 @@ export const Dashboard = () => {
     }
   };
 
-  // ─── Product Details Handler ──────────────────────────────────────
-  const handleOpenDetails = async (product) => {
-    setSelectedProductDetails(product);
-    try {
-      const res = await shopService.getRelatedProducts(product.productId);
-      if (res.success) setRelatedProducts(res.data || []);
-    } catch { setRelatedProducts([]); }
+  // ─── Product Details Handler (Navigates to dedicated page) ─────────
+  const handleOpenDetails = (product) => {
+    if (product && product.productId) {
+      navigate(`/product/${product.productId}`);
+    }
   };
 
   // ─── Buy Now Handlers ─────────────────────────────────────────────
@@ -489,7 +536,7 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="dashboard-page light">
+    <div className="dashboard-page" style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #d1fae5 50%, #f0fdf4 100%)', minHeight: '100vh' }}>
       {/* ── Sticky Navbar ─────────────────────────── */}
       <Navbar
         user={user}
@@ -503,9 +550,30 @@ export const Dashboard = () => {
           fetchOrders();
           setIsOrdersOpen(true);
         }}
+        onOpenChatbot={() => {
+          const botEl = document.querySelector('.sanjeevani-bot-fab');
+          if (botEl) botEl.click();
+        }}
+        onOpenProfile={() => setIsProfileOpen(v => !v)}
         onLogout={handleLogout}
         categories={displayCategories}
         onScrollToCategory={handleSelectCategory}
+      />
+
+      {/* ── Profile Left Push Sidebar ───────────────────── */}
+      <ProfileSidebar
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        onOpenOrders={() => {
+          fetchOrders();
+          setIsOrdersOpen(true);
+        }}
+        onOpenWishlist={() => setIsFavoritesOpen(true)}
+        onOpenChatbot={() => {
+          const botEl = document.querySelector('.sanjeevani-bot-fab');
+          if (botEl) botEl.click();
+        }}
+        onChangePassword={() => navigate('/change-password')}
       />
 
       {/* ── Main content ──────────────────────────── */}
@@ -521,8 +589,8 @@ export const Dashboard = () => {
             transition={{ duration: 0.5, delay: 0.15 }}
           >
             <div className="cat-hero-row__header">
-              <h2 className="cat-hero-row__title">🏪 Shop by Category</h2>
-              <p className="cat-hero-row__subtitle">Explore our curated healthcare product categories</p>
+              <h2 className="cat-hero-row__title">🏪 {translateData('Shop by Category')}</h2>
+              <p className="cat-hero-row__subtitle">{translateData('Explore our curated healthcare product categories')}</p>
             </div>
             <div className="cat-hero-cards">
               {/* All Products option */}
@@ -536,9 +604,9 @@ export const Dashboard = () => {
                 }}
                 className={`cat-hero-card ${selectedCategory === null ? 'cat-hero-card--active' : ''}`}
                 style={{
-                  '--card-color': '#059669',
+                  '--card-color': '#0D5C75',
                   '--card-bg': 'transparent',
-                  '--card-ring': '#6ee7b7',
+                  '--card-ring': '#709775',
                 }}
                 whileHover={{ y: -6, scale: 1.04 }}
                 whileTap={{ scale: 0.97 }}
@@ -546,10 +614,10 @@ export const Dashboard = () => {
               >
                 <div className="cat-hero-card__icon-wrap">
                   <div className="cat-hero-card__icon-fallback" style={{ display: 'flex' }}>
-                    <LayoutGrid style={{ color: '#059669', width: 28, height: 28 }} />
+                    <LayoutGrid style={{ color: '#0D5C75', width: 28, height: 28 }} />
                   </div>
                 </div>
-                <p className="cat-hero-card__name">All Products</p>
+                <p className="cat-hero-card__name">{translateData('All Products')}</p>
               </motion.div>
               {displayCategories.map((cat) => (
                 <CategoryCard
@@ -575,27 +643,27 @@ export const Dashboard = () => {
         {isSearchActive ? (
           /* When searching/filtering: flat grid with matched results paginated across separate pages */
           <section className="cat-section">
-            <div className="cat-section__header" style={{ borderLeftColor: '#059669', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="cat-section__header" style={{ borderLeftColor: '#0D5C75', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div className="cat-section__title-group">
-                <div className="cat-section__icon-wrap" style={{ background: '#d1fae5' }}>
-                  <Search style={{ color: '#059669', width: 22, height: 22 }} />
+                <div className="cat-section__icon-wrap" style={{ background: '#E8F3EF' }}>
+                  <Search style={{ color: '#0D5C75', width: 22, height: 22 }} />
                 </div>
                 <div>
-                  <h2 className="cat-section__title">
+                  <h2 className="cat-section__title" style={{ color: '#1A2E35' }}>
                     {selectedCategory && !searchQuery.trim()
-                      ? displayCategories.find(c => c.categoryId === selectedCategory || c.categoryIds?.includes(selectedCategory))?.categoryName || 'Category'
-                      : 'Search Results'}
+                      ? translateData(displayCategories.find(c => c.categoryId === selectedCategory || c.categoryIds?.includes(selectedCategory))?.categoryName || 'Category')
+                      : translateData('Search Results')}
                   </h2>
                 </div>
               </div>
 
               {totalPages > 1 && (
-                <span style={{ fontSize: '0.78rem', color: '#047857', fontWeight: 800, background: '#ecfdf5', padding: '0.25rem 0.75rem', borderRadius: 99, border: '1px solid #a7f3d0' }}>
-                  Page {currentPage} of {totalPages} ({filteredProducts.length} Total Items)
+                <span style={{ fontSize: '0.78rem', color: '#0D5C75', fontWeight: 800, background: '#E8F3EF', padding: '0.25rem 0.75rem', borderRadius: 99, border: '1px solid #A4C3D2' }}>
+                  {translateData('Page')} {currentPage} {translateData('of')} {totalPages} ({filteredProducts.length} {translateData('Total Items')})
                 </span>
               )}
             </div>
-            <div className="cat-section__divider" style={{ background: 'linear-gradient(90deg, #05966940, transparent)' }} />
+            <div className="cat-section__divider" style={{ background: 'linear-gradient(90deg, rgba(13, 92, 117, 0.25), transparent)' }} />
             <div className="cat-section__grid" style={{ minHeight: loadingProducts ? 300 : 'auto', display: loadingProducts ? 'flex' : 'grid', alignItems: 'center', justifyContent: 'center' }}>
               {loadingProducts
                 ? <BrandLoader fullScreen={false} message="Loading Healthcare Essentials..." />
@@ -714,26 +782,11 @@ export const Dashboard = () => {
         </div>
       </main>
 
-      {/* ── Footer ───────────────────────────────── */}
-      <DashboardFooter />
-
       {/* Global Toast Popup Notifications */}
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
       {/* ── Modals & Drawers ──────────────────────── */}
       <React.Suspense fallback={null}>
-        {selectedProductDetails && (
-          <ProductDetailsModal
-            product={selectedProductDetails}
-            relatedProducts={allProducts.filter(p => p && p.productId !== selectedProductDetails.productId).slice(0, 4)}
-            isFavorite={!!favoritesMap[selectedProductDetails.productId]}
-            onClose={() => setSelectedProductDetails(null)}
-            onToggleFavorite={handleToggleFavorite}
-            onAddToCart={handleAddToCart}
-            onBuyNow={handleStartBuyNow}
-            onSelectProduct={handleOpenDetails}
-          />
-        )}
 
         {isCartOpen && (
           <CartDrawer
@@ -752,6 +805,19 @@ export const Dashboard = () => {
             onRemoveFavorite={handleRemoveFavorite}
             onAddToCart={handleAddToCart}
             onOpenDetails={handleOpenDetails}
+          />
+        )}
+
+        {selectedProductDetails && (
+          <ProductDetailsModal
+            product={selectedProductDetails}
+            relatedProducts={products.filter(p => p.categoryName === selectedProductDetails.categoryName && (p.productId || p.id) !== (selectedProductDetails.productId || selectedProductDetails.id))}
+            isFavorite={favorites.some(f => (f.productId || f.id) === (selectedProductDetails.productId || selectedProductDetails.id))}
+            onClose={() => setSelectedProductDetails(null)}
+            onToggleFavorite={handleToggleFavorite}
+            onAddToCart={handleAddToCart}
+            onBuyNow={handleStartBuyNow}
+            onSelectProduct={(p) => setSelectedProductDetails(p)}
           />
         )}
 
@@ -775,6 +841,7 @@ export const Dashboard = () => {
           <OrdersModal
             orders={orders}
             onClose={() => setIsOrdersOpen(false)}
+            onOrderCreated={fetchOrders}
           />
         )}
 
@@ -788,6 +855,12 @@ export const Dashboard = () => {
             }}
           />
         )}
+
+        <SanjeevaniBot
+          onOpenCart={() => setIsCartOpen(true)}
+          onOpenOrders={() => setIsOrdersOpen(true)}
+          onOpenPrescriptionModal={() => setIsPrescriptionModalOpen && setIsPrescriptionModalOpen(true)}
+        />
       </React.Suspense>
     </div>
   );

@@ -25,4 +25,16 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Session s SET s.active = false WHERE s.jwtToken = :token AND s.active = true")
     int invalidateByToken(@Param("token") String token);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM Session s WHERE s.jwtToken = :token")
+    int deleteByJwtToken(@Param("token") String token);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM Session s WHERE s.user.userId = :userId")
+    int deleteByUserId(@Param("userId") Integer userId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM Session s WHERE s.user = :user")
+    int deleteByUser(@Param("user") User user);
 }

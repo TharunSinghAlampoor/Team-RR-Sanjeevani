@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import InputField from '../components/InputField';
 import authService from '../api/authService';
 import { useAuth } from '../context/AuthContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 export const Register = () => {
   const [formData, setFormData] = useState({
@@ -174,7 +175,10 @@ export const Register = () => {
   };
 
   return (
-    <div className="auth-container register-container">
+    <div className="auth-container register-container" style={{ position: 'relative' }}>
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 100 }}>
+        <LanguageSelector />
+      </div>
       <div className="auth-card register-card">
         <div className="auth-logo-header" style={{ marginBottom: '6px' }}>
           <img src="/sanjeevani_text_transparent.png" alt="Sanjeevani" className="auth-logo-text" style={{ height: '34px', width: 'auto' }} />

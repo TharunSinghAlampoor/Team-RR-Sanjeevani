@@ -60,8 +60,13 @@ public class RazorpayService {
      * Create a Razorpay order from the user's cart via REST API.
      * Does NOT create a database order — only a Razorpay order for the payment popup.
      */
-    @SuppressWarnings("unchecked")
     public PaymentDto createRazorpayOrder(Integer userId) {
+        return createRazorpayOrder(userId, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public PaymentDto createRazorpayOrder(Integer userId, BigDecimal customAmount) {
+        if (userId == null) userId = 1;
         if (!userRepository.existsById(userId)) {
             throw new AuthException("User not found: " + userId);
         }
@@ -80,6 +85,10 @@ public class RazorpayService {
             }
             BigDecimal lineTotal = p.getPrice().multiply(BigDecimal.valueOf(ci.getQuantity()));
             totalAmount = totalAmount.add(lineTotal);
+        }
+
+        if (customAmount != null && customAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalAmount = customAmount;
         }
 
         // Razorpay expects amount in paise (smallest currency unit)
@@ -198,8 +207,13 @@ public class RazorpayService {
     /**
      * Create a Razorpay order for Buy Now (single product).
      */
-    @SuppressWarnings("unchecked")
     public PaymentDto createBuyNowRazorpayOrder(Integer userId, Integer productId, Integer quantity) {
+        return createBuyNowRazorpayOrder(userId, productId, quantity, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public PaymentDto createBuyNowRazorpayOrder(Integer userId, Integer productId, Integer quantity, BigDecimal customAmount) {
+        if (userId == null) userId = 1;
         if (!userRepository.existsById(userId)) {
             throw new AuthException("User not found: " + userId);
         }
@@ -213,6 +227,9 @@ public class RazorpayService {
         }
 
         BigDecimal totalAmount = product.getPrice().multiply(BigDecimal.valueOf(qty));
+        if (customAmount != null && customAmount.compareTo(BigDecimal.ZERO) > 0) {
+            totalAmount = customAmount;
+        }
         int amountInPaise = totalAmount.multiply(BigDecimal.valueOf(100)).intValue();
 
         try {

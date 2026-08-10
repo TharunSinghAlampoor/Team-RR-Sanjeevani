@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import InputField from '../components/InputField';
 import authService from '../api/authService';
 import { useAuth } from '../context/AuthContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 export const Login = () => {
   const [loginMethod, setLoginMethod] = useState('email'); // 'email' | 'phone'
@@ -83,27 +84,36 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
+      let rawPhone = formData.phone.trim();
+      if (rawPhone.startsWith('+91')) {
+        rawPhone = rawPhone.substring(3);
+      } else if (rawPhone.startsWith('91') && rawPhone.length > 10) {
+        rawPhone = rawPhone.substring(2);
+      } else if (rawPhone.startsWith('0')) {
+        rawPhone = rawPhone.substring(1);
+      }
+
       const identifier = loginMethod === 'email'
         ? formData.email.trim()
-        : `${countryCode}${formData.phone.trim()}`;
+        : `${countryCode}${rawPhone}`;
 
       const response = await authService.login(identifier, formData.password);
 
-      if (response.success && response.data) {
+      if (response && response.success && response.data) {
         const { token, user } = response.data;
+        login(user, token);
         setIsSuccess(true);
         setTimeout(() => {
-          login(user, token);
           navigate('/dashboard');
-        }, 1500);
+        }, 500);
       } else {
-        setApiError('Invalid credentials. Please try again.');
+        setApiError(response?.message || 'Invalid credentials. Please try again.');
       }
     } catch (err) {
       if (err.response && err.response.data) {
-        setApiError(err.response.data.message || 'Login failed');
+        setApiError(err.response.data.message || 'Login failed. Please check your credentials.');
       } else {
-        setApiError('Network error. Please try again.');
+        setApiError('Network error. Please check backend connection.');
       }
     } finally {
       setIsSubmitting(false);
@@ -128,7 +138,10 @@ export const Login = () => {
   }
 
   return (
-    <div className="auth-container">
+    <div className="auth-container" style={{ position: 'relative' }}>
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 100 }}>
+        <LanguageSelector />
+      </div>
       <div className="auth-card">
         <div className="auth-logo-header">
           <img src="/sanjeevani_text_transparent.png" alt="Sanjeevani" className="auth-logo-text" style={{ height: '44px', width: 'auto' }} />

@@ -120,7 +120,10 @@ const s = {
   },
 };
 
+import { useLanguage } from '../context/LanguageContext';
+
 export const FavoritesDrawer = ({ isOpen = true, favorites = [], onClose, onRemoveFavorite, onAddToCart, onOpenDetails }) => {
+  const { t, translateData } = useLanguage();
   if (isOpen === false) return null;
 
   return (
@@ -136,8 +139,8 @@ export const FavoritesDrawer = ({ isOpen = true, favorites = [], onClose, onRemo
         <div style={s.header}>
           <div style={s.headerLeft}>
             <Heart style={{ width: 20, height: 20, color: '#f43f5e', fill: '#f43f5e' }} />
-            <h3 style={s.headerTitle}>My Wishlist</h3>
-            <span style={s.headerCount}>{favorites.length} item{favorites.length !== 1 ? 's' : ''}</span>
+            <h3 style={s.headerTitle}>{t('favorites') || translateData('My Wishlist')}</h3>
+            <span style={s.headerCount}>{favorites.length} {translateData('item')}{favorites.length !== 1 ? 's' : ''}</span>
           </div>
           <button style={s.closeBtn} onClick={onClose}>
             <X style={{ width: 16, height: 16, color: '#f43f5e' }} />
@@ -149,11 +152,11 @@ export const FavoritesDrawer = ({ isOpen = true, favorites = [], onClose, onRemo
           {favorites.length === 0 ? (
             <div style={s.emptyState}>
               <Heart style={{ width: 52, height: 52, color: '#fecdd3' }} />
-              <p style={s.emptyTitle}>Your wishlist is empty</p>
+              <p style={s.emptyTitle}>{translateData('Your wishlist is empty')}</p>
               <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>
-                Click the ❤️ on any product to save it here
+                {translateData('Click the ❤️ on any product to save it here')}
               </p>
-              <button style={s.emptyBtn} onClick={onClose}>Browse Products</button>
+              <button style={s.emptyBtn} onClick={onClose}>{translateData('Browse Products')}</button>
             </div>
           ) : (
             <AnimatePresence initial={false}>
@@ -188,24 +191,30 @@ export const FavoritesDrawer = ({ isOpen = true, favorites = [], onClose, onRemo
 
                     {/* Info */}
                     <div style={s.cardInfo}>
-                      <p style={s.cardName}>{product.name}</p>
-                      <p style={s.cardBrand}>{product.brand || product.categoryName || ''}</p>
+                      <p style={s.cardName}>{translateData(product.name)}</p>
+                      <p style={s.cardBrand}>{translateData(product.brand || product.categoryName || '')}</p>
                       <p style={s.cardPrice}>₹{Number(product.price || 0).toLocaleString('en-IN')}</p>
                       <p style={{
                         ...s.cardStock,
                         color: inStock ? '#059669' : '#ef4444',
                       }}>
-                        {inStock ? '✓ In Stock' : '✗ Out of Stock'}
+                        {inStock ? `✓ ${t('inStock') || translateData('In Stock')}` : `✗ ${t('outOfStock') || translateData('Out of Stock')}`}
                       </p>
 
                       <div style={s.actionRow}>
                         <button
                           style={{ ...s.cartBtn, opacity: inStock ? 1 : 0.5 }}
                           disabled={!inStock}
-                          onClick={() => onAddToCart(pId, 1)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAddToCart(pId, 1);
+                            if (onRemoveFavorite) {
+                              onRemoveFavorite(pId);
+                            }
+                          }}
                         >
                           <ShoppingCart style={{ width: 12, height: 12 }} />
-                          Add to Cart
+                          {t('addToCart') || translateData('Add to Cart')}
                         </button>
                         <button
                           style={s.removeBtn}

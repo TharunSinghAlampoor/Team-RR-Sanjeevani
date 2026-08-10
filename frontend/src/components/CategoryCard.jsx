@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Layers, Pill, Baby, Stethoscope, Sparkles, Activity } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export const formatCategoryName = (name) => {
   if (!name) return '';
@@ -31,6 +32,7 @@ const ICON_MAP = {
 };
 
 export const CategoryCard = ({ category, isSelected, onClick }) => {
+  const { translateData } = useLanguage();
   const meta = ICON_MAP[category.categoryName] || ICON_MAP[formatCategoryName(category.categoryName)] || {
     icon: Layers, color: '#64748b', bg: 'transparent', ring: '#cbd5e1',
   };
@@ -72,7 +74,7 @@ export const CategoryCard = ({ category, isSelected, onClick }) => {
       </div>
 
       {/* Name */}
-      <p className="cat-hero-card__name">{formatCategoryName(category.categoryName)}</p>
+      <p className="cat-hero-card__name">{translateData(formatCategoryName(category.categoryName))}</p>
 
       {/* Active indicator */}
       {isSelected && (

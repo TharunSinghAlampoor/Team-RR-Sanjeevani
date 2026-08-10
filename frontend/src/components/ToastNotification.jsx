@@ -2,7 +2,11 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, Heart, ShoppingBag, Trash2, X, AlertCircle } from 'lucide-react';
 
+import { useLanguage } from '../context/LanguageContext';
+
 export const ToastNotification = ({ toast, onClose }) => {
+  const { translateData } = useLanguage();
+
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => {
@@ -77,11 +81,11 @@ export const ToastNotification = ({ toast, onClose }) => {
         <div style={{ flex: 1, minWidth: 0 }}>
           {title && (
             <p style={{ margin: 0, fontSize: '1.02rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.25 }}>
-              {title}
+              {translateData(title)}
             </p>
           )}
           <p style={{ margin: '0.2rem 0 0', fontSize: '0.92rem', fontWeight: 600, color: '#334155', lineHeight: 1.4 }}>
-            {message}
+            {translateData(message)}
           </p>
         </div>
 

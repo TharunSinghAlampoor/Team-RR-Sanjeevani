@@ -1,12 +1,43 @@
-// Utility to handle browser geolocation and reverse geocoding
+// Utility to handle browser geolocation, Nominatim reverse geocoding & IP fallback for Android, iPhone, iPad, and PC
 
 export const detectUserLocation = () => {
   return new Promise((resolve, reject) => {
+    // Helper for IP-based Location Fallback (Works on PCs without GPS chips & denied permissions)
+    const fallbackToIPLocation = async (originalErrorMsg) => {
+      try {
+        const ipRes = await fetch('https://ipapi.co/json/');
+        if (ipRes.ok) {
+          const ipData = await ipRes.json();
+          if (ipData && (ipData.city || ipData.region)) {
+            resolve({
+              formattedAddress: `${ipData.city || ''}, ${ipData.region || ''}, ${ipData.country_name || 'India'} - ${ipData.postal || ''}`,
+              raw: {
+                address: {
+                  suburb: ipData.city || 'City Center',
+                  city: ipData.city || 'Hyderabad',
+                  state: ipData.region || 'Telangana',
+                  postcode: ipData.postal || '500033'
+                }
+              },
+              latitude: ipData.latitude,
+              longitude: ipData.longitude,
+              isFallback: true
+            });
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('IP location fallback error:', e);
+      }
+      reject(new Error(originalErrorMsg || 'Unable to detect location. Please enter manually.'));
+    };
+
     if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported by your browser.'));
+      fallbackToIPLocation('Geolocation is not supported by your browser.');
       return;
     }
 
+    // High Accuracy GPS detection (Optimized for Android & iPhone iOS)
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
@@ -53,8 +84,7 @@ export const detectUserLocation = () => {
             });
           }
         } catch (err) {
-          console.error('Reverse geocoding error:', err);
-          // Fallback to coordinates string
+          console.warn('Reverse geocoding error, using coordinates:', err);
           const lat = position.coords.latitude.toFixed(4);
           const lon = position.coords.longitude.toFixed(4);
           resolve({
@@ -65,24 +95,25 @@ export const detectUserLocation = () => {
         }
       },
       (error) => {
-        let msg = 'Unable to retrieve location.';
+        console.warn('GPS position error:', error.message);
+        let msg = 'Unable to retrieve GPS location.';
         if (error.code === error.PERMISSION_DENIED) {
-          msg = 'Location permission denied. Please allow location access or type your address manually.';
+          msg = 'Location permission denied.';
         } else if (error.code === error.POSITION_UNAVAILABLE) {
-          msg = 'Location information is unavailable.';
+          msg = 'GPS signal unavailable.';
         } else if (error.code === error.TIMEOUT) {
-          msg = 'Location request timed out.';
+          msg = 'GPS request timed out.';
         }
-        reject(new Error(msg));
+        fallbackToIPLocation(msg);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
     );
   });
 };
 
 export const getSavedAddress = () => {
   try {
-    return localStorage.getItem('user_shipping_address') || '';
+    return sessionStorage.getItem('user_shipping_address') || '';
   } catch {
     return '';
   }
@@ -91,9 +122,9 @@ export const getSavedAddress = () => {
 export const saveAddress = (address) => {
   try {
     if (address) {
-      localStorage.setItem('user_shipping_address', address);
+      sessionStorage.setItem('user_shipping_address', address);
     }
   } catch (e) {
-    console.error('Failed to save address to localStorage:', e);
+    console.error('Failed to save address:', e);
   }
 };

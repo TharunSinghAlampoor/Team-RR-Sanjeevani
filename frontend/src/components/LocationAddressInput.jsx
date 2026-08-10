@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Navigation, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { detectUserLocation, getSavedAddress, saveAddress } from '../utils/locationUtils';
+import { useLanguage } from '../context/LanguageContext';
 
 export const LocationAddressInput = ({
   value,
@@ -10,6 +11,7 @@ export const LocationAddressInput = ({
   placeholder = 'Enter your delivery address...',
   className = '',
 }) => {
+  const { translateData } = useLanguage();
   const [isDetecting, setIsDetecting] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
   const [statusType, setStatusType] = useState('info');
@@ -77,7 +79,7 @@ export const LocationAddressInput = ({
           }}
         >
           <MapPin style={{ width: 14, height: 14, color: '#10b981' }} />
-          <span>{label}</span>
+          <span>{translateData(label)}</span>
         </label>
 
         <motion.button
@@ -102,17 +104,17 @@ export const LocationAddressInput = ({
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
             marginLeft: 'auto',
           }}
-          title="Detect location using GPS"
+          title={translateData("Detect location using GPS")}
         >
           {isDetecting ? (
             <>
               <Loader2 style={{ width: 12, height: 12, animation: 'spin 1s linear infinite' }} />
-              <span>Detecting...</span>
+              <span>{translateData('Detecting...')}</span>
             </>
           ) : (
             <>
               <Navigation style={{ width: 12, height: 12, color: '#059669' }} />
-              <span>Detect Location</span>
+              <span>{translateData('Detect Location')}</span>
             </>
           )}
         </motion.button>

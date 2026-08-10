@@ -46,7 +46,8 @@ public class OrderService {
     }
 
     public List<OrderDto> getUserOrders(Integer userId) {
-        List<Order> orders = orderRepository.findByUserUserId(userId);
+        if (userId == null) return List.of();
+        List<Order> orders = orderRepository.findByUserUserIdOrderByCreatedAtDesc(userId);
         return orders.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
@@ -153,6 +154,8 @@ public class OrderService {
                 order.getCreatedAt(),
                 itemDtos);
 
+        dto.setUpdatedAt(order.getUpdatedAt() != null ? order.getUpdatedAt() : order.getCreatedAt());
+
         if (order.getUser() != null) {
             dto.setCustomerName(
                     order.getUser().getFullName() != null ? order.getUser().getFullName() : order.getUser().getEmail());
@@ -194,5 +197,23 @@ public class OrderService {
                 dto.getPaymentId(),
                 dto.getReferenceNumber()
         );
+    }
+
+    @Transactional
+    public OrderDto updateOrderStatus(String orderId, String newStatusStr) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AuthException("Order not found with ID: " + orderId));
+
+        if (newStatusStr != null && !newStatusStr.trim().isEmpty()) {
+            try {
+                String formatted = newStatusStr.trim().toUpperCase().replace(" ", "_");
+                OrderStatus newStatus = OrderStatus.valueOf(formatted);
+                order.setStatus(newStatus);
+                orderRepository.save(order);
+            } catch (IllegalArgumentException e) {
+                throw new AuthException("Invalid order status: " + newStatusStr);
+            }
+        }
+        return convertToDto(order);
     }
 }

@@ -1,7 +1,9 @@
 import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, CreditCard, ShieldAlert, CheckCircle2, AlertCircle, Heart, Star, ChevronRight } from 'lucide-react';
 import ProductImage from './ProductImage';
 import { resolveBrandName } from '../utils/brandUtils';
+import { useLanguage } from '../context/LanguageContext';
 
 const ProductCard = React.memo(({
   product,
@@ -14,16 +16,23 @@ const ProductCard = React.memo(({
   compact = false,
   index = 0,
 }) => {
-  const inStock = product.stock > 0;
+  if (!product) return null;
+  const { t, translateData } = useLanguage();
+
+  const inStock = Boolean(product.stock && product.stock > 0);
   const [imgError, setImgError] = useState(false);
   const [isAddedLocal, setIsAddedLocal] = useState(false);
+  const navigate = useNavigate();
 
   const handleCardClick = useCallback((e) => {
     if (e && e.stopPropagation) e.stopPropagation();
-    if (typeof onOpenDetails === 'function' && product) {
+    const targetId = product?.productId || product?.id;
+    if (typeof onOpenDetails === 'function') {
       onOpenDetails(product);
+    } else if (targetId) {
+      navigate(`/product/${targetId}`);
     }
-  }, [onOpenDetails, product]);
+  }, [onOpenDetails, product, navigate]);
 
   const handleCart = useCallback((e) => {
     e.stopPropagation();
@@ -104,24 +113,24 @@ const ProductCard = React.memo(({
       {/* Info */}
       <div className="pcard__info">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
-          <p className="pcard__brand" style={{ color: '#047857', fontWeight: 800 }}>{brandName}</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginLeft: 'auto', background: '#fffbeb', padding: '1px 6px', borderRadius: 99, border: '1px solid #fef3c7' }}>
+          <p className="pcard__brand" style={{ color: '#0369a1', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: '0.7rem' }}>{brandName}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginLeft: 'auto', background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', padding: '2px 7px', borderRadius: 99, border: '1px solid #fde68a', boxShadow: '0 1px 3px rgba(245, 158, 11, 0.12)' }}>
             <Star style={{ width: 12, height: 12, color: '#f59e0b', fill: '#f59e0b' }} />
-            <span style={{ fontSize: '0.78rem', fontWeight: 900, color: '#d97706' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 900, color: '#b45309' }}>
               {Number(product.rating || 4.5).toFixed(1)}
             </span>
           </div>
         </div>
-        <h3 className="pcard__name">{product.name}</h3>
-        <p className="pcard__desc">{product.description}</p>
+        <h3 className="pcard__name" style={{ color: '#0f172a', fontWeight: 800 }}>{translateData(product.name)}</h3>
+        <p className="pcard__desc" style={{ color: '#64748b' }}>{translateData(product.description)}</p>
       </div>
 
       {/* Price + Stock */}
-      <div className="pcard__price-row" style={{ marginTop: '0.35rem' }}>
-        <span className="pcard__price" style={{ color: '#047857', fontSize: '1.08rem', fontWeight: 900 }}>₹{Number(product.price).toLocaleString('en-IN')}</span>
+      <div className="pcard__price-row" style={{ marginTop: '0.4rem' }}>
+        <span className="pcard__price" style={{ color: '#0f766e', fontSize: '1.12rem', fontWeight: 900, letterSpacing: '-0.02em' }}>₹{Number(product.price).toLocaleString('en-IN')}</span>
         {inStock
-          ? <span className="pcard__stock pcard__stock--in" style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}><CheckCircle2 className="w-3 h-3" /> In Stock</span>
-          : <span className="pcard__stock pcard__stock--out" style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5' }}><AlertCircle className="w-3 h-3" /> Out of Stock</span>
+          ? <span className="pcard__stock pcard__stock--in" style={{ background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', color: '#047857', border: '1px solid #6ee7b7', fontWeight: 800, padding: '2px 8px', borderRadius: '0.4rem', fontSize: '0.7rem' }}><CheckCircle2 className="w-3 h-3" /> {t('inStock')}</span>
+          : <span className="pcard__stock pcard__stock--out" style={{ background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 800, padding: '2px 8px', borderRadius: '0.4rem', fontSize: '0.7rem' }}><AlertCircle className="w-3 h-3" /> {t('outOfStock')}</span>
         }
       </div>
 
@@ -133,35 +142,35 @@ const ProductCard = React.memo(({
           className="pcard__btn"
           style={{
             width: '100%',
-            padding: '0.65rem',
+            padding: '0.68rem',
             borderRadius: '0.75rem',
             fontWeight: 900,
-            fontSize: '0.85rem',
+            fontSize: '0.86rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.45rem',
             cursor: inStock ? 'pointer' : 'not-allowed',
-            transition: 'all 0.25s ease',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             background: inCartActive
-              ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-              : '#f0fdfa',
-            color: inCartActive ? '#ffffff' : '#0f766e',
-            border: inCartActive ? 'none' : '1.5px solid #99f6e4',
+              ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
+              : 'linear-gradient(135deg, #FF6B55 0%, #E63946 100%)',
+            color: '#ffffff',
+            border: 'none',
             boxShadow: inCartActive
-              ? '0 4px 14px rgba(16, 185, 129, 0.4)'
-              : '0 2px 6px rgba(15, 118, 110, 0.08)',
+              ? '0 4px 14px rgba(16, 185, 129, 0.35)'
+              : '0 4px 14px rgba(230, 57, 70, 0.35)',
           }}
         >
           {inCartActive ? (
             <>
               <CheckCircle2 style={{ width: 17, height: 17, color: '#ffffff' }} />
-              <span>✓ Added in Cart</span>
+              <span>✓ {t('addedToCart')}</span>
             </>
           ) : (
             <>
               <ShoppingCart style={{ width: 16, height: 16 }} />
-              <span>Add to Cart</span>
+              <span>{t('addToCart')}</span>
             </>
           )}
         </button>

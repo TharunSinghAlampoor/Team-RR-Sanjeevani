@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, PackageCheck, CheckCircle2, Calendar, Clock, MapPin, User, Download, Truck, AlertCircle, FileText, ChevronRight, Navigation, Phone, Mail, Send, Check, Copy, Sparkles, ShieldCheck } from 'lucide-react';
 import ProductImage from './ProductImage';
 import shopService from '../api/shopService';
+import { parseExactDate, formatExactDateTime } from '../utils/dateUtils';
 
 // Helper to load jsPDF library dynamically from CDN
 const loadJsPdf = () => {
@@ -57,10 +58,8 @@ export const downloadOrderInvoice = async (order, e) => {
     return;
   }
 
-  const createdDate = order.createdAt ? new Date(order.createdAt) : new Date();
-  const formattedDate = createdDate.toLocaleString('en-IN', {
-    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-  });
+  const createdDate = parseExactDate(order.createdAt);
+  const formattedDate = formatExactDateTime(createdDate);
 
   const customerName = order.customerName || 'Valued Customer';
   const customerEmail = order.customerEmail || 'N/A';
@@ -666,24 +665,28 @@ export const SelectedOrderDetailModal = ({ order, onClose }) => {
           <div style={detailStyles.amazonCardTitle}>
             <span>Product Details ({orderItems.length} Item{orderItems.length === 1 ? '' : 's'})</span>
           </div>
-          {orderItems.map((item, idx) => (
-            <div key={item.id || item.productId || idx} style={detailStyles.itemRow}>
-              <div style={detailStyles.imgWrap}>
-                <ProductImage src={item.productImage} alt={item.productName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          {orderItems.map((item, idx) => {
+            const itemImg = item.productImage || item.product?.imageUrl || item.imageUrl || item.image || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80';
+            const itemName = item.productName || item.product?.name || item.name || 'Healthcare Product';
+            return (
+              <div key={item.id || item.productId || idx} style={detailStyles.itemRow}>
+                <div style={detailStyles.imgWrap}>
+                  <ProductImage src={itemImg} alt={itemName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontWeight: 800, color: '#0f172a', margin: 0, fontSize: '1rem', lineHeight: 1.35 }}>
+                    {itemName}
+                  </p>
+                  <p style={{ fontSize: '0.88rem', color: '#64748b', margin: '0.25rem 0 0', fontWeight: 600 }}>
+                    Qty: {item.quantity || 1} • Unit Price: ₹{Number(item.pricePerUnit || 0).toFixed(2)}
+                  </p>
+                  <p style={{ fontSize: '1.05rem', fontWeight: 900, color: '#059669', margin: '0.35rem 0 0' }}>
+                    ₹{Number(item.totalPrice || (Number(item.pricePerUnit || 0) * (item.quantity || 1))).toFixed(2)}
+                  </p>
+                </div>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontWeight: 800, color: '#0f172a', margin: 0, fontSize: '1rem', lineHeight: 1.35 }}>
-                  {item.productName}
-                </p>
-                <p style={{ fontSize: '0.88rem', color: '#64748b', margin: '0.25rem 0 0', fontWeight: 600 }}>
-                  Qty: {item.quantity} • Unit Price: ₹{Number(item.pricePerUnit || 0).toFixed(2)}
-                </p>
-                <p style={{ fontSize: '1.05rem', fontWeight: 900, color: '#059669', margin: '0.35rem 0 0' }}>
-                  ₹{Number(item.totalPrice || 0).toFixed(2)}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* 2. Ship To (Customer Details & Delivery Address) */}
@@ -882,21 +885,81 @@ const drawerStyles = {
   },
 };
 
-export const OrdersModal = ({ orders = [], onClose, initialOrderId = null }) => {
+export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderId = null, onOrderCreated }) => {
+  if (isOpen === false) return null;
   const navigate = useNavigate();
-  // Filter out FAILED orders so only successful/valid orders are listed
-  const validOrders = orders.filter(o => o && o.status !== 'FAILED');
-
-  // Sort orders from Latest / Newest first to Oldest last
-  const sortedOrders = [...validOrders].sort((a, b) => {
-    const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-    if (timeA !== timeB) return timeB - timeA;
-
-    const idA = Number(String(a.orderId || '').replace(/[^0-9]/g, '')) || 0;
-    const idB = Number(String(b.orderId || '').replace(/[^0-9]/g, '')) || 0;
-    return idB - idA;
+  const [creatingDemo, setCreatingDemo] = useState(false);
+  const [modalOrders, setModalOrders] = useState(() => {
+    let localList = [];
+    try {
+      const stored = localStorage.getItem('sanjeevani_local_orders');
+      if (stored) localList = JSON.parse(stored);
+    } catch (e) {}
+    return (Array.isArray(orders) && orders.length > 0) ? orders : localList;
   });
+
+  React.useEffect(() => {
+    let isMounted = true;
+    if (Array.isArray(orders) && orders.length > 0) {
+      setModalOrders(orders);
+    }
+    shopService.getOrders().then(res => {
+      if (isMounted && res && res.success && Array.isArray(res.data)) {
+        setModalOrders(res.data);
+      }
+    }).catch(() => {});
+    return () => { isMounted = false; };
+  }, [orders]);
+
+  const handleCreateSampleOrder = async () => {
+    setCreatingDemo(true);
+    try {
+      const res = await shopService.buyNow({
+        productId: 1,
+        quantity: 1,
+        shippingAddress: 'Flat 402, Block A, Jubilee Hills, Hyderabad - 500033'
+      });
+      if (res && res.success) {
+        if (onOrderCreated) {
+          await onOrderCreated();
+        }
+        const updated = await shopService.getOrders();
+        if (updated && updated.success && Array.isArray(updated.data)) {
+          setModalOrders(updated.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to create demo order:', err);
+    } finally {
+      setCreatingDemo(false);
+    }
+  };
+
+  // Deduplicate and sort orders from Latest / Newest first (top) to Oldest last (bottom)
+  const sortedOrders = React.useMemo(() => {
+    const listToUse = Array.isArray(modalOrders) && modalOrders.length > 0 ? modalOrders : (Array.isArray(orders) ? orders : []);
+    if (!listToUse.length) return [];
+
+    const uniqueMap = new Map();
+    listToUse.forEach(o => {
+      if (!o) return;
+      if (String(o.status || '').toUpperCase() === 'FAILED') return;
+      const key = String(o.orderId || o.id || Math.random()).trim().toLowerCase();
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, o);
+      }
+    });
+
+    return Array.from(uniqueMap.values()).sort((a, b) => {
+      const timeA = parseExactDate(a.createdAt).getTime();
+      const timeB = parseExactDate(b.createdAt).getTime();
+      if (timeA !== timeB) return timeB - timeA; // Newest first
+
+      const idA = Number(String(a.orderId || a.id || '').replace(/[^0-9]/g, '')) || 0;
+      const idB = Number(String(b.orderId || b.id || '').replace(/[^0-9]/g, '')) || 0;
+      return idB - idA; // Higher order number first
+    });
+  }, [modalOrders, orders]);
 
   const [selectedOrderForDetail, setSelectedOrderForDetail] = useState(() => {
     if (initialOrderId) {
@@ -956,14 +1019,50 @@ export const OrdersModal = ({ orders = [], onClose, initialOrderId = null }) => 
           {/* Orders Scrollable Drawer Body */}
           <div style={drawerStyles.scrollArea}>
             {sortedOrders.length === 0 ? (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem 1rem', textAlign: 'center', color: '#94a3b8' }}>
-                <PackageCheck style={{ width: 64, height: 64, strokeWidth: 1.5, margin: '0 auto 1rem', color: '#cbd5e1' }} />
-                <p style={{ fontSize: '1rem', fontWeight: 900, color: '#475569', margin: 0 }}>No Placed Orders Found</p>
-                <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0.4rem 0 0' }}>Your successful orders will automatically show up here.</p>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 1rem', textAlign: 'center', color: '#94a3b8' }}>
+                <PackageCheck style={{ width: 58, height: 58, strokeWidth: 1.5, margin: '0 auto 0.85rem', color: '#a7f3d0' }} />
+                <p style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.25rem' }}>No Placed Orders Found</p>
+                <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1.35rem', maxWidth: 300, lineHeight: 1.45 }}>
+                  You haven't placed any orders on this account yet. Place an order or generate a test order below.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', width: '100%', maxWidth: 280 }}>
+                  <button
+                    onClick={handleCreateSampleOrder}
+                    disabled={creatingDemo}
+                    style={{
+                      padding: '0.75rem 1.25rem', borderRadius: '0.75rem',
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: '#ffffff', fontWeight: 900, fontSize: '0.86rem', border: 'none',
+                      cursor: creatingDemo ? 'wait' : 'pointer',
+                      boxShadow: '0 4px 14px rgba(16,185,129,0.35)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem'
+                    }}
+                  >
+                    <Sparkles style={{ width: 16, height: 16 }} />
+                    <span>{creatingDemo ? 'Creating Test Order...' : '⚡ Place Quick Test Order'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      onClose();
+                      const el = document.getElementById('products-catalog-section');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    style={{
+                      padding: '0.65rem 1.25rem', borderRadius: '0.75rem',
+                      background: '#ffffff', border: '1.5px solid #cbd5e1',
+                      color: '#334155', fontWeight: 800, fontSize: '0.82rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    🛍️ Explore Sanjeevani Store
+                  </button>
+                </div>
               </div>
             ) : (
               sortedOrders.map((order, idx) => {
-                const createdDate = order.createdAt ? new Date(order.createdAt) : new Date();
+                const createdDate = parseExactDate(order.createdAt);
                 const deliveryAddress = order.shippingAddress || 'Flat 402, Block A, Jubilee Hills, Hyderabad - 500033';
 
                 return (
@@ -986,7 +1085,8 @@ export const OrdersModal = ({ orders = [], onClose, initialOrderId = null }) => 
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedOrderForDetail(order);
+                      onClose();
+                      navigate(`/track-order/${order.orderId}`);
                     }}
                   >
                     {/* Top Accent Line */}
@@ -1020,80 +1120,38 @@ export const OrdersModal = ({ orders = [], onClose, initialOrderId = null }) => 
                         <span style={{ fontSize: '1.08rem', fontWeight: 900, color: '#059669', display: 'block', letterSpacing: '-0.02em' }}>
                           ₹{Number(order.totalAmount || 0).toFixed(2)}
                         </span>
-                        <motion.button
-                          whileHover={{ scale: 1.06, background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', color: '#ffffff' }}
-                          whileTap={{ scale: 0.95 }}
-                          style={{
-                            marginTop: '0.3rem', padding: '0.25rem 0.65rem', borderRadius: '0.5rem',
-                            border: '1.5px solid #7dd3fc', background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', color: '#0284c7',
-                            fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer',
-                            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-                            transition: 'all 0.2s ease',
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedOrderForDetail(order);
-                          }}
-                        >
-                          <span>Details</span>
-                          <ChevronRight style={{ width: 12, height: 12 }} />
-                        </motion.button>
                       </div>
                     </div>
 
                     {/* Purchased Items Thumbnails */}
                     <div style={{ padding: '0.45rem 1rem', background: '#fafafa', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '0.5rem', overflowX: 'auto' }}>
-                      {(order.items || []).map((item, idx) => (
-                        <motion.div
-                          key={idx}
-                          whileHover={{ scale: 1.04, borderColor: '#10b981', background: '#ecfdf5' }}
-                          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', padding: '0.28rem 0.6rem', borderRadius: '0.55rem', border: '1.5px solid #e2e8f0', flexShrink: 0, transition: 'all 0.2s ease' }}
-                        >
-                          <div style={{ width: 24, height: 24, flexShrink: 0, background: '#ecfdf5', borderRadius: '0.35rem', padding: '0.1rem', border: '1px solid #a7f3d0' }}>
-                            <ProductImage src={item.productImage} alt={item.productName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                          </div>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a', maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {item.productName} <span style={{ color: '#059669', fontWeight: 900 }}>(x{item.quantity})</span>
-                          </span>
-                        </motion.div>
-                      ))}
+                      {(order.items || []).map((item, itemIdx) => {
+                        const itemImg = item.productImage || item.product?.imageUrl || item.imageUrl || item.image || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80';
+                        const itemName = item.productName || item.product?.name || item.name || 'Healthcare Item';
+                        return (
+                          <motion.div
+                            key={itemIdx}
+                            whileHover={{ scale: 1.04, borderColor: '#10b981', background: '#ecfdf5' }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', padding: '0.28rem 0.6rem', borderRadius: '0.55rem', border: '1.5px solid #e2e8f0', flexShrink: 0, transition: 'all 0.2s ease' }}
+                          >
+                            <div style={{ width: 24, height: 24, flexShrink: 0, background: '#ecfdf5', borderRadius: '0.35rem', padding: '0.1rem', border: '1px solid #a7f3d0' }}>
+                              <ProductImage src={itemImg} alt={itemName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            </div>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a', maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {itemName} <span style={{ color: '#059669', fontWeight: 900 }}>(x{item.quantity || 1})</span>
+                            </span>
+                          </motion.div>
+                        );
+                      })}
                     </div>
 
-                    {/* Delivery Destination & Quick PDF Invoice */}
-                    <div style={{ padding: '0.55rem 1rem', background: 'linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%)', borderTop: '1px solid #d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {/* Delivery Destination */}
+                    <div style={{ padding: '0.55rem 1rem', background: 'linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%)', borderTop: '1px solid #d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', fontSize: '0.74rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
                         <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <Navigation style={{ width: 11, height: 11, color: '#047857' }} />
                         </div>
                         <span style={{ color: '#1e293b', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>{deliveryAddress}</span>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', border: 'none', padding: '0.28rem 0.65rem', borderRadius: '0.5rem', color: '#ffffff', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)' }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onClose();
-                            navigate(`/track-order/${order.orderId}`);
-                          }}
-                          title="Open Realtime Order GPS Tracking"
-                        >
-                          <Truck style={{ width: 12, height: 12 }} />
-                          <span>Track Order</span>
-                        </motion.button>
-
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', padding: '0.28rem 0.65rem', borderRadius: '0.5rem', color: '#ffffff', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)' }}
-                          onClick={(e) => downloadOrderInvoice(order, e)}
-                          title="Download Tax Invoice"
-                        >
-                          <Download style={{ width: 12, height: 12 }} />
-                          <span>Invoice PDF</span>
-                        </motion.button>
                       </div>
                     </div>
                   </motion.div>

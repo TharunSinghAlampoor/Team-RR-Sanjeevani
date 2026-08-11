@@ -25,13 +25,14 @@ const CATEGORIES = [
   { name: 'Skin Care', slug: 'skin-care', icon: '✨', action: 'cat_skin' },
 ];
 
-/* ── HIGH-VISIBILITY ANIMATED FULL-BODY DOCTOR ROBO (HEAD, MOVING EYES, WAVING HANDS, LEGS & FEET) ── */
-const AnimatedDoctorRoboIcon = ({ size = 46 }) => {
+/* ── VIBRANT HIGH-CONTRAST ANIMATED ROBO ICON (METALLIC SILVER HEAD, DARK CONTOURS, ELECTRIC BLUE BODY, NEON CYAN VISOR EYES) ── */
+const AnimatedDoctorRoboIcon = ({ size = 68, style = {} }) => {
+  const sizeStyle = typeof size === 'number' ? `${size}px` : size;
   return (
     <motion.div
       animate={{
-        y: [0, -4, 0],
-        rotate: [0, -2, 2, 0],
+        y: [0, -5, 0],
+        rotate: [0, -1.5, 1.5, 0],
       }}
       transition={{
         duration: 2.8,
@@ -40,101 +41,144 @@ const AnimatedDoctorRoboIcon = ({ size = 46 }) => {
       }}
       style={{
         position: 'relative',
-        width: size,
-        height: size,
+        width: sizeStyle,
+        height: sizeStyle,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
+        willChange: 'transform',
+        transform: 'translateZ(0)',
+        filter: 'drop-shadow(0 6px 16px rgba(13, 92, 117, 0.4))',
+        ...style
       }}
     >
       <svg
-        width={size}
-        height={size}
-        viewBox="0 0 54 64"
+        width="100%"
+        height="100%"
+        viewBox="0 0 100 115"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* 1. Antenna Stem & Pulsing Green Gem */}
-        <line x1="27" y1="1" x2="27" y2="7" stroke="#047857" strokeWidth="3" strokeLinecap="round" />
-        <motion.circle
-          cx="27"
-          cy="2"
-          r="3.5"
-          fill="#10b981"
-          stroke="#ffffff"
-          strokeWidth="1.2"
-          animate={{ scale: [1, 1.4, 1], opacity: [0.8, 1, 0.8] }}
-          transition={{ duration: 1.4, repeat: Infinity }}
+        <defs>
+          {/* Head Metallic Gloss Gradient with Dark Contour */}
+          <linearGradient id="roboHeadGrad" x1="20" y1="12" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="70%" stopColor="#F1F5F9" />
+            <stop offset="100%" stopColor="#CBD5E1" />
+          </linearGradient>
+
+          {/* Visor Jet-Black Glass */}
+          <linearGradient id="roboVisorGrad" x1="28" y1="20" x2="72" y2="40" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#0F172A" />
+            <stop offset="100%" stopColor="#020617" />
+          </linearGradient>
+
+          {/* High-Contrast Sanjeevani Electric Blue Body Gradient */}
+          <linearGradient id="roboBodyGrad" x1="30" y1="46" x2="70" y2="100" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#0EA5E9" />
+            <stop offset="45%" stopColor="#0284C7" />
+            <stop offset="100%" stopColor="#0369A1" />
+          </linearGradient>
+
+          {/* Chest Screen Dark Navy Gradient */}
+          <linearGradient id="roboChestGrad" x1="34" y1="56" x2="66" y2="84" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#0F172A" />
+            <stop offset="100%" stopColor="#1E293B" />
+          </linearGradient>
+
+          {/* Eye Glow Filter */}
+          <filter id="cyanGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+
+        {/* 1. TOP ANTENNAE */}
+        <line x1="33" y1="18" x2="31" y2="6" stroke="#0F172A" strokeWidth="2.8" strokeLinecap="round" />
+        <circle cx="30.5" cy="5" r="2.8" fill="#10B981" stroke="#0F172A" strokeWidth="1.2" />
+
+        <line x1="67" y1="18" x2="69" y2="6" stroke="#0F172A" strokeWidth="2.8" strokeLinecap="round" />
+        <circle cx="69.5" cy="5" r="2.8" fill="#10B981" stroke="#0F172A" strokeWidth="1.2" />
+
+        {/* 2. HELMET HEAD */}
+        {/* Helmet Shadow Base Rim */}
+        <ellipse cx="50" cy="46" rx="27" ry="6" fill="#0F172A" opacity="0.4" />
+
+        {/* High-Contrast Helmet Outer Shell with Bold Dark Stroke */}
+        <path
+          d="M 22 28 C 22 13, 78 13, 78 28 C 78 41, 68 46, 50 46 C 32 46, 22 41, 22 28 Z"
+          fill="url(#roboHeadGrad)"
+          stroke="#0F172A"
+          strokeWidth="2.2"
         />
 
-        {/* 2. Doctor Headband & Reflector Mirror */}
-        <rect x="11" y="7" width="32" height="4.5" rx="2.2" fill="#0D5C75" stroke="#047857" strokeWidth="1" />
-        <circle cx="27" cy="9.2" r="3.8" fill="#a7f3d0" stroke="#047857" strokeWidth="1.5" />
+        {/* Side Ear Caps */}
+        <rect x="18" y="23" width="4.5" height="11" rx="2" fill="#0EA5E9" stroke="#0F172A" strokeWidth="1.2" />
+        <rect x="77.5" y="23" width="4.5" height="11" rx="2" fill="#0EA5E9" stroke="#0F172A" strokeWidth="1.2" />
 
-        {/* 3. Robo Head (Bold High-Contrast Shell) */}
-        <rect x="9" y="10.5" width="36" height="24" rx="10" fill="url(#doctorHeadGradBold)" stroke="#047857" strokeWidth="2.8" />
+        {/* Dark Visor Screen */}
+        <rect x="27" y="19.5" width="46" height="21" rx="9" fill="url(#roboVisorGrad)" stroke="#38BDF8" strokeWidth="1.6" />
 
-        {/* 4. Face Plate Screen (Ultra High Contrast Dark Glass) */}
-        <rect x="13" y="14" width="28" height="16" rx="7" fill="#090D16" stroke="#10B981" strokeWidth="1.8" />
-
-        {/* 5. Animated Moving & Looking Eyes (High-Visibility Cyan Glowing LEDs) */}
+        {/* Glowing Cyan Eyes ("|" and "-") */}
         <motion.g
-          animate={{
-            x: [0, 2.5, -2.5, 0],
-            y: [0, -1, 1, 0],
-          }}
-          transition={{
-            duration: 3.6,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
+          animate={{ opacity: [1, 0.6, 1] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+          filter="url(#cyanGlow)"
         >
-          {/* Left Eye */}
-          <motion.ellipse
-            cx="21"
-            cy="21.5"
-            rx="3.5"
-            ry="3.5"
-            fill="#38BDF8"
-            animate={{ scaleY: [1, 1, 0.1, 1] }}
-            transition={{ duration: 3.4, repeat: Infinity, times: [0, 0.92, 0.96, 1] }}
-          />
-          <circle cx="22.4" cy="20.2" r="1.2" fill="#FFFFFF" />
-
-          {/* Right Eye */}
-          <motion.ellipse
-            cx="33"
-            cy="21.5"
-            rx="3.5"
-            ry="3.5"
-            fill="#38BDF8"
-            animate={{ scaleY: [1, 1, 0.1, 1] }}
-            transition={{ duration: 3.4, repeat: Infinity, times: [0, 0.92, 0.96, 1] }}
-          />
-          <circle cx="34.4" cy="20.2" r="1.2" fill="#FFFFFF" />
+          <rect x="36.5" y="24" width="4.8" height="11.8" rx="1.5" fill="#00F0FF" />
+          <rect x="48.5" y="28" width="13" height="4.5" rx="1.5" fill="#00F0FF" />
         </motion.g>
 
-        {/* 6. Cute Bright Smile */}
-        <path d="M22.5 25.5C24 27.2 29 27.2 30.5 25.5" stroke="#34D399" strokeWidth="2.2" strokeLinecap="round" />
+        {/* 3. VIBRANT HIGH-CONTRAST BODY POD */}
+        {/* Neck Pedestal Joint */}
+        <ellipse cx="50" cy="48.5" rx="12" ry="3.5" fill="#38BDF8" stroke="#0F172A" strokeWidth="1" />
 
-        {/* 7. Crisp Doctor Coat Body */}
-        <path d="M15 34 L39 34 L41 49 L13 49 Z" fill="#FFFFFF" stroke="#047857" strokeWidth="2.5" />
-        <path d="M27 34 L27 49" stroke="#059669" strokeWidth="2" strokeDasharray="2.5 2.5" />
+        {/* High Contrast Blue/Teal Body */}
+        <path
+          d="M 31 50 C 27 70, 31 92, 50 98 C 69 92, 73 70, 69 50 Z"
+          fill="url(#roboBodyGrad)"
+          stroke="#0F172A"
+          strokeWidth="2"
+        />
 
-        {/* Red Cross Badge on Pocket */}
-        <rect x="29.5" y="38.5" width="7.5" height="7.5" rx="1.8" fill="#FFFFFF" stroke="#EF4444" strokeWidth="1.5" />
-        <path d="M33.25 40 V44.5 M31 42.25 H35.5" stroke="#EF4444" strokeWidth="1.8" strokeLinecap="round" />
+        {/* Bottom Base */}
+        <ellipse cx="50" cy="98" rx="12" ry="4" fill="#0284C7" stroke="#0F172A" strokeWidth="1.2" />
 
-        {/* Stethoscope Hanging round Neck */}
-        <path d="M17 33 C17 40.5, 37 40.5, 37 33" stroke="#F43F5E" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-        <circle cx="27" cy="42" r="2.8" fill="#EAB308" stroke="#047857" strokeWidth="1.2" />
+        {/* 4. CHEST DISPLAY SCREEN */}
+        <rect x="33" y="55" width="34" height="27" rx="7.5" fill="url(#roboChestGrad)" stroke="#38BDF8" strokeWidth="1.5" />
 
-        {/* 8. ANIMATED WAVING LEFT HAND */}
+        {/* 4 Glowing White LED Dots */}
         <motion.g
-          style={{ transformOrigin: '14px 35px' }}
+          animate={{ opacity: [0.85, 1, 0.85] }}
+          transition={{ duration: 1.8, repeat: Infinity }}
+        >
+          <circle cx="40.5" cy="63" r="2.3" fill="#00F0FF" />
+          <circle cx="46.8" cy="63" r="2.3" fill="#00F0FF" />
+          <circle cx="53.2" cy="63" r="2.3" fill="#00F0FF" />
+          <circle cx="59.5" cy="63" r="2.3" fill="#00F0FF" />
+        </motion.g>
+
+        {/* "HELP" Text */}
+        <text
+          x="50"
+          y="76"
+          textAnchor="middle"
+          fill="#FFFFFF"
+          fontSize="6.8"
+          fontWeight="900"
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+          letterSpacing="0.8"
+        >
+          HELP
+        </text>
+
+        {/* 5. ARMS & HANDS WITH HIGH CONTRAST OUTLINES */}
+        {/* RIGHT ARM (Viewer's Left) - WAVING HAND 👋 */}
+        <motion.g
+          style={{ transformOrigin: '31px 54px' }}
           animate={{
-            rotate: [0, 24, -10, 24, 0],
+            rotate: [0, 20, -8, 20, 0],
           }}
           transition={{
             duration: 2.2,
@@ -142,17 +186,40 @@ const AnimatedDoctorRoboIcon = ({ size = 46 }) => {
             ease: 'easeInOut',
           }}
         >
-          {/* Left Arm */}
-          <path d="M14 36 L6 27" stroke="#047857" strokeWidth="3.5" strokeLinecap="round" />
-          {/* Left Hand Knob */}
-          <circle cx="5" cy="26" r="3.8" fill="#10B981" stroke="#FFFFFF" strokeWidth="1.5" />
+          <path
+            d="M 31 54 C 23 50, 15 44, 12 34"
+            stroke="#FFFFFF"
+            strokeWidth="5.5"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M 31 54 C 23 50, 15 44, 12 34"
+            stroke="#0F172A"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <circle cx="12" cy="34" r="3" fill="#0EA5E9" stroke="#0F172A" strokeWidth="1" />
+
+          {/* Waving Palm & Fingers */}
+          <circle cx="10" cy="28" r="3.5" fill="#FFFFFF" stroke="#0F172A" strokeWidth="1.2" />
+          <path d="M 12 30 L 16 28" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" />
+          <path d="M 12 30 L 16 28" stroke="#0F172A" strokeWidth="1" strokeLinecap="round" />
+          <path d="M 10 26 L 8 19" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 10 26 L 8 19" stroke="#0F172A" strokeWidth="1" strokeLinecap="round" />
+          <path d="M 8 27 L 4 20" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 8 27 L 4 20" stroke="#0F172A" strokeWidth="1" strokeLinecap="round" />
+          <path d="M 6 29 L 1 23" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 6 29 L 1 23" stroke="#0F172A" strokeWidth="1" strokeLinecap="round" />
+          <path d="M 6 31 L 2 27" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" />
         </motion.g>
 
-        {/* 9. ANIMATED RIGHT HAND (Holding Prescription Pad) */}
+        {/* LEFT ARM (Viewer's Right) - GESTURING OUT */}
         <motion.g
-          style={{ transformOrigin: '40px 35px' }}
+          style={{ transformOrigin: '69px 54px' }}
           animate={{
-            rotate: [0, -8, 8, 0],
+            rotate: [0, -5, 5, 0],
           }}
           transition={{
             duration: 2.8,
@@ -160,42 +227,30 @@ const AnimatedDoctorRoboIcon = ({ size = 46 }) => {
             ease: 'easeInOut',
           }}
         >
-          {/* Right Arm */}
-          <path d="M40 36 L47 41" stroke="#047857" strokeWidth="3.5" strokeLinecap="round" />
-          {/* Right Hand Knob */}
-          <circle cx="48" cy="42" r="3.5" fill="#10B981" stroke="#FFFFFF" strokeWidth="1.5" />
-          {/* Mini Rx Prescription Pad */}
-          <rect x="46" y="37" width="7" height="9" rx="1.2" fill="#FEF08A" stroke="#047857" strokeWidth="1.2" />
-          <line x1="47.5" y1="39.5" x2="51.5" y2="39.5" stroke="#047857" strokeWidth="1" />
-          <line x1="47.5" y1="42.5" x2="51.5" y2="42.5" stroke="#047857" strokeWidth="1" />
-        </motion.g>
+          <path
+            d="M 69 54 C 77 56, 84 62, 87 70"
+            stroke="#FFFFFF"
+            strokeWidth="5.5"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M 69 54 C 77 56, 84 62, 87 70"
+            stroke="#0F172A"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <circle cx="87" cy="70" r="3" fill="#0EA5E9" stroke="#0F172A" strokeWidth="1" />
 
-        {/* 10. ANIMATED LEGS & FEET */}
-        {/* Left Leg */}
-        <motion.g
-          animate={{ y: [0, -1.8, 0] }}
-          transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <rect x="19" y="49" width="5.5" height="8.5" rx="2" fill="#0D5C75" stroke="#047857" strokeWidth="1" />
-          <rect x="16" y="56.5" width="10" height="5" rx="2.5" fill="#10B981" stroke="#FFFFFF" strokeWidth="1.2" />
+          <circle cx="91" cy="73" r="3.5" fill="#FFFFFF" stroke="#0F172A" strokeWidth="1.2" />
+          <path d="M 93 71 L 98 69" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 93 71 L 98 69" stroke="#0F172A" strokeWidth="1" strokeLinecap="round" />
+          <path d="M 94 74 L 99 73" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 94 74 L 99 73" stroke="#0F172A" strokeWidth="1" strokeLinecap="round" />
+          <path d="M 93 76 L 97 77" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 91 76 L 94 80" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" />
         </motion.g>
-
-        {/* Right Leg */}
-        <motion.g
-          animate={{ y: [0, 1.8, 0] }}
-          transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <rect x="29.5" y="49" width="5.5" height="8.5" rx="2" fill="#0D5C75" stroke="#047857" strokeWidth="1" />
-          <rect x="28" y="56.5" width="10" height="5" rx="2.5" fill="#10B981" stroke="#FFFFFF" strokeWidth="1.2" />
-        </motion.g>
-
-        <defs>
-          <linearGradient id="doctorHeadGradBold" x1="9" y1="10.5" x2="45" y2="34.5" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FFFFFF" />
-            <stop offset="0.6" stopColor="#F1F5F9" />
-            <stop offset="1" stopColor="#CBD5E1" />
-          </linearGradient>
-        </defs>
       </svg>
     </motion.div>
   );
@@ -309,7 +364,6 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
         quickReplies: [
           { label: 'Find Medicines & Categories', action: 'show_categories' },
           { label: 'Track My Order', action: 'track_order' },
-          { label: 'Upload Prescription', action: 'upload_rx' },
           { label: 'Return & Refund Policy', action: 'return_policy' },
           { label: 'Offers & Discounts', action: 'offers' }
         ]
@@ -497,22 +551,6 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
         };
       }
     }
-    // Prescription Upload
-    else if (
-      q.includes('prescription') || q.includes('rx') || q.includes('doctor note') || q.includes('upload') ||
-      q.includes('प्रिस्क्रिप्शन') || q.includes('पर्चा') || q.includes('अपलोड') ||
-      q.includes('ప్రిస్క్రిప్షన్') || q.includes('అప్‌లోడ్') ||
-      q.includes('ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್') || q.includes('ಅಪ್‌ಲೋಡ್')
-    ) {
-      botResponse.text = 'You can upload your Doctor Prescription PDF or Image easily! Our licensed Sanjeevani Pharmacists will verify and prepare your exact medication order.';
-      botResponse.actionBtn = {
-        label: 'Upload Prescription Now',
-        onClick: () => {
-          setIsOpen(false);
-          if (onOpenPrescriptionModal) onOpenPrescriptionModal();
-        }
-      };
-    }
     // Return & Refund Policy
     else if (
       q.includes('return') || q.includes('refund') || q.includes('replace') || q.includes('cancel') ||
@@ -631,30 +669,52 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
     <>
       {/* ── FLOATING SANJEEVANI BRAND LOGO TRIGGER BUTTON (TRANSPARENT, LARGER ROBO AVATAR) ──────── */}
       {!isOpen && (
-        <motion.button
-          onClick={() => setIsOpen(true)}
+        <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          whileHover={{ scale: 1.12 }}
-          whileTap={{ scale: 0.92 }}
-          className="sanjeevani-bot-fab"
-          title="Open SANJEEVANI AI Assistant"
+          className="sanjeevani-bot-fab-container"
           style={{
             position: 'fixed',
-            bottom: '90px',
-            right: '28px',
             zIndex: 9999,
-            background: 'none',
-            border: 'none',
-            outline: 'none',
-            padding: 0,
-            cursor: 'pointer',
-            filter: 'none',
+            pointerEvents: 'auto',
           }}
         >
-          {/* Standalone Animated Doctor Robo Logo Character (Clean without background or name) */}
-          <AnimatedDoctorRoboIcon size={54} />
-        </motion.button>
+          {/* Compact Floating Robo Icon Trigger Button */}
+          <motion.button
+            onClick={() => setIsOpen(true)}
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.92 }}
+            className="sanjeevani-bot-fab"
+            title="Open SANJEEVANI AI Assistant"
+            style={{
+              background: 'linear-gradient(135deg, #0D5C75 0%, #059669 100%)',
+              borderRadius: '50%',
+              padding: '6px',
+              border: '2px solid #FFFFFF',
+              boxShadow: '0 8px 24px rgba(13, 92, 117, 0.4), 0 3px 10px rgba(5, 150, 105, 0.3)',
+              outline: 'none',
+              cursor: 'pointer',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {/* Soft Glowing Pulsing Radial Backlight Ring */}
+            <span
+              style={{
+                position: 'absolute',
+                inset: '-4px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(16,185,129,0.35) 0%, rgba(13,92,117,0) 75%)',
+                animation: 'pulse 2.2s infinite',
+                pointerEvents: 'none',
+              }}
+            />
+            {/* Compact High-Contrast Robo Character Icon */}
+            <AnimatedDoctorRoboIcon size="clamp(42px, 5vw, 54px)" />
+          </motion.button>
+        </motion.div>
       )}
 
       {/* ── SANJEEVANI BOT CHAT DIALOG / DRAWER ────────────────────────── */}
@@ -695,7 +755,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
               boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <AnimatedDoctorRoboIcon size={30} />
+                <AnimatedDoctorRoboIcon size={32} />
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.35rem', letterSpacing: '0.5px' }}>
                     SANJEEVANI
@@ -991,12 +1051,9 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
       {/* ── RESPONSIVE ALIGNMENT STYLES (Android, iPhone, Tablet, PC) ────── */}
       <style>{`
         @media (max-width: 480px) {
-          .sanjeevani-bot-fab {
-            bottom: 76px !important;
-            right: 16px !important;
-            background: none !important;
-            border: none !important;
-            padding: 0 !important;
+          .sanjeevani-bot-fab-container {
+            bottom: 72px !important;
+            right: 14px !important;
           }
           .sanjeevani-bot-window {
             bottom: 8px !important;
@@ -1005,34 +1062,34 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
             width: auto !important;
             max-width: calc(100vw - 16px) !important;
             height: calc(100vh - 75px) !important;
-            max-height: 570px !important;
+            max-height: 580px !important;
             border-radius: 16px !important;
           }
         }
 
         @media (min-width: 481px) and (max-width: 1024px) {
-          .sanjeevani-bot-fab {
-            bottom: 84px !important;
-            right: 22px !important;
+          .sanjeevani-bot-fab-container {
+            bottom: 80px !important;
+            right: 20px !important;
           }
           .sanjeevani-bot-window {
             bottom: 20px !important;
             right: 20px !important;
-            width: 380px !important;
-            height: 575px !important;
+            width: 390px !important;
+            height: 580px !important;
           }
         }
 
         @media (min-width: 1025px) {
-          .sanjeevani-bot-fab {
-            bottom: 90px !important;
-            right: 28px !important;
+          .sanjeevani-bot-fab-container {
+            bottom: 88px !important;
+            right: 26px !important;
           }
           .sanjeevani-bot-window {
             bottom: 24px !important;
             right: 24px !important;
-            width: 410px !important;
-            height: 600px !important;
+            width: 420px !important;
+            height: 610px !important;
           }
         }
       `}</style>

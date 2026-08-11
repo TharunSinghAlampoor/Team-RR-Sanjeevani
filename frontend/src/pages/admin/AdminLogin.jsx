@@ -209,10 +209,6 @@ export function AdminLogin() {
                   </>
                 )}
               </button>
-
-              <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: '#64748b' }}>
-                Demo Admin Account: <strong style={{ color: '#059669' }}>admin@sanjeevani.com</strong> / <strong style={{ color: '#059669' }}>Admin@1234</strong>
-              </div>
             </form>
           </motion.div>
         </div>

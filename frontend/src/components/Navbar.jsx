@@ -53,7 +53,7 @@ export const Navbar = ({
         setShowProfileDropdown(false);
       }
     };
-    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('mousedown', handleClick, { passive: true });
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 

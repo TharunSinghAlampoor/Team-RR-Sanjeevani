@@ -10,7 +10,6 @@ const FOOTER_LINKS = {
   ],
   'Services': [
     { label: '24/7 Pharmacist Support', href: '#' },
-    { label: 'Prescription Upload', href: '#' },
     { label: 'Express Delivery', href: '#' },
     { label: 'Health Consultation', href: '#' },
   ],

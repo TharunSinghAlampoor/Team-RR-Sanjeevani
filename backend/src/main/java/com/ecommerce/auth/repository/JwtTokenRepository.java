@@ -25,4 +25,8 @@ public interface JwtTokenRepository extends JpaRepository<JwtToken, Integer> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM JwtToken t WHERE t.user = :user")
     int deleteByUser(@Param("user") User user);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM JwtToken t")
+    int deleteAllTokens();
 }

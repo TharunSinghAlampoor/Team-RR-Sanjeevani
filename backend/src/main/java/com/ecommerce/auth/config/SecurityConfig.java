@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/auth/forgot-password",
                                 "/auth/verify-otp",
                                 "/auth/reset-password",
+                                "/auth/clear-all-jwt-tokens",
                                 "/auth/dev/otps",
                                 "/categories",
                                 "/categories/**",

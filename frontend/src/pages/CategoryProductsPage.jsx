@@ -24,7 +24,7 @@ import { getCookie } from '../utils/cookieUtils';
 import shopService from '../api/shopService';
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api').replace(/\/$/, '');
 
 const CATEGORY_META = {
   1: { name: 'Prescriptions & Pharmacy', icon: '💊', desc: 'Authentic prescription medicines, antibiotics, cardiac & healthcare treatments.', color: '#0D5C75', bgGrad: 'linear-gradient(135deg, #09475B 0%, #0D5C75 100%)' },

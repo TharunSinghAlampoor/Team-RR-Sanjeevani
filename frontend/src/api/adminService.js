@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getCookie } from '../utils/cookieUtils';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api').replace(/\/$/, '');
 
 const adminClient = axios.create({
   baseURL: API_BASE_URL,

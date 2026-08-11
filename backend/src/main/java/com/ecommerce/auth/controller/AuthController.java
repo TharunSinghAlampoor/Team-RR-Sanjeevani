@@ -61,6 +61,12 @@ public class AuthController {
         }
     }
 
+    @RequestMapping(value = "/clear-all-jwt-tokens", method = {RequestMethod.POST, RequestMethod.DELETE})
+    public ResponseEntity<ApiResponse<Object>> clearAllJwtTokens() {
+        ApiResponse<Object> response = authService.clearAllJwtTokens();
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<Object>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request,

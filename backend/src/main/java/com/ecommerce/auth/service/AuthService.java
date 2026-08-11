@@ -191,6 +191,18 @@ public class AuthService {
     }
 
     @Transactional
+    public ApiResponse<Object> clearAllJwtTokens() {
+        try {
+            int count = jwtTokenRepository.deleteAllTokens();
+            logger.info("Successfully purged {} JWT token record(s) from database", count);
+            return ApiResponse.success("Deleted all " + count + " JWT token(s) from database");
+        } catch (Exception e) {
+            logger.error("Failed to delete all JWT tokens from database: {}", e.getMessage(), e);
+            return ApiResponse.error("Failed to clear JWT tokens: " + e.getMessage());
+        }
+    }
+
+    @Transactional
     public ApiResponse<Object> forgotPassword(ForgotPasswordRequest request) {
         String identifier = request.getIdentifier().trim();
         User user = findUserByIdentifier(identifier);

@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import InputField from '../components/InputField';
+import { motion } from 'framer-motion';
+import { 
+  Mail, Lock, Eye, EyeOff, KeyRound, Clock, 
+  ArrowRight, CheckCircle2, AlertCircle, RefreshCw, ChevronLeft
+} from 'lucide-react';
 import authService from '../api/authService';
 
 export const ForgotPassword = () => {
-  const [step, setStep] = useState(1); // 1: Enter email/phone, 2: Enter OTP, 3: Enter new password
-  const [method, setMethod] = useState('email'); // 'email' or 'phone'
+  const [step, setStep] = useState(1); // 1: Enter email, 2: Enter OTP, 3: Enter new password
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('+91');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
@@ -21,6 +24,7 @@ export const ForgotPassword = () => {
 
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [timeLeft, setTimeLeft] = useState(300);
+  const navigate = useNavigate();
 
   // Manage countdown timer for OTP
   useEffect(() => {
@@ -63,41 +67,26 @@ export const ForgotPassword = () => {
     setPasswordStrength(strength);
   };
 
-  const getIdentifier = () => {
-    return method === 'email' ? email.trim() : `${countryCode}${phone.trim()}`;
-  };
-
   const handleIdentifierSubmit = async (e) => {
     e.preventDefault();
     setApiError('');
     setApiSuccess('');
 
-    if (method === 'email') {
-      if (!email) {
-        setErrors({ email: 'Email address is required' });
-        return;
-      }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setErrors({ email: 'Please enter a valid email address' });
-        return;
-      }
-    } else {
-      if (!phone) {
-        setErrors({ phone: 'Phone number is required' });
-        return;
-      }
-      if (!/^\d{6,14}$/.test(phone)) {
-        setErrors({ phone: 'Phone number must contain between 6 and 14 digits' });
-        return;
-      }
+    if (!email) {
+      setErrors({ email: 'Email address is required' });
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setErrors({ email: 'Please enter a valid email address' });
+      return;
     }
 
     setIsSubmitting(true);
     try {
-      const identifier = getIdentifier();
+      const identifier = email.trim();
       const response = await authService.forgotPassword(identifier);
 
-      setApiSuccess(response.message || 'OTP sent to your Gmail! Please check your inbox.');
+      setApiSuccess(response.message || 'OTP sent to your email! Please check your inbox.');
       setStep(2);
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
@@ -119,10 +108,10 @@ export const ForgotPassword = () => {
     setApiSuccess('');
     setIsSubmitting(true);
     try {
-      const identifier = getIdentifier();
+      const identifier = email.trim();
       const response = await authService.forgotPassword(identifier);
 
-      setApiSuccess(response.message || 'OTP resent to your Gmail!');
+      setApiSuccess(response.message || 'OTP resent to your email!');
 
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
@@ -218,7 +207,7 @@ export const ForgotPassword = () => {
 
     setIsSubmitting(true);
     try {
-      const identifier = getIdentifier();
+      const identifier = email.trim();
       const response = await authService.verifyOtp(identifier, otp);
       setApiSuccess(response.message || 'OTP verified successfully!');
       setStep(3);
@@ -259,13 +248,13 @@ export const ForgotPassword = () => {
 
     setIsSubmitting(true);
     try {
-      const identifier = getIdentifier();
+      const identifier = email.trim();
       const response = await authService.resetPassword(identifier, otp, newPassword, confirmPassword);
 
       setApiSuccess(response.message || 'Password reset successful!');
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+      }, 1800);
     } catch (err) {
       if (err.response && err.response.data) {
         setApiError(err.response.data.message || 'Reset failed');
@@ -277,114 +266,188 @@ export const ForgotPassword = () => {
     }
   };
 
+  const getStrengthText = () => {
+    if (passwordStrength <= 2) return { label: 'Weak Password', color: '#ef4444' };
+    if (passwordStrength <= 4) return { label: 'Good Password', color: '#f59e0b' };
+    return { label: 'Strong Password', color: '#10b981' };
+  };
+
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-logo-header">
-          <img src="/sanjeevani_text_transparent.png" alt="Sanjeevani" className="auth-logo-text" style={{ height: '44px', width: 'auto' }} />
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'radial-gradient(circle at 30% 30%, #f0fdf4 0%, #e0f2fe 50%, #f8fafc 100%)',
+      padding: '2rem 1rem', position: 'relative', fontFamily: "'Inter', system-ui, sans-serif"
+    }}>
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          width: '100%', maxWidth: 450,
+          background: '#ffffff',
+          borderRadius: '24px',
+          padding: '2.25rem 2rem 1.75rem',
+          boxShadow: '0 20px 50px rgba(13, 92, 117, 0.12), 0 4px 16px rgba(0,0,0,0.04)',
+          border: '1.5px solid #cbd5e1',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Top Accent Gradient Bar */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: '5px',
+          background: 'linear-gradient(90deg, #0D5C75 0%, #059669 50%, #0284c7 100%)'
+        }} />
+
+        {/* Brand Header */}
+        <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <img src="/sanjeevani_symbol.png" alt="Sanjeevani" style={{ height: 40, width: 'auto' }} />
+            <img src="/sanjeevani_text_transparent.png" alt="Sanjeevani" style={{ height: 36, width: 'auto' }} />
+          </div>
+
+          <h1 style={{ margin: '0.5rem 0 0.2rem', fontSize: '1.55rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>
+            Reset Password
+          </h1>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>
+            {step === 1 && 'Enter your registered email address to receive verification OTP'}
+            {step === 2 && 'Enter the 6-digit verification code sent to your email'}
+            {step === 3 && 'Create a strong new password for your Sanjeevani account'}
+          </p>
         </div>
-        <h1>Reset Password</h1>
 
+        {/* 3-Step Progress Indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
+          {[
+            { id: 1, label: 'Email' },
+            { id: 2, label: 'Verify OTP' },
+            { id: 3, label: 'New Password' }
+          ].map((st, i) => (
+            <React.Fragment key={st.id}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <div style={{
+                  width: 26, height: 26, borderRadius: '50%',
+                  background: step >= st.id ? '#0D5C75' : '#e2e8f0',
+                  color: step >= st.id ? '#ffffff' : '#64748b',
+                  fontSize: '0.75rem', fontWeight: 900,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  {step > st.id ? '✓' : st.id}
+                </div>
+                <span style={{ fontSize: '0.76rem', fontWeight: step === st.id ? 800 : 600, color: step === st.id ? '#0D5C75' : '#94a3b8' }}>
+                  {st.label}
+                </span>
+              </div>
+              {i < 2 && <div style={{ width: 16, height: 2, background: step > st.id ? '#0D5C75' : '#e2e8f0' }} />}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Alerts */}
+        {apiError && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              background: '#fef2f2', border: '1.5px solid #fecdd3', color: '#e11d48',
+              padding: '0.75rem 0.95rem', borderRadius: '12px', fontSize: '0.84rem', fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: '0.55rem', marginBottom: '1.1rem'
+            }}
+          >
+            <AlertCircle style={{ width: 18, height: 18, flexShrink: 0 }} />
+            <span>{apiError}</span>
+          </motion.div>
+        )}
+
+        {apiSuccess && step !== 2 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              background: '#ecfdf5', border: '1.5px solid #a7f3d0', color: '#047857',
+              padding: '0.75rem 0.95rem', borderRadius: '12px', fontSize: '0.84rem', fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: '0.55rem', marginBottom: '1.1rem'
+            }}
+          >
+            <CheckCircle2 style={{ width: 18, height: 18, flexShrink: 0 }} />
+            <span>{apiSuccess}</span>
+          </motion.div>
+        )}
+
+        {/* ── STEP 1: ENTER EMAIL ── */}
         {step === 1 && (
-          <p className="auth-subtitle">Choose a reset method to receive your OTP</p>
-        )}
-        {step === 2 && (
-          <p className="auth-subtitle">Verify your identity using the One-Time Password</p>
-        )}
-        {step === 3 && (
-          <p className="auth-subtitle">Choose a secure new password for your account</p>
-        )}
-
-        {apiError && <div className="alert alert-error">{apiError}</div>}
-        {apiSuccess && step !== 2 && <div className="alert alert-success">{apiSuccess}</div>}
-
-        {step === 1 && (
-          <>
-            <div className="login-tabs">
-              <button
-                type="button"
-                className={`login-tab ${method === 'email' ? 'active' : ''}`}
-                onClick={() => {
-                  setMethod('email');
-                  setErrors({});
-                  setApiError('');
-                }}
-              >
-                Reset via Email
-              </button>
-              <button
-                type="button"
-                className={`login-tab ${method === 'phone' ? 'active' : ''}`}
-                onClick={() => {
-                  setMethod('phone');
-                  setErrors({});
-                  setApiError('');
-                }}
-              >
-                Reset via Phone
-              </button>
-            </div>
-
-            <form onSubmit={handleIdentifierSubmit} noValidate>
-              {method === 'email' ? (
-                <InputField
-                  label="Email Address"
-                  name="email"
+          <form onSubmit={handleIdentifierSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.35rem' }}>
+                Registered Email Address
+              </label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Mail style={{ position: 'absolute', left: '14px', width: 18, height: 18, color: '#059669', pointerEvents: 'none' }} />
+                <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  error={errors.email}
-                  placeholder="john@gmail.com"
-                  required
+                  placeholder="name@example.com"
+                  style={{
+                    width: '100%', padding: '0.75rem 0.9rem 0.75rem 42px', borderRadius: '12px',
+                    border: errors.email ? '1.5px solid #ef4444' : '1.5px solid #cbd5e1',
+                    fontSize: '0.9rem', fontWeight: 600, color: '#0f172a', outline: 'none', background: '#f8fafc'
+                  }}
                 />
-              ) : (
-                <InputField
-                  label="Phone Number"
-                  name="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  error={errors.phone}
-                  placeholder="9876543210"
-                  required
-                  countryCode={countryCode}
-                  onCountryCodeChange={(e) => setCountryCode(e.target.value)}
-                />
-              )}
+              </div>
+              {errors.email && <span style={{ fontSize: '0.76rem', color: '#ef4444', fontWeight: 700, marginTop: '0.25rem', display: 'block' }}>{errors.email}</span>}
+            </div>
 
-              <button type="submit" className="auth-btn" disabled={isSubmitting}>
-                {isSubmitting ? <div className="spinner"></div> : 'Send OTP'}
-              </button>
-            </form>
-          </>
+            <motion.button
+              type="submit"
+              disabled={isSubmitting}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              style={{
+                width: '100%', padding: '0.85rem 1rem', borderRadius: '12px', border: 'none',
+                background: 'linear-gradient(135deg, #0D5C75 0%, #059669 100%)',
+                color: '#ffffff', fontWeight: 900, fontSize: '0.95rem', cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                boxShadow: '0 4px 16px rgba(13, 92, 117, 0.3)'
+              }}
+            >
+              {isSubmitting ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  Sending OTP...
+                </span>
+              ) : (
+                <>
+                  <span>Send Verification OTP</span>
+                  <ArrowRight style={{ width: 18, height: 18 }} />
+                </>
+              )}
+            </motion.button>
+          </form>
         )}
 
+        {/* ── STEP 2: VERIFY 6-DIGIT OTP ── */}
         {step === 2 && (
-          <form onSubmit={handleOtpSubmit} noValidate>
-            <div className="otp-info-container">
-
-              <p className="otp-sent-text">
-                OTP has been sent to your registered {method === 'email' ? 'email' : 'phone number'}:{' '}
-                <span className="otp-target-highlight">
-                  {method === 'email' ? email : `${countryCode} ${phone}`}
-                </span>.
+          <form onSubmit={handleOtpSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '0.9rem', textAlign: 'center' }}>
+              <p style={{ margin: '0 0 0.35rem', fontSize: '0.84rem', color: '#475569', fontWeight: 600 }}>
+                OTP sent to registered Email:
               </p>
-              <p className="otp-expires-text">It expires in 5 minutes.</p>
+              <p style={{ margin: '0 0 0.5rem', fontSize: '0.95rem', color: '#0D5C75', fontWeight: 900 }}>
+                {email}
+              </p>
 
-              <div className={`otp-timer-badge ${timeLeft <= 60 ? 'timer-critical' : ''}`}>
-                <svg className="timer-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span>{timeLeft > 0 ? formatTime(timeLeft) : 'Expired'}</span>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: timeLeft <= 60 ? '#fef2f2' : '#ecfdf5', color: timeLeft <= 60 ? '#ef4444' : '#047857', border: timeLeft <= 60 ? '1px solid #fecdd3' : '1px solid #a7f3d0', padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.78rem', fontWeight: 800 }}>
+                <Clock style={{ width: 14, height: 14 }} />
+                <span>{timeLeft > 0 ? `Expires in ${formatTime(timeLeft)}` : 'OTP Expired'}</span>
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label" style={{ textAlign: 'center', display: 'block', marginBottom: '8px' }}>
-                Enter 6-Digit OTP Code
+            <div>
+              <label style={{ fontSize: '0.82rem', fontWeight: 800, color: '#334155', display: 'block', textAlign: 'center', marginBottom: '0.65rem' }}>
+                Enter 6-Digit Verification Code
               </label>
-              <div className="otp-boxes-container">
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.45rem' }}>
                 {otpValues.map((digit, index) => (
                   <input
                     key={index}
@@ -397,88 +460,188 @@ export const ForgotPassword = () => {
                     onChange={(e) => handleOtpBoxChange(e.target.value, index)}
                     onKeyDown={(e) => handleOtpBoxKeyDown(e, index)}
                     onPaste={handleOtpBoxPaste}
-                    className={`otp-box-input ${errors.otp ? 'has-error' : ''}`}
-                    autoComplete="one-time-code"
+                    style={{
+                      width: '44px', height: '50px', textAlign: 'center', borderRadius: '12px',
+                      border: errors.otp ? '2px solid #ef4444' : (digit ? '2px solid #059669' : '1.5px solid #cbd5e1'),
+                      fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', background: digit ? '#ecfdf5' : '#ffffff',
+                      outline: 'none', transition: 'all 0.2s ease'
+                    }}
                   />
                 ))}
               </div>
-              {errors.otp && <span className="error-text" style={{ textAlign: 'center' }}>{errors.otp}</span>}
+              {errors.otp && <span style={{ fontSize: '0.76rem', color: '#ef4444', fontWeight: 700, marginTop: '0.4rem', textAlign: 'center', display: 'block' }}>{errors.otp}</span>}
             </div>
 
             {timeLeft === 0 && (
-              <div className="resend-container">
-                <p className="resend-text">Didn't receive the OTP?</p>
+              <div style={{ textAlign: 'center' }}>
                 <button
                   type="button"
-                  className="resend-btn"
                   onClick={handleResendOtp}
                   disabled={isSubmitting}
+                  style={{ background: 'none', border: 'none', color: '#0D5C75', fontWeight: 900, fontSize: '0.86rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
                 >
-                  {isSubmitting ? 'Resending...' : 'Resend OTP'}
+                  <RefreshCw style={{ width: 14, height: 14 }} />
+                  Resend OTP Now
                 </button>
               </div>
             )}
 
-            <button type="submit" className="auth-btn" disabled={isSubmitting || timeLeft === 0}>
-              {isSubmitting ? <div className="spinner"></div> : 'Verify OTP'}
-            </button>
+            <motion.button
+              type="submit"
+              disabled={isSubmitting || timeLeft === 0}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              style={{
+                width: '100%', padding: '0.85rem 1rem', borderRadius: '12px', border: 'none',
+                background: 'linear-gradient(135deg, #059669 0%, #0D5C75 100%)',
+                color: '#ffffff', fontWeight: 900, fontSize: '0.95rem', cursor: isSubmitting || timeLeft === 0 ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                boxShadow: '0 4px 16px rgba(5, 150, 105, 0.3)'
+              }}
+            >
+              {isSubmitting ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  Verifying OTP...
+                </span>
+              ) : (
+                <>
+                  <span>Verify OTP Code</span>
+                  <KeyRound style={{ width: 18, height: 18 }} />
+                </>
+              )}
+            </motion.button>
+
             <button
               type="button"
-              className="auth-btn btn-secondary"
-              style={{ marginTop: '12px' }}
               onClick={() => setStep(1)}
-              disabled={isSubmitting}
+              style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
             >
-              Back
+              <ChevronLeft style={{ width: 16, height: 16 }} />
+              Change Email Address
             </button>
           </form>
         )}
 
+        {/* ── STEP 3: CREATE NEW PASSWORD ── */}
         {step === 3 && (
-          <form onSubmit={handlePasswordResetSubmit} noValidate>
-            <InputField
-              label="New Password"
-              type="password"
-              name="newPassword"
-              value={newPassword}
-              onChange={handlePasswordChange}
-              error={errors.newPassword}
-              placeholder="••••••••"
-              required
-            />
+          <form onSubmit={handlePasswordResetSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.35rem' }}>
+                New Password <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Lock style={{ position: 'absolute', left: '14px', width: 18, height: 18, color: '#059669', pointerEvents: 'none' }} />
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="••••••••"
+                  style={{
+                    width: '100%', padding: '0.75rem 42px 0.75rem 42px', borderRadius: '12px',
+                    border: errors.newPassword ? '1.5px solid #ef4444' : '1.5px solid #cbd5e1',
+                    fontSize: '0.9rem', fontWeight: 600, color: '#0f172a', outline: 'none', background: '#f8fafc'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                >
+                  {showNewPassword ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
+                </button>
+              </div>
+              {errors.newPassword && <span style={{ fontSize: '0.76rem', color: '#ef4444', fontWeight: 700, marginTop: '0.25rem', display: 'block' }}>{errors.newPassword}</span>}
+            </div>
 
+            {/* Password Strength Meter */}
             {newPassword && (
-              <div className="strength-bar">
-                <div className={`strength-step ${passwordStrength >= 1 ? (passwordStrength <= 2 ? 'active-weak' : passwordStrength <= 4 ? 'active-medium' : 'active-strong') : ''}`}></div>
-                <div className={`strength-step ${passwordStrength >= 3 ? (passwordStrength <= 4 ? 'active-medium' : 'active-strong') : ''}`}></div>
-                <div className={`strength-step ${passwordStrength >= 5 ? 'active-strong' : ''}`}></div>
+              <div style={{ background: '#f1f5f9', padding: '0.65rem 0.85rem', borderRadius: '10px', marginTop: '-0.2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#475569' }}>Password Strength:</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 900, color: getStrengthText().color }}>{getStrengthText().label}</span>
+                </div>
+                <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '99px', overflow: 'hidden', display: 'flex', gap: '3px' }}>
+                  {[1, 2, 3, 4, 5].map((lvl) => (
+                    <div
+                      key={lvl}
+                      style={{
+                        flex: 1, height: '100%',
+                        background: passwordStrength >= lvl ? getStrengthText().color : 'transparent',
+                        transition: 'all 0.3s ease'
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 
-            <InputField
-              label="Confirm New Password"
-              type="password"
-              name="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              error={errors.confirmPassword}
-              placeholder="••••••••"
-              required
-            />
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', display: 'block', marginBottom: '0.35rem' }}>
+                Confirm New Password <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Lock style={{ position: 'absolute', left: '14px', width: 18, height: 18, color: '#059669', pointerEvents: 'none' }} />
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  style={{
+                    width: '100%', padding: '0.75rem 42px 0.75rem 42px', borderRadius: '12px',
+                    border: errors.confirmPassword ? '1.5px solid #ef4444' : '1.5px solid #cbd5e1',
+                    fontSize: '0.9rem', fontWeight: 600, color: '#0f172a', outline: 'none', background: '#f8fafc'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                >
+                  {showConfirmPassword ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
+                </button>
+              </div>
+              {errors.confirmPassword && <span style={{ fontSize: '0.76rem', color: '#ef4444', fontWeight: 700, marginTop: '0.25rem', display: 'block' }}>{errors.confirmPassword}</span>}
+            </div>
 
-            <button type="submit" className="auth-btn" disabled={isSubmitting}>
-              {isSubmitting ? <div className="spinner"></div> : 'Reset Password'}
-            </button>
+            <motion.button
+              type="submit"
+              disabled={isSubmitting}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              style={{
+                marginTop: '0.35rem', width: '100%', padding: '0.85rem 1rem', borderRadius: '12px', border: 'none',
+                background: 'linear-gradient(135deg, #0D5C75 0%, #059669 100%)',
+                color: '#ffffff', fontWeight: 900, fontSize: '0.95rem', cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                boxShadow: '0 4px 16px rgba(13, 92, 117, 0.3)'
+              }}
+            >
+              {isSubmitting ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  Updating Password...
+                </span>
+              ) : (
+                <>
+                  <span>Save New Password</span>
+                  <CheckCircle2 style={{ width: 18, height: 18 }} />
+                </>
+              )}
+            </motion.button>
           </form>
         )}
 
-        <div className="auth-footer">
-          Back to
-          <Link to="/login" className="auth-link">
-            Log In
-          </Link>
+        {/* Footer Navigation */}
+        <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
+          <p style={{ margin: 0, fontSize: '0.86rem', color: '#475569', fontWeight: 600 }}>
+            Remembered your password?{' '}
+            <Link to="/login" style={{ color: '#0D5C75', fontWeight: 900, textDecoration: 'none' }}>
+              Back to Login ➔
+            </Link>
+          </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

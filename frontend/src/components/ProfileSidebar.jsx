@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, User, Mail, Phone, MapPin, Edit3, Check, Save,
   ShieldCheck, UserCheck, Package, Heart, Key, LogOut,
-  ChevronRight, Sparkles, Building, Hash, Compass, RefreshCw, Navigation, Bot
+  ChevronRight, Sparkles, Building, Hash, Compass, RefreshCw, Navigation, Bot,
+  HelpCircle, Info, BookOpen, Smartphone, Award
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { detectUserLocation } from '../utils/locationUtils';
@@ -25,6 +26,10 @@ export const ProfileSidebar = ({
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [profileMsg, setProfileMsg] = useState('');
+
+  // Info Modal states for "How to Use App" and "About App"
+  const [showHowToUseModal, setShowHowToUseModal] = useState(false);
+  const [showAboutAppModal, setShowAboutAppModal] = useState(false);
 
   // Delivery Address fields state
   const [isEditingAddress, setIsEditingAddress] = useState(false);
@@ -174,8 +179,9 @@ export const ProfileSidebar = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
+    <>
+      <AnimatePresence>
+        {isOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 2500, display: 'flex', justifyContent: 'flex-end' }}>
           {/* Backdrop Overlay (Identical to Wishlist & Orders drawers) */}
           <motion.div
@@ -663,6 +669,46 @@ export const ProfileSidebar = ({
                 </div>
                 <ChevronRight style={{ width: 16, height: 16, color: '#94a3b8' }} />
               </button>
+
+              {/* How to Use App */}
+              <button
+                onClick={() => setShowHowToUseModal(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '0.75rem 1rem', borderRadius: '0.75rem',
+                  border: '1.5px solid #e2e8f0', background: '#ffffff',
+                  color: '#0f172a', fontWeight: 800, fontSize: '0.88rem',
+                  cursor: 'pointer', transition: 'all 0.2s',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '0.5rem', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <HelpCircle style={{ width: 16, height: 16, color: '#059669' }} />
+                  </div>
+                  <span>How to Use App</span>
+                </div>
+                <ChevronRight style={{ width: 16, height: 16, color: '#94a3b8' }} />
+              </button>
+
+              {/* About App */}
+              <button
+                onClick={() => setShowAboutAppModal(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '0.75rem 1rem', borderRadius: '0.75rem',
+                  border: '1.5px solid #e2e8f0', background: '#ffffff',
+                  color: '#0f172a', fontWeight: 800, fontSize: '0.88rem',
+                  cursor: 'pointer', transition: 'all 0.2s',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '0.5rem', background: '#e0f2fe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Info style={{ width: 16, height: 16, color: '#0284c7' }} />
+                  </div>
+                  <span>About App</span>
+                </div>
+                <ChevronRight style={{ width: 16, height: 16, color: '#94a3b8' }} />
+              </button>
             </div>
 
             {/* 5. Logout Button */}
@@ -687,6 +733,221 @@ export const ProfileSidebar = ({
       </div>
     )}
   </AnimatePresence>
+
+  {/* ── HOW TO USE APP MODAL ────────────────────────────────────── */}
+  <AnimatePresence>
+    {showHowToUseModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowHowToUseModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)' }}
+          />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: 'spring', damping: 25 }}
+            style={{
+              position: 'relative', width: '100%', maxWidth: 500, maxHeight: '85vh',
+              background: '#ffffff', borderRadius: '1.25rem', overflow: 'hidden',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.3)', zIndex: 3010, display: 'flex', flexDirection: 'column'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{
+              padding: '1.1rem 1.4rem',
+              background: 'linear-gradient(135deg, #0D5C75 0%, #059669 100%)',
+              color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <BookOpen style={{ width: 22, height: 22, color: '#6ee7b7' }} />
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>How to Use Sanjeevani App</h3>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#a7f3d0' }}>Complete Step-by-Step Feature Guide</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowHowToUseModal(false)}
+                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <X style={{ width: 16, height: 16 }} />
+              </button>
+            </div>
+
+            {/* Modal Scroll Body */}
+            <div style={{ padding: '1.25rem 1.4rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+              {[
+                {
+                  step: '1',
+                  title: 'Search & Browse Products 🔍',
+                  desc: 'Search any medicine, health device, or daily wellness item by name in the top search bar or select from curated categories.'
+                },
+                {
+                  step: '2',
+                  title: 'Set Delivery Address with GPS 📍',
+                  desc: 'Add your home or work delivery address, or tap "GPS" to auto-detect your live location instantly.'
+                },
+                {
+                  step: '3',
+                  title: 'Secure Payments (UPI, Cards, COD) 💳',
+                  desc: 'Pay safely via Razorpay UPI, Credit/Debit cards, Net Banking, or choose Cash on Delivery (COD).'
+                },
+                {
+                  step: '4',
+                  title: 'Track Orders Live 🚚',
+                  desc: 'Monitor your package journey in real-time from "My Orders" right up to doorstep delivery.'
+                },
+                {
+                  step: '5',
+                  title: 'Multilingual Voice AI Assistant 🤖',
+                  desc: 'Tap the floating Sanjeevani Robo icon at the bottom right to ask questions by typing or speaking in English, Hindi, Telugu, or Kannada!'
+                }
+              ].map((item) => (
+                <div key={item.step} style={{ display: 'flex', gap: '0.9rem', background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: '0.85rem', border: '1px solid #e2e8f0' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#fff', fontWeight: 900, fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {item.step}
+                  </div>
+                  <div>
+                    <h4 style={{ margin: '0 0 0.2rem', fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>{item.title}</h4>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.45 }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ padding: '0.85rem 1.4rem', borderTop: '1px solid #e2e8f0', background: '#f8fafc', textAlign: 'right' }}>
+              <button
+                onClick={() => setShowHowToUseModal(false)}
+                style={{ padding: '0.55rem 1.25rem', borderRadius: '0.6rem', border: 'none', background: '#059669', color: '#ffffff', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+              >
+                Got It!
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+
+    {/* ── ABOUT APP MODAL ────────────────────────────────────────── */}
+    <AnimatePresence>
+      {showAboutAppModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowAboutAppModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)' }}
+          />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: 'spring', damping: 25 }}
+            style={{
+              position: 'relative', width: '100%', maxWidth: 500, maxHeight: '85vh',
+              background: '#ffffff', borderRadius: '1.25rem', overflow: 'hidden',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.3)', zIndex: 3010, display: 'flex', flexDirection: 'column'
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              padding: '1.1rem 1.4rem',
+              background: 'linear-gradient(135deg, #0D5C75 0%, #059669 100%)',
+              color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <Info style={{ width: 22, height: 22, color: '#6ee7b7' }} />
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>About Sanjeevani Store</h3>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#a7f3d0' }}>Version 2.4.0 (Official Release)</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAboutAppModal(false)}
+                style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <X style={{ width: 16, height: 16 }} />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div style={{ padding: '1.25rem 1.4rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+              {/* Mission Card */}
+              <div style={{ background: '#ecfdf5', border: '1.5px solid #a7f3d0', padding: '1rem', borderRadius: '0.85rem' }}>
+                <h4 style={{ margin: '0 0 0.4rem', fontSize: '0.95rem', fontWeight: 900, color: '#047857', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Sparkles style={{ width: 16, height: 16, color: '#059669' }} />
+                  Our Healthcare Mission
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: '#065f46', lineHeight: 1.5, fontWeight: 500 }}>
+                  Sanjeevani is India's trusted AI-driven healthcare & pharmacy application committed to providing 100% genuine, licensed medicines, healthcare equipment, and wellness products delivered straight to your doorstep with express speed.
+                </p>
+              </div>
+
+              {/* Feature Badges Grid */}
+              <div>
+                <h5 style={{ margin: '0 0 0.6rem', fontSize: '0.78rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Key Features & Assurance
+                </h5>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+                  {[
+                    { title: '100% Genuine', sub: 'Verified Manufacturers', icon: ShieldCheck, color: '#059669', bg: '#f0fdf4' },
+                    { title: '24/7 Delivery', sub: 'Express Doorstep Delivery', icon: Package, color: '#0284c7', bg: '#f0f9ff' },
+                    { title: 'Rx Verification', sub: 'Licensed Pharmacists', icon: Award, color: '#d97706', bg: '#fffbeb' },
+                    { title: 'Voice AI Assistant', sub: 'Indic Languages Support', icon: Bot, color: '#7c3aed', bg: '#f5f3ff' }
+                  ].map((feat, idx) => (
+                    <div key={idx} style={{ background: feat.bg, padding: '0.75rem 0.85rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <feat.icon style={{ width: 20, height: 20, color: feat.color, flexShrink: 0 }} />
+                      <div>
+                        <h6 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>{feat.title}</h6>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{feat.sub}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Customer Care Contact Details */}
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '0.85rem', border: '1px solid #e2e8f0' }}>
+                <h5 style={{ margin: '0 0 0.6rem', fontSize: '0.84rem', fontWeight: 900, color: '#0f172a' }}>
+                  Customer Support & Contact Info
+                </h5>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.82rem', color: '#334155' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Phone style={{ width: 14, height: 14, color: '#059669' }} />
+                    <span>Toll-Free Helpline: <strong>1800-SANJEEVANI (+91 1800-726-5338)</strong></span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Mail style={{ width: 14, height: 14, color: '#059669' }} />
+                    <span>Email Support: <strong>support@sanjeevani.com</strong></span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <MapPin style={{ width: 14, height: 14, color: '#059669' }} />
+                    <span>H.O: Sanjeevani Health Towers, Jubilee Hills, Hyderabad 500033</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ padding: '0.85rem 1.4rem', borderTop: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 600 }}>© 2026 Sanjeevani Healthcare Inc.</span>
+              <button
+                onClick={() => setShowAboutAppModal(false)}
+                style={{ padding: '0.55rem 1.25rem', borderRadius: '0.6rem', border: 'none', background: '#0D5C75', color: '#ffffff', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+              >
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  </>
   );
 };
 

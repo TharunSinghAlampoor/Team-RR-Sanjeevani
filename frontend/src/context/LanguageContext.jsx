@@ -571,13 +571,6 @@ export const LanguageProvider = ({ children }) => {
       });
     }
 
-    // 5. Trigger live background translation & force app re-render on completion
-    fetchTranslation(clean, language).then((resText) => {
-      if (resText && resText !== clean && resText !== translated) {
-        setTrVersion(v => v + 1);
-      }
-    });
-
     return translated;
   };
 

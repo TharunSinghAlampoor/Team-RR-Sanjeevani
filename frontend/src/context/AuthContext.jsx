@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     cleanLocalStorage();
-    const interval = setInterval(cleanLocalStorage, 2000);
     const loadSession = async () => {
       // 1. Try loading from sessionStorage first, then localStorage
       let localToken = sessionStorage.getItem('token') || localStorage.getItem('token');
@@ -117,7 +116,6 @@ export const AuthProvider = ({ children }) => {
 
     window.addEventListener('auth-unauthorized', handleUnauthorized);
     return () => {
-      clearInterval(interval);
       window.removeEventListener('auth-unauthorized', handleUnauthorized);
     };
   }, []);

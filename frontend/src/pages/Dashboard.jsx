@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import authService from '../api/authService';
@@ -32,6 +32,7 @@ export const Dashboard = () => {
   const { user, logout, updateShoppingState } = useAuth();
   const { language, t, translateData } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Data States
   const [categories, setCategories] = useState([]);
@@ -43,6 +44,19 @@ export const Dashboard = () => {
   const [orders, setOrders] = useState([]);
   // Toast Notification state
   const [toast, setToast] = useState(null);
+
+  // Trigger login success toast when navigated from Login page
+  useEffect(() => {
+    if (location.state?.loginSuccess) {
+      const displayName = location.state?.userName || user?.fullName || 'User';
+      setToast({
+        type: 'success',
+        title: 'Login Successful! 🎉',
+        message: `Welcome back, ${displayName}! You are logged in.`
+      });
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, user]);
   // Filter / Search
   const [searchQuery, setSearchQuery] = useState('');
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -861,6 +875,7 @@ export const Dashboard = () => {
           onOpenOrders={() => setIsOrdersOpen(true)}
           onOpenPrescriptionModal={() => setIsPrescriptionModalOpen && setIsPrescriptionModalOpen(true)}
         />
+        <ToastNotification toast={toast} onClose={() => setToast(null)} />
       </React.Suspense>
     </div>
   );

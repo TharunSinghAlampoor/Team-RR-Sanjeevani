@@ -202,12 +202,19 @@ export function CategoryProductsPage() {
 
     // 2. Normalize category name from raw URL param string (handling dashes/spaces)
     const normalizedName = formatCategoryName(rawStr.replace(/[-_]/g, ' '));
-    const metaEntry = Object.values(CATEGORY_META).find(m => m.name.toLowerCase() === normalizedName.toLowerCase());
+    const metaPair = Object.entries(CATEGORY_META).find(([k, m]) => 
+      m.name.toLowerCase() === normalizedName.toLowerCase() || 
+      toCategorySlug(m.name) === toCategorySlug(rawStr)
+    );
 
-    if (metaEntry) {
-      const catObj = categories.find(c => formatCategoryName(c.categoryName).toLowerCase() === normalizedName.toLowerCase());
+    if (metaPair) {
+      const [catIdKey, metaEntry] = metaPair;
+      const catObj = categories.find(c => 
+        formatCategoryName(c.categoryName).toLowerCase() === normalizedName.toLowerCase() || 
+        toCategorySlug(c.categoryName) === toCategorySlug(rawStr)
+      );
       return {
-        id: catObj ? catObj.categoryId : rawStr,
+        id: catObj ? catObj.categoryId : Number(catIdKey),
         ...metaEntry
       };
     }
@@ -240,27 +247,35 @@ export function CategoryProductsPage() {
       prods = prods.filter(p => {
         if (!p) return false;
 
-        // Extract category name from product
         const pCatName = p.categoryName || p.category?.categoryName || p.category?.name || '';
-        const pFormattedCatName = formatCategoryName(pCatName);
+        const pSlug = toCategorySlug(pCatName);
+        const rawSlug = toCategorySlug(categoryId);
+        const targetSlug = toCategorySlug(targetCategoryName);
 
-        // 1. Canonical formatted category name match (e.g. "Skin Care" === "Skin Care")
+        // 1. Direct slug match (e.g. "skin-care" === "skin-care")
+        if (pSlug && (pSlug === rawSlug || pSlug === targetSlug)) {
+          return true;
+        }
+
+        // 2. Canonical formatted category name match (e.g. "Skin Care" === "Skin Care")
+        const pFormattedCatName = formatCategoryName(pCatName);
         if (pFormattedCatName.toLowerCase() === targetCategoryName.toLowerCase()) {
           return true;
         }
 
-        // 2. Numeric ID match if available
+        // 3. Numeric ID match if available
         const targetCatId = Number(currentCatMeta.id);
         const pCatId = Number(p.categoryId || p.category?.categoryId);
         if (!isNaN(targetCatId) && !isNaN(pCatId) && targetCatId === pCatId) {
           return true;
         }
 
-        // 3. Substring match fallback
+        // 4. Substring match fallback
         if (pCatName && targetCategoryName) {
-          const pLower = pCatName.toLowerCase();
-          const targetLower = targetCategoryName.toLowerCase();
-          if (pLower.includes(targetLower) || targetLower.includes(pLower)) {
+          const pLower = pCatName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const targetLower = targetCategoryName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const rawLower = String(categoryId).toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (pLower.includes(targetLower) || targetLower.includes(pLower) || pLower.includes(rawLower) || rawLower.includes(pLower)) {
             return true;
           }
         }

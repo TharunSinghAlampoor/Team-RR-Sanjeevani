@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getCookie } from '../utils/cookieUtils';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api').replace(/\/$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://sanjeevani-backend-txgo.onrender.com/api').replace(/\/$/, '');
 
 const shopClient = axios.create({
   baseURL: API_BASE_URL,
@@ -9,6 +9,8 @@ const shopClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+let catalogCache = null;
 
 shopClient.interceptors.request.use(
   (config) => {
@@ -106,15 +108,21 @@ export const shopService = {
 
   // Products
   getProducts: async (params = {}) => {
+    if (!params || Object.keys(params).length === 0) {
+      if (catalogCache) return catalogCache;
+    }
     try {
       const response = await shopClient.get('/products', { params });
       if (response && response.data && (Array.isArray(response.data.data) ? response.data.data.length > 0 : (Array.isArray(response.data) && response.data.length > 0))) {
+        if (!params || Object.keys(params).length === 0) catalogCache = response.data;
         return response.data;
       }
-      return { success: true, data: FALLBACK_CATALOG };
+      catalogCache = { success: true, data: FALLBACK_CATALOG };
+      return catalogCache;
     } catch (e) {
       console.warn('Backend products API offline, using fallback catalog:', e.message);
-      return { success: true, data: FALLBACK_CATALOG };
+      catalogCache = { success: true, data: FALLBACK_CATALOG };
+      return catalogCache;
     }
   },
 

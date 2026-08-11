@@ -422,7 +422,7 @@ export function CategoryProductsPage() {
   }
 
   return (
-    <div className="dashboard-page light" style={{ minHeight: '100vh', backgroundImage: "linear-gradient(180deg, rgba(248, 250, 252, 0.45) 0%, rgba(241, 245, 249, 0.55) 100%), url('/custom_medical_bg_light.jpg')", backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
+    <div className="dashboard-page light" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e0f2fe 0%, #d1fae5 50%, #f0fdf4 100%)' }}>
       {/* Navbar */}
       <Navbar
         user={user}

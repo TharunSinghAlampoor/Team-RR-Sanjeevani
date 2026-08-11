@@ -151,8 +151,6 @@ export const Dashboard = () => {
   }, []);
 
   const fetchOrders = useCallback(async () => {
-    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
-    if (!activeToken) return;
     try {
       const res = await shopService.getOrders();
       const rawList = (res && res.success && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);

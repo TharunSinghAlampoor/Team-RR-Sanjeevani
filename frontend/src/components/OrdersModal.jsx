@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, PackageCheck, CheckCircle2, Calendar, Clock, MapPin, User, Download, Truck, AlertCircle, FileText, ChevronRight, Navigation, Phone, Mail, Send, Check, Copy, Sparkles, ShieldCheck } from 'lucide-react';
 import ProductImage from './ProductImage';
 import shopService from '../api/shopService';
-import { parseExactDate, formatExactDateTime } from '../utils/dateUtils';
+import { parseExactDate, formatExactDateTime, formatExactDateStr, formatExactTimeStr } from '../utils/dateUtils';
 
 // Helper to load jsPDF library dynamically from CDN
 const loadJsPdf = () => {
@@ -1107,11 +1107,12 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
                         <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem', fontWeight: 700 }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#047857' }}>
                             <Calendar style={{ width: 12, height: 12 }} />
-                            {createdDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {formatExactDateStr(createdDate)}
                           </span>
                           <span>•</span>
-                          <span style={{ background: '#f1f5f9', color: '#475569', padding: '0.1rem 0.45rem', borderRadius: '0.35rem', fontWeight: 700, fontSize: '0.7rem' }}>
-                            {createdDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                          <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '0.1rem 0.45rem', borderRadius: '0.35rem', fontWeight: 800, fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <Clock style={{ width: 11, height: 11 }} />
+                            {formatExactTimeStr(createdDate)}
                           </span>
                         </div>
                       </div>

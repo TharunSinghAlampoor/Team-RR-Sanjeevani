@@ -39,6 +39,7 @@ export const formatExactDateTime = (dateInput) => {
   const timeStr = d.toLocaleTimeString('en-IN', {
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
     hour12: true
   });
   return `${dateStr}, ${timeStr}`;
@@ -57,13 +58,14 @@ export const formatExactDateStr = (dateInput) => {
 };
 
 /**
- * Format Date to exact 12-hour Time string (e.g. "07:59 PM").
+ * Format Date to exact 12-hour Time string with seconds (e.g. "07:59:45 PM").
  */
 export const formatExactTimeStr = (dateInput) => {
   const d = parseExactDate(dateInput);
   return d.toLocaleTimeString('en-IN', {
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
     hour12: true
   });
 };

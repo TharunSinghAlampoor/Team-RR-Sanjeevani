@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -17,6 +17,7 @@ import OrdersModal from '../components/OrdersModal';
 import CheckoutModal from '../components/CheckoutModal';
 import SanjeevaniBot from '../components/SanjeevaniBot';
 import BrandLoader from '../components/BrandLoader';
+import ShareModal from '../components/ShareModal';
 import { resolveBrandName } from '../utils/brandUtils';
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 import { useLanguage } from '../context/LanguageContext';
@@ -34,6 +35,7 @@ export const ProductDetailsPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Cart & Drawers State
   const [cartItems, setCartItems] = useState([]);
@@ -209,6 +211,23 @@ export const ProductDetailsPage = () => {
     return () => { isMounted = false; };
   }, [productId]);
 
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await shopService.getOrders();
+      if (res && res.success && Array.isArray(res.data)) {
+        setOrders(res.data);
+      } else if (Array.isArray(res)) {
+        setOrders(res);
+      }
+    } catch (e) {
+      console.error("fetchOrders error:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
   // Load cart and favorites from localStorage
   useEffect(() => {
     try {
@@ -220,6 +239,19 @@ export const ProductDetailsPage = () => {
       console.error(e);
     }
   }, []);
+
+  // Save cart & favorites to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('sanjeevani_cart', JSON.stringify(cartItems));
+    } catch (e) {}
+  }, [cartItems]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sanjeevani_favorites', JSON.stringify(favorites));
+    } catch (e) {}
+  }, [favorites]);
 
   // Sync cart & favorites via API & cookies
 
@@ -282,12 +314,25 @@ export const ProductDetailsPage = () => {
     setFavorites(prev => prev.includes(pId) ? prev.filter(id => id !== pId) : [...prev, pId]);
   };
 
-  const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
+  const handleShare = async () => {
+    const shareTitle = `${product?.name || 'Sanjeevani Healthcare'} - Sanjeevani`;
+    const shareUrl = window.location.href;
+    const shareText = `Check out ${product?.name || 'this item'} on Sanjeevani Care!\n\n💰 Price: ₹${product?.price || ''}\n🔗 Link: ${shareUrl}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl
+        });
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
     }
+
+    setIsShareModalOpen(true);
   };
 
   const displayRating = useMemo(() => {
@@ -370,7 +415,10 @@ export const ProductDetailsPage = () => {
         onSearchChange={setSearchQuery}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenFavorites={() => setIsFavoritesOpen(true)}
-        onOpenOrders={() => setIsOrdersOpen(true)}
+        onOpenOrders={() => {
+          fetchOrders();
+          setIsOrdersOpen(true);
+        }}
         onLogout={logout}
         categories={categories}
       />
@@ -730,25 +778,25 @@ export const ProductDetailsPage = () => {
         </div>
 
         {/* ── Real Public Customer Reviews & Ratings ───────────── */}
-        <div style={{ marginTop: '2.5rem', background: '#ffffff', borderRadius: '1.25rem', border: '1.5px solid #cbd5e1', padding: '2rem', boxShadow: '0 8px 25px -4px rgba(15, 23, 42, 0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ marginTop: '2.5rem', background: '#ffffff', borderRadius: '1.25rem', border: '1.5px solid #cbd5e1', padding: '1.25rem', boxShadow: '0 8px 25px -4px rgba(15, 23, 42, 0.06)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
                 <Star style={{ width: 22, height: 22, color: '#f59e0b', fill: '#f59e0b' }} /> {t('publicReviewsTitle')}
               </h2>
-              <p style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 600, marginTop: '0.3rem', margin: 0 }}>
+              <p style={{ color: '#64748b', fontSize: '0.82rem', fontWeight: 600, marginTop: '0.25rem', margin: 0 }}>
                 {t('publicReviewsSubtitle')}
               </p>
             </div>
 
-            <div style={{ background: '#ecfdf5', border: '1px solid #6ee7b7', color: '#047857', padding: '0.4rem 0.85rem', borderRadius: '9999px', fontSize: '0.82rem', fontWeight: 800 }}>
+            <div style={{ background: '#ecfdf5', border: '1px solid #6ee7b7', color: '#047857', padding: '0.35rem 0.85rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 800 }}>
               {reviewsList.length} Public Review(s)
             </div>
           </div>
 
           {/* Write a Review Form or Submitted Notice */}
           {hasReviewed ? (
-            <div style={{ background: '#ecfdf5', border: '1.5px solid #6ee7b7', borderRadius: '1rem', padding: '1.25rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ background: '#ecfdf5', border: '1.5px solid #6ee7b7', borderRadius: '1rem', padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <CheckCircle2 style={{ width: 22, height: 22, color: '#059669', flexShrink: 0 }} />
               <div>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#047857', margin: 0 }}>{t('reviewSubmitted')}</h4>
@@ -758,8 +806,8 @@ export const ProductDetailsPage = () => {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleAddReview} style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%)', border: '1.5px solid #a7f3d0', borderRadius: '1rem', padding: '1.5rem', marginBottom: '2rem' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem', marginTop: 0 }}>
+            <form onSubmit={handleAddReview} style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%)', border: '1.5px solid #a7f3d0', borderRadius: '1rem', padding: '1.15rem', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.85rem', marginTop: 0 }}>
                 ✍️ {t('writeReview')}
               </h3>
 
@@ -769,22 +817,22 @@ export const ProductDetailsPage = () => {
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: '1rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
                 <input
                   type="text"
                   required
                   placeholder={t('yourName')}
                   value={newReviewName}
                   onChange={(e) => setNewReviewName(e.target.value)}
-                  style={{ padding: '0.65rem 1rem', borderRadius: '0.6rem', border: '1.5px solid #cbd5e1', fontSize: '0.9rem', outline: 'none', background: '#ffffff' }}
+                  style={{ padding: '0.65rem 0.9rem', borderRadius: '0.6rem', border: '1.5px solid #cbd5e1', fontSize: '0.88rem', outline: 'none', background: '#ffffff', width: '100%', boxSizing: 'border-box' }}
                 />
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#ffffff', padding: '0 0.75rem', borderRadius: '0.6rem', border: '1.5px solid #cbd5e1' }}>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b' }}>{t('rating')}:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#ffffff', padding: '0.45rem 0.75rem', borderRadius: '0.6rem', border: '1.5px solid #cbd5e1', boxSizing: 'border-box' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}>{t('rating')}:</span>
                   <select
                     value={newReviewRating}
                     onChange={(e) => setNewReviewRating(Number(e.target.value))}
-                    style={{ border: 'none', background: 'transparent', fontSize: '0.9rem', fontWeight: 800, color: '#b45309', outline: 'none', cursor: 'pointer', width: '100%' }}
+                    style={{ border: 'none', background: 'transparent', fontSize: '0.88rem', fontWeight: 800, color: '#b45309', outline: 'none', cursor: 'pointer', width: '100%' }}
                   >
                     <option value={5}>⭐⭐⭐⭐⭐ (5/5)</option>
                     <option value={4}>⭐⭐⭐⭐ (4/5)</option>
@@ -801,12 +849,12 @@ export const ProductDetailsPage = () => {
                 placeholder={t('yourComment')}
                 value={newReviewComment}
                 onChange={(e) => setNewReviewComment(e.target.value)}
-                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.6rem', border: '1.5px solid #cbd5e1', fontSize: '0.9rem', outline: 'none', resize: 'vertical', background: '#ffffff', marginBottom: '1rem' }}
+                style={{ width: '100%', padding: '0.75rem 0.9rem', borderRadius: '0.6rem', border: '1.5px solid #cbd5e1', fontSize: '0.88rem', outline: 'none', resize: 'vertical', background: '#ffffff', marginBottom: '0.85rem', boxSizing: 'border-box' }}
               />
 
               <button
                 type="submit"
-                style={{ padding: '0.7rem 1.5rem', background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', border: 'none', borderRadius: '0.6rem', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)' }}
+                style={{ padding: '0.7rem 1.5rem', background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', border: 'none', borderRadius: '0.6rem', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)', width: '100%', boxSizing: 'border-box' }}
               >
                 {t('postReview')}
               </button>
@@ -817,24 +865,24 @@ export const ProductDetailsPage = () => {
           {reviewsList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2rem 1rem', background: '#f8fafc', borderRadius: '0.85rem', border: '1px dashed #cbd5e1' }}>
               <Star style={{ width: 32, height: 32, color: '#94a3b8', margin: '0 auto 0.5rem' }} />
-              <p style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 700, margin: 0 }}>
+              <p style={{ color: '#64748b', fontSize: '0.88rem', fontWeight: 700, margin: 0 }}>
                 {t('noReviewsYet')}
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {reviewsList.map((rev) => (
-                <div key={rev.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.85rem', padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div key={rev.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.85rem', padding: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#059669', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>
+                      <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#059669', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem' }}>
                         {rev.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
                           {rev.name}
                           {rev.verified && (
-                            <span style={{ fontSize: '0.72rem', background: '#dcfce7', color: '#15803d', border: '1px solid #86efac', padding: '0.15rem 0.45rem', borderRadius: '9999px', fontWeight: 800 }}>
+                            <span style={{ fontSize: '0.7rem', background: '#dcfce7', color: '#15803d', border: '1px solid #86efac', padding: '0.12rem 0.4rem', borderRadius: '9999px', fontWeight: 800 }}>
                               ✔ Verified Purchaser
                             </span>
                           )}
@@ -843,12 +891,12 @@ export const ProductDetailsPage = () => {
                       </div>
                     </div>
 
-                    <div style={{ color: '#f59e0b', fontSize: '0.9rem', fontWeight: 800 }}>
+                    <div style={{ color: '#f59e0b', fontSize: '0.88rem', fontWeight: 800 }}>
                       {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
                     </div>
                   </div>
 
-                  <p style={{ color: '#334155', fontSize: '0.9rem', lineHeight: 1.6, margin: 0 }}>
+                  <p style={{ color: '#334155', fontSize: '0.88rem', lineHeight: 1.55, margin: 0 }}>
                     {translateData(rev.comment)}
                   </p>
                 </div>
@@ -942,13 +990,11 @@ export const ProductDetailsPage = () => {
         />
       )}
 
-      {isOrdersOpen && (
-        <OrdersModal
-          isOpen={isOrdersOpen}
-          orders={orders}
-          onClose={() => setIsOrdersOpen(false)}
-        />
-      )}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        product={product}
+      />
 
       <SanjeevaniBot
         onOpenCart={() => setIsCartOpen(true)}

@@ -27,9 +27,13 @@ export const Navbar = ({
 }) => {
   const { t, translateData } = useLanguage();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [isInternalProfileOpen, setIsInternalProfileOpen] = useState(false);
+
   const handleTriggerProfile = () => {
     if (typeof onOpenProfile === 'function') {
       onOpenProfile();
+    } else {
+      setIsInternalProfileOpen(true);
     }
   };
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
@@ -140,7 +144,7 @@ export const Navbar = ({
           {/* Categories */}
           <div style={{ position: 'relative' }} onMouseLeave={() => setShowCategoriesDropdown(false)}>
             <button
-              className="action-btn"
+              className="action-btn cat-action-btn"
               onMouseEnter={() => setShowCategoriesDropdown(true)}
               onClick={() => setShowCategoriesDropdown(v => !v)}
               title="Categories"
@@ -149,6 +153,7 @@ export const Navbar = ({
               <LayoutGrid style={{ width: 18, height: 18, color: '#059669' }} />
               <span className="nav-cat-label" style={{ fontSize: '0.82rem', fontWeight: 700, color: '#059669' }}>{t('categories') || translateData('Categories')}</span>
               <ChevronDown
+                className="nav-cat-chevron"
                 style={{
                   width: 14, height: 14, color: '#059669',
                   transition: 'transform 0.2s',
@@ -421,6 +426,14 @@ export const Navbar = ({
 
         </div>
       </div>
+
+      <ProfileSidebar
+        isOpen={isInternalProfileOpen}
+        onClose={() => setIsInternalProfileOpen(false)}
+        user={user}
+        onLogout={onLogout}
+        onOpenOrders={onOpenOrders}
+      />
     </motion.header>
   );
 };

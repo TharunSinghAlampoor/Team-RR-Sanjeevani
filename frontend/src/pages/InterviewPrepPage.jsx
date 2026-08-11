@@ -6,8 +6,10 @@ import {
   Copy, Check, ArrowLeft, Sparkles, Filter, CheckCircle2
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 
 export const InterviewPrepPage = () => {
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'frontend' | 'backend'
   const [selectedSubCategory, setSelectedSubCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,7 +85,7 @@ export const InterviewPrepPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a', fontFamily: "'Outfit', sans-serif" }}>
-      <Navbar />
+      <Navbar user={user} onLogout={logout} />
 
       <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1rem 4rem' }}>
         {/* Top Header */}

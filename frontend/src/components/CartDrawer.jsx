@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductImage from './ProductImage';
@@ -6,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 const s = {
   overlay: {
-    position: 'fixed', inset: 0, zIndex: 1000,
+    position: 'fixed', inset: 0, zIndex: 99999,
     background: 'rgba(15,23,42,0.55)',
     backdropFilter: 'blur(4px)',
     display: 'flex', justifyContent: 'flex-end',
@@ -178,7 +179,7 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
   const progress = Math.min(100, (subtotal / FREE_THRESHOLD) * 100);
   const shipping = subtotal >= FREE_THRESHOLD ? 0 : 40;
 
-  return (
+  return ReactDOM.createPortal(
     <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <motion.div
         style={s.panel}
@@ -309,7 +310,8 @@ export const CartDrawer = ({ isOpen = true, cartItems = [], onClose, onUpdateQua
           </div>
         )}
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

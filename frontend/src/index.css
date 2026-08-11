@@ -5346,9 +5346,23 @@ body:has(.dashboard-page) {
     height: 32px !important;
   }
 
-  /* Hide category text label on mobile screens */
-  .navbar-actions .nav-cat-label {
+  /* Neat Category icon button on mobile screens */
+  .navbar-actions .nav-cat-label,
+  .navbar-actions .nav-cat-chevron {
     display: none !important;
+  }
+
+  .cat-action-btn {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #ECFDF5 !important;
+    border: 1.5px solid #a7f3d0 !important;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.12) !important;
   }
 
   /* Hide username text on mobile profile avatar pill */

@@ -1,11 +1,12 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { X, Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductImage from './ProductImage';
 
 const s = {
   overlay: {
-    position: 'fixed', inset: 0, zIndex: 1000,
+    position: 'fixed', inset: 0, zIndex: 99999,
     background: 'rgba(15,23,42,0.55)',
     backdropFilter: 'blur(4px)',
     display: 'flex', justifyContent: 'flex-end',

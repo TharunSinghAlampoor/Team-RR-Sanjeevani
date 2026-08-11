@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -178,11 +179,11 @@ export const ProfileSidebar = ({
     }
   };
 
-  return (
+  return ReactDOM.createPortal(
     <>
       <AnimatePresence>
         {isOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 2500, display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999999, display: 'flex', justifyContent: 'flex-end' }}>
           {/* Backdrop Overlay (Identical to Wishlist & Orders drawers) */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -947,8 +948,9 @@ export const ProfileSidebar = ({
         </div>
       )}
     </AnimatePresence>
-  </>
-  );
+  </>,
+  document.body
+);
 };
 
 export default ProfileSidebar;

@@ -114,8 +114,6 @@ export function CategoryProductsPage() {
   }, []);
 
   const fetchOrders = useCallback(async () => {
-    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
-    if (!activeToken) return;
     try {
       const res = await shopService.getOrders();
       if (res && res.success && Array.isArray(res.data)) {
@@ -158,10 +156,10 @@ export function CategoryProductsPage() {
 
         const prodsList = prodsRes && prodsRes.success && Array.isArray(prodsRes.data)
           ? prodsRes.data
-          : Array.isArray(prodsRes) ? prodsRes : [];
+          : (Array.isArray(prodsRes) ? prodsRes : (prodsRes && Array.isArray(prodsRes.data) ? prodsRes.data : []));
         const catsList = catsRes && catsRes.success && Array.isArray(catsRes.data)
           ? catsRes.data
-          : Array.isArray(catsRes) ? catsRes : [];
+          : (Array.isArray(catsRes) ? catsRes : (catsRes && Array.isArray(catsRes.data) ? catsRes.data : []));
 
         setAllProducts(prodsList);
         setCategories(catsList);
@@ -181,8 +179,21 @@ export function CategoryProductsPage() {
 
   // Determine current active category meta
   const currentCatMeta = useMemo(() => {
-    const rawStr = String(categoryId || '').trim();
+    const rawStr = String(categoryId || '').trim().toLowerCase();
     const numId = parseInt(rawStr, 10);
+
+    // 0. All products / All categories check
+    if (rawStr === 'all' || rawStr === 'all-products' || rawStr === 'all-categories' || rawStr === '0' || rawStr === 'all products') {
+      return {
+        id: 'all-products',
+        isAll: true,
+        name: 'All Products',
+        icon: '🏪',
+        desc: 'Explore our complete catalog of authentic healthcare & medical products.',
+        color: '#0D5C75',
+        bgGrad: 'linear-gradient(135deg, #09475B 0%, #0D5C75 100%)',
+      };
+    }
 
     // 1. Direct match by numeric ID in CATEGORY_META (1 to 5)
     if (!isNaN(numId) && CATEGORY_META[numId]) {
@@ -222,37 +233,41 @@ export function CategoryProductsPage() {
     if (!prods.length) return [];
 
     const targetCategoryName = currentCatMeta.name;
+    const isAllMode = currentCatMeta.isAll || categoryId === 'all' || categoryId === 'all-products' || targetCategoryName === 'All Products';
 
-    prods = prods.filter(p => {
-      if (!p) return false;
+    // Only filter by category if NOT in All Products mode
+    if (!isAllMode) {
+      prods = prods.filter(p => {
+        if (!p) return false;
 
-      // Extract category name from product
-      const pCatName = p.categoryName || p.category?.categoryName || p.category?.name || '';
-      const pFormattedCatName = formatCategoryName(pCatName);
+        // Extract category name from product
+        const pCatName = p.categoryName || p.category?.categoryName || p.category?.name || '';
+        const pFormattedCatName = formatCategoryName(pCatName);
 
-      // 1. Canonical formatted category name match (e.g. "Skin Care" === "Skin Care")
-      if (pFormattedCatName.toLowerCase() === targetCategoryName.toLowerCase()) {
-        return true;
-      }
-
-      // 2. Numeric ID match if available
-      const targetCatId = Number(currentCatMeta.id);
-      const pCatId = Number(p.categoryId || p.category?.categoryId);
-      if (!isNaN(targetCatId) && !isNaN(pCatId) && targetCatId === pCatId) {
-        return true;
-      }
-
-      // 3. Substring match fallback
-      if (pCatName && targetCategoryName) {
-        const pLower = pCatName.toLowerCase();
-        const targetLower = targetCategoryName.toLowerCase();
-        if (pLower.includes(targetLower) || targetLower.includes(pLower)) {
+        // 1. Canonical formatted category name match (e.g. "Skin Care" === "Skin Care")
+        if (pFormattedCatName.toLowerCase() === targetCategoryName.toLowerCase()) {
           return true;
         }
-      }
 
-      return false;
-    });
+        // 2. Numeric ID match if available
+        const targetCatId = Number(currentCatMeta.id);
+        const pCatId = Number(p.categoryId || p.category?.categoryId);
+        if (!isNaN(targetCatId) && !isNaN(pCatId) && targetCatId === pCatId) {
+          return true;
+        }
+
+        // 3. Substring match fallback
+        if (pCatName && targetCategoryName) {
+          const pLower = pCatName.toLowerCase();
+          const targetLower = targetCategoryName.toLowerCase();
+          if (pLower.includes(targetLower) || targetLower.includes(pLower)) {
+            return true;
+          }
+        }
+
+        return false;
+      });
+    }
 
     // Multi-keyword search query
     if (searchQuery.trim()) {

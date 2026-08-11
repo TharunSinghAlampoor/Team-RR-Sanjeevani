@@ -6,6 +6,7 @@ import {
   Truck, Shield, RotateCcw, Package, ChevronLeft, Share2
 } from 'lucide-react';
 import ProductImage from './ProductImage';
+import ShareModal from './ShareModal';
 import { resolveBrandName } from '../utils/brandUtils';
 
 export const ProductDetailsModal = ({
@@ -19,6 +20,7 @@ export const ProductDetailsModal = ({
   onSelectProduct,
 }) => {
   const [imgError, setImgError] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   if (!product) return null;
 
@@ -35,31 +37,21 @@ export const ProductDetailsModal = ({
     const formattedPrice = `₹${Number(product.price).toLocaleString('en-IN')}`;
 
     const shareTitle = `${product.name} - Sanjeevani Medical Care`;
-    const shareText = `Check out ${product.name} on Sanjeevani Care!\n\n🏷️ Brand: ${brandName}\n💰 Price: ${formattedPrice}\n📝 ${product.description || ''}\n\n🔗 Purchase Link: ${purchaseUrl}\n🖼️ Product Image: ${imageUrl}`;
+    const shareText = `Check out ${product.name} on Sanjeevani Care!\n\n🏷️ Brand: ${brandName}\n💰 Price: ${formattedPrice}\n📝 ${product.description || ''}\n\n🔗 Purchase Link: ${purchaseUrl}`;
 
-    try {
-      if (navigator.share) {
+    if (navigator.share) {
+      try {
         await navigator.share({
           title: shareTitle,
           text: shareText,
           url: purchaseUrl,
         });
         return;
-      }
-
-      // Clipboard fallback
-      await navigator.clipboard.writeText(shareText);
-      alert(`✅ Product details & purchase link copied to clipboard!\n\n${shareText}`);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        try {
-          await navigator.clipboard.writeText(shareText);
-          alert(`✅ Product details & purchase link copied to clipboard!\n\n${shareText}`);
-        } catch {
-          alert(`${product.name}\n${purchaseUrl}`);
-        }
+      } catch (err) {
+        if (err.name === 'AbortError') return;
       }
     }
+    setIsShareOpen(true);
   };
 
   return (
@@ -262,6 +254,12 @@ export const ProductDetailsModal = ({
             </div>
           )}
         </motion.div>
+
+        <ShareModal
+          isOpen={isShareOpen}
+          onClose={() => setIsShareOpen(false)}
+          product={product}
+        />
       </motion.div>
     </AnimatePresence>
   );

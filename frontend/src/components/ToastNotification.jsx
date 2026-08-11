@@ -39,34 +39,36 @@ export const ToastNotification = ({ toast, onClose }) => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -50, x: '-50%', scale: 0.9 }}
+        initial={{ opacity: 0, y: -40, x: '-50%', scale: 0.92 }}
         animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }}
         exit={{ opacity: 0, y: -30, x: '-50%', scale: 0.9 }}
-        transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+        className="sanjeevani-toast-wrapper"
         style={{
           position: 'fixed',
-          top: '32px',
+          top: '20px',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 99999,
+          zIndex: 999999,
           background: 'rgba(255, 255, 255, 0.98)',
           backdropFilter: 'blur(16px)',
-          border: '1.5px solid rgba(16, 185, 129, 0.3)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1.5px solid rgba(16, 185, 129, 0.4)',
           borderRadius: '1.25rem',
-          padding: '1.1rem 1.6rem',
+          padding: '1rem 1.4rem',
           display: 'flex',
           alignItems: 'center',
-          gap: '1rem',
-          boxShadow: '0 16px 48px rgba(15, 23, 42, 0.18), 0 6px 20px rgba(5, 150, 105, 0.12)',
+          gap: '0.85rem',
+          boxShadow: '0 20px 50px rgba(15, 23, 42, 0.22), 0 6px 20px rgba(5, 150, 105, 0.18)',
           maxWidth: '460px',
-          width: 'calc(100% - 32px)',
+          width: 'calc(100% - 28px)',
           pointerEvents: 'auto',
         }}
       >
         {/* Badge Icon */}
         <div style={{
-          width: '44px',
-          height: '44px',
+          width: '42px',
+          height: '42px',
           borderRadius: '14px',
           background: getBadgeBg(),
           display: 'flex',
@@ -80,11 +82,11 @@ export const ToastNotification = ({ toast, onClose }) => {
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {title && (
-            <p style={{ margin: 0, fontSize: '1.02rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.25 }}>
+            <p style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.25 }}>
               {translateData(title)}
             </p>
           )}
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.92rem', fontWeight: 600, color: '#334155', lineHeight: 1.4 }}>
+          <p style={{ margin: '0.15rem 0 0', fontSize: '0.86rem', fontWeight: 700, color: '#334155', lineHeight: 1.35 }}>
             {translateData(message)}
           </p>
         </div>
@@ -94,10 +96,10 @@ export const ToastNotification = ({ toast, onClose }) => {
           onClick={onClose}
           style={{
             border: 'none',
-            background: 'rgba(241, 245, 249, 0.8)',
+            background: 'rgba(241, 245, 249, 0.9)',
             color: '#64748b',
             cursor: 'pointer',
-            padding: '0.4rem',
+            padding: '0.35rem',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
@@ -106,8 +108,18 @@ export const ToastNotification = ({ toast, onClose }) => {
             flexShrink: 0,
           }}
         >
-          <X style={{ width: 18, height: 18 }} />
+          <X style={{ width: 17, height: 17 }} />
         </button>
+
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media (max-width: 640px) {
+            .sanjeevani-toast-wrapper {
+              top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+              width: calc(100% - 24px) !important;
+              padding: 0.85rem 1.1rem !important;
+            }
+          }
+        ` }} />
       </motion.div>
     </AnimatePresence>
   );

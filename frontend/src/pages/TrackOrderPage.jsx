@@ -21,6 +21,7 @@ import CartDrawer from '../components/CartDrawer';
 import FavoritesDrawer from '../components/FavoritesDrawer';
 import OrdersModal from '../components/OrdersModal';
 import CheckoutModal from '../components/CheckoutModal';
+import BrandLoader from '../components/BrandLoader';
 
 import { useLanguage } from '../context/LanguageContext';
 
@@ -380,11 +381,8 @@ export const TrackOrderPage = () => {
           onLogout={handleLogout}
           categories={categories}
         />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center' }}>
-          <div>
-            <div style={{ width: 44, height: 44, border: '3px solid #e2e8f0', borderTopColor: '#0D5C75', borderRadius: '50%', margin: '0 auto 1rem', animation: 'spin 0.8s linear infinite' }} />
-            <p style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1A2E35' }}>Loading Package Tracking Details...</p>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '65vh', textAlign: 'center' }}>
+          <BrandLoader fullScreen={false} message="Syncing Live Package & Delivery Tracking..." />
         </div>
       </div>
     );
@@ -401,7 +399,7 @@ export const TrackOrderPage = () => {
   const totalAmount = Number(selectedOrder?.totalAmount || 0).toFixed(2);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F0FDFA', paddingBottom: '4rem', fontFamily: "'Inter', system-ui, -apple-system, sans-serif", color: '#1A2E35' }}>
+    <div className="track-order-page-wrapper" style={{ minHeight: '100vh', background: '#F0FDFA', paddingBottom: '4rem', fontFamily: "'Inter', system-ui, -apple-system, sans-serif", color: '#1A2E35', overflowX: 'hidden', width: '100%', maxWidth: '100vw' }}>
 
       {/* ── 1. DASHBOARD NAVBAR ────────────────────────────────────────────── */}
       <Navbar
@@ -915,13 +913,20 @@ export const TrackOrderPage = () => {
 
         {/* ── RESPONSIVE CSS MEDIA QUERIES (ANDROID, IPHONE, TABLET, PC) ──────────── */}
         <style dangerouslySetInnerHTML={{ __html: `
+          .track-order-page-wrapper {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+          }
           .track-order-container {
             max-width: 820px;
+            width: 100%;
             margin: 1.25rem auto 0;
             padding: 0 1rem;
             display: flex;
             flex-direction: column;
             gap: 1.15rem;
+            box-sizing: border-box;
           }
           .track-bottom-grid {
             display: grid;
@@ -935,12 +940,13 @@ export const TrackOrderPage = () => {
             text-align: center;
           }
 
-          /* Mobile & Tablet Responsive Media Queries */
+          /* Mobile, iPhone & Tablet Responsive Media Queries */
           @media (max-width: 768px) {
             .track-order-container {
               margin: 0.75rem auto 0 !important;
-              padding: 0 0.6rem !important;
+              padding: 0 0.65rem !important;
               gap: 0.85rem !important;
+              max-width: 100% !important;
             }
             .track-bottom-grid {
               grid-template-columns: 1fr !important;
@@ -953,21 +959,25 @@ export const TrackOrderPage = () => {
               padding-bottom: 0.35rem !important;
               gap: 0.5rem !important;
               -webkit-overflow-scrolling: touch;
+              max-width: 100% !important;
             }
             .track-stepper-item {
-              min-width: 60px !important;
+              min-width: 58px !important;
               flex-shrink: 0 !important;
             }
           }
 
           @media (max-width: 480px) {
             .track-card-padding {
-              padding: 1rem 0.85rem !important;
+              padding: 0.95rem 0.75rem !important;
             }
             .track-header-row {
               flex-direction: column !important;
               align-items: flex-start !important;
               gap: 0.5rem !important;
+            }
+            .track-support-grid {
+              grid-template-columns: 1fr !important;
             }
           }
         ` }} />

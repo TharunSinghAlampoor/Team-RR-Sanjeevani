@@ -162,12 +162,22 @@ export const CategorySection = ({
   onOpenDetails,
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
   const navigate = useNavigate();
   const { translateData } = useLanguage();
 
+  const getResponsivePreviewCount = () => {
+    if (typeof window === 'undefined') return 8;
+    const w = window.innerWidth;
+    if (w <= 480) return 4;
+    if (w <= 820) return 4;
+    if (w <= 1280) return 6;
+    return 8;
+  };
+
+  const [previewLimit, setPreviewLimit] = useState(getResponsivePreviewCount);
+
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => setPreviewLimit(getResponsivePreviewCount());
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -182,7 +192,6 @@ export const CategorySection = ({
   };
   const Icon = meta.icon;
 
-  const previewLimit = isMobile ? 4 : PREVIEW_COUNT;
   const displayProducts = expanded ? products : products.slice(0, previewLimit);
   const hasMore = products.length > previewLimit;
 

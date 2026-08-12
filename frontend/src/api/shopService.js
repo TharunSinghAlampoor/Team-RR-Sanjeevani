@@ -45,32 +45,38 @@ shopClient.interceptors.response.use(
 export const saveLocalOrder = (order) => {
   if (!order) return;
   try {
-    const stored = localStorage.getItem('sanjeevani_local_orders');
-    let localOrders = stored ? JSON.parse(stored) : [];
-    if (!Array.isArray(localOrders)) localOrders = [];
-    const orderId = String(order.orderId || order.id || '').trim().toLowerCase();
-    if (!orderId) return;
+    const stored1 = localStorage.getItem('sanjeevani_local_orders');
+    const stored2 = localStorage.getItem('sanjeevani_orders');
+    let localOrders1 = stored1 ? JSON.parse(stored1) : [];
+    let localOrders2 = stored2 ? JSON.parse(stored2) : [];
+    if (!Array.isArray(localOrders1)) localOrders1 = [];
+    if (!Array.isArray(localOrders2)) localOrders2 = [];
 
-    const existingIndex = localOrders.findIndex(o => String(o.orderId || o.id || '').trim().toLowerCase() === orderId);
-    if (existingIndex >= 0) {
-      localOrders[existingIndex] = { ...localOrders[existingIndex], ...order };
-    } else {
-      localOrders.unshift({
-        orderId: order.orderId || order.id || `ORD-${Math.floor(100000 + Math.random() * 900000)}`,
-        status: order.status || 'CONFIRMED',
-        createdAt: order.createdAt || new Date().toISOString(),
-        totalAmount: order.totalAmount || order.grandTotal || 499.00,
-        paymentMethod: order.paymentMethod || order.paymentMode || 'Razorpay UPI',
-        shippingAddress: order.shippingAddress || 'Flat 402, Block A, Jubilee Hills, Hyderabad - 500033',
-        customerName: order.customerName || 'Valued Customer',
-        customerPhone: order.customerPhone || '+91 98765 43210',
-        items: Array.isArray(order.items) && order.items.length > 0 ? order.items : [
-          { productId: 1, productName: 'Paracetamol 650mg Extra Strength', quantity: 2, pricePerUnit: 45.00, totalPrice: 90.00 }
-        ],
-        ...order
-      });
-    }
-    localStorage.setItem('sanjeevani_local_orders', JSON.stringify(localOrders));
+    const combinedMap = new Map();
+    [...localOrders1, ...localOrders2].forEach(o => {
+      if (o && (o.orderId || o.id)) combinedMap.set(String(o.orderId || o.id).trim().toLowerCase(), o);
+    });
+
+    const newObj = {
+      orderId: order.orderId || order.id || `ORD-${Math.floor(100000 + Math.random() * 900000)}`,
+      status: order.status || 'CONFIRMED',
+      createdAt: order.createdAt || new Date().toISOString(),
+      totalAmount: order.totalAmount || order.grandTotal || 499.00,
+      paymentMethod: order.paymentMethod || order.paymentMode || 'Razorpay UPI',
+      shippingAddress: order.shippingAddress || 'Flat 402, Block A, Jubilee Hills, Hyderabad - 500033',
+      customerName: order.customerName || 'Valued Customer',
+      customerPhone: order.customerPhone || '+91 98765 43210',
+      items: Array.isArray(order.items) && order.items.length > 0 ? order.items : [
+        { productId: 1, productName: 'Paracetamol 650mg Extra Strength', quantity: 2, pricePerUnit: 45.00, totalPrice: 90.00 }
+      ],
+      ...order
+    };
+
+    combinedMap.set(String(newObj.orderId).trim().toLowerCase(), newObj);
+    const finalArr = Array.from(combinedMap.values());
+
+    localStorage.setItem('sanjeevani_local_orders', JSON.stringify(finalArr));
+    localStorage.setItem('sanjeevani_orders', JSON.stringify(finalArr));
   } catch (e) {
     console.warn('Failed to save order to localStorage:', e);
   }
@@ -300,8 +306,13 @@ export const shopService = {
 
     let localOrders = [];
     try {
-      const stored = localStorage.getItem('sanjeevani_local_orders');
-      if (stored) localOrders = JSON.parse(stored);
+      const stored1 = localStorage.getItem('sanjeevani_local_orders');
+      const stored2 = localStorage.getItem('sanjeevani_orders');
+      let arr1 = stored1 ? JSON.parse(stored1) : [];
+      let arr2 = stored2 ? JSON.parse(stored2) : [];
+      if (!Array.isArray(arr1)) arr1 = [];
+      if (!Array.isArray(arr2)) arr2 = [];
+      localOrders = [...arr1, ...arr2];
     } catch (e) {}
 
     const combinedMap = new Map();
@@ -315,11 +326,10 @@ export const shopService = {
     });
 
     const finalOrders = Array.from(combinedMap.values());
-    if (finalOrders.length > 0) {
-      try {
-        localStorage.setItem('sanjeevani_local_orders', JSON.stringify(finalOrders));
-      } catch (e) {}
-    }
+    try {
+      localStorage.setItem('sanjeevani_local_orders', JSON.stringify(finalOrders));
+      localStorage.setItem('sanjeevani_orders', JSON.stringify(finalOrders));
+    } catch (e) {}
 
     return { success: true, data: finalOrders };
   },

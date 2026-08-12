@@ -8,4 +8,5 @@ backend/target/
 .env
 .env.local
 .idea/
+*.sql
 

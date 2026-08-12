@@ -128,9 +128,9 @@ public class AuthService {
                 || "admin@sanjeevani.com".equalsIgnoreCase(identifier)
                 || "user@sanjeevani.com".equalsIgnoreCase(identifier))) {
             User newUser = new User(
-                    "Tharun Singh Alampoor",
+                    "admin@sanjeevani.com".equalsIgnoreCase(identifier) ? "System Admin" : "Tharun Singh",
                     identifier.toLowerCase(),
-                    "+919876543212",
+                    "admin@sanjeevani.com".equalsIgnoreCase(identifier) ? "+919999999999" : "+917702173084",
                     passwordEncoder.encode(request.getPassword()),
                     "admin@sanjeevani.com".equalsIgnoreCase(identifier) ? Role.ADMIN : Role.CUSTOMER
             );

@@ -503,7 +503,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
       emoji: '🦷',
       triggers: ['tooth', 'teeth', 'dental', 'gum', 'mouth ulcer', 'oral', 'toothache', 'दांत', 'दाँत', 'పంటి', 'ಹಲ್ಲು', 'cavity', 'bad breath'],
       medicineKeywords: ['toothpaste', 'mouthwash', 'sensodyne', 'listerine', 'clove oil', 'chlorhexidine', 'orajel', 'tooth paste', 'dental gel', 'oral gel'],
-      advice: 'For toothache, Clove Oil or Ibuprofen provides temporary relief. For mouth ulcers, Orajel or Chlorhexidine mouthwash helps. Use Sensodyne for sensitive teeth. Visit a dentist for persistent dental issues.',
+      advice: '• Apply Clove Oil or take Paracetamol for toothache relief.\n• Use Orajel or Chlorhexidine mouthwash for mouth ulcers.\n• Brush with Sensodyne toothpaste for sensitive teeth.',
     },
     {
       symptomName: 'Respiratory & Asthma',

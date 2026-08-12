@@ -37,29 +37,33 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         try {
-            if (userRepository.count() == 0) {
-                logger.info("Seeding initial demo user accounts into users table...");
-                User admin = new User(
-                        "System Admin",
-                        "admin@sanjeevani.com",
-                        "+919876543210",
-                        passwordEncoder.encode("Admin@123"),
-                        Role.ADMIN
-                );
-                userRepository.save(admin);
-
-                User customer = new User(
-                        "Valued Customer",
-                        "user@sanjeevani.com",
-                        "+919876543211",
-                        passwordEncoder.encode("User@123"),
-                        Role.CUSTOMER
-                );
-                userRepository.save(customer);
-                logger.info("Successfully seeded Admin (admin@sanjeevani.com / Admin@123) and Customer (user@sanjeevani.com / User@123)");
-            }
+            seedUserIfMissing("Tharun Singh Alampoor", "tharunsingh851@gmail.com", "+919876543212", "Tharun@123", Role.CUSTOMER);
+            seedUserIfMissing("System Admin", "admin@sanjeevani.com", "+919876543210", "Admin@123", Role.ADMIN);
+            seedUserIfMissing("Valued Customer", "user@sanjeevani.com", "+919876543211", "User@123", Role.CUSTOMER);
         } catch (Exception e) {
             logger.warn("User seeding status: {}", e.getMessage());
+        }
+    }
+
+    private void seedUserIfMissing(String fullName, String email, String phone, String rawPassword, Role role) {
+        java.util.Optional<User> existing = userRepository.findByEmail(email.toLowerCase());
+        if (existing.isEmpty()) {
+            User user = new User(
+                    fullName,
+                    email.toLowerCase(),
+                    phone,
+                    passwordEncoder.encode(rawPassword),
+                    role
+            );
+            userRepository.save(user);
+            logger.info("Seeded user account: {} ({})", fullName, email);
+        } else {
+            User user = existing.get();
+            if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(rawPassword));
+                userRepository.save(user);
+                logger.info("Updated password hash for user account: {}", email);
+            }
         }
     }
 }

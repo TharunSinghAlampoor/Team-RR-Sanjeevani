@@ -986,7 +986,8 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
         // 2. Fallback to symptom keywords matching with strict audience filter
         if (medicineMatches.length < 4) {
           const isAdult = q.includes('adult') || q.includes('skin care') || q.includes('skincare') || q.includes('sunscreen') || q.includes('serum') || q.includes('acne') || q.includes('vitamin c');
-          
+          const isBaby = q.includes('baby') || q.includes('kid') || q.includes('child') || q.includes('infant') || q.includes('pediatric') || q.includes('toddler');
+
           for (const keyword of symptomResult.medicineKeywords) {
             for (const p of allProds) {
               if (!p) continue;
@@ -996,8 +997,10 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
               const pDesc = (p.description || '').toLowerCase();
               const pCat = (p.categoryName || '').toLowerCase();
 
-              const isBaby = pCat.includes('baby') || pCat.includes('kid') || pName.includes('baby') || pName.includes('child') || pName.includes('pediatric');
-              if (isAdult && isBaby) continue; // EXCLUDE baby products for adult queries!
+              const pIsBaby = pCat.includes('baby') || pCat.includes('kid') || pName.includes('baby') || pName.includes('child') || pName.includes('pediatric') || pCat.includes('pediatric');
+              
+              if (isAdult && pIsBaby) continue; // EXCLUDE baby products for adult queries!
+              if (isBaby && !pIsBaby) continue; // EXCLUDE adult products for baby queries!
 
               if (pName.includes(keyword) || pDesc.includes(keyword) || pCat.includes(keyword)) {
                 medicineMatches.push(p);

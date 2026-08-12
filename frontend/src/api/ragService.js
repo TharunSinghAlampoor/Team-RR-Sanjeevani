@@ -79,7 +79,7 @@ export const filterAndRankProducts = (allProds, rawQuery) => {
     const noSpaceText = fullText.replace(/[^a-z0-9]/g, '');
 
     // Audience Check
-    const isBabyProduct = cat.includes('baby') || cat.includes('kid') || name.includes('baby') || name.includes('child') || name.includes('pediatric') || name.includes('dermo cream');
+    const isBabyProduct = cat.includes('baby') || cat.includes('kid') || name.includes('baby') || name.includes('kid') || name.includes('child') || name.includes('infant') || name.includes('pediatric') || cat.includes('pediatric') || name.includes('diaper') || name.includes('cerelac') || name.includes('lactogen');
 
     if (isAdultQuery && isBabyProduct) {
       return { product: p, score: -999 }; // Hard exclude baby products for adult requests!

@@ -18,6 +18,9 @@ const SPEECH_LANG_MAP = {
   kn: 'kn-IN',
 };
 
+const fmtPrice = (v) => `₹${Number(v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return 'N/A'; } };
+
 const CATEGORIES = [
   { name: 'Prescriptions & Pharmacy', slug: 'prescriptions-pharmacy', icon: '💊', action: 'cat_prescriptions' },
   { name: 'Nutrition & Health', slug: 'nutrition-health', icon: '🏋️', action: 'cat_nutrition' },
@@ -610,11 +613,6 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
     const orderIdMatch = queryText.match(/(?:FAIL|ORD|BUY|ord|fail|buy)-[A-Za-z0-9]{4,16}/i) || 
                           queryText.match(/[A-Za-z0-9]{4,8}-[A-Za-z0-9]{4,12}/i);
     const specificOrderId = orderIdMatch ? orderIdMatch[0].toUpperCase() : null;
-
-    // Helper: format currency
-    const fmtPrice = (v) => `₹${Number(v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    // Helper: format date
-    const fmtDate = (d) => { try { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return 'N/A'; } };
 
     // ─────────────────────────────────────────────────────────
     // 1. MY ORDERS — Show all orders with real data

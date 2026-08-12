@@ -260,7 +260,7 @@ const AnimatedDoctorRoboIcon = ({ size = 68, style = {} }) => {
   );
 };
 
-export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
+export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNow }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -1423,12 +1423,24 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                         {msg.products.map((prod) => {
                           const pId = prod.productId || prod.id || prod._id || prod.prodId;
                           const handleOpen = (e) => {
-                            if (e) e.stopPropagation();
+                            if (e && e.stopPropagation) e.stopPropagation();
                             setIsOpen(false);
-                            if (pId) {
+                            if (typeof onOpenDetails === 'function') {
+                              onOpenDetails(prod);
+                            } else if (pId) {
                               navigate(`/product/${pId}`);
                             } else {
                               navigate('/dashboard');
+                            }
+                          };
+
+                          const handleBuy = (e) => {
+                            if (e && e.stopPropagation) e.stopPropagation();
+                            setIsOpen(false);
+                            if (typeof onBuyNow === 'function') {
+                              onBuyNow(prod);
+                            } else {
+                              handleOpen(e);
                             }
                           };
 
@@ -1469,8 +1481,8 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                                 </div>
                               </div>
 
-                              {/* Bottom Row: Dual Full-Width Action Buttons */}
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                              {/* Bottom Row: 3 Interactive Action Buttons */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                 <button
                                   onClick={async (e) => {
                                     e.stopPropagation();
@@ -1489,27 +1501,41 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                                     flex: 1,
                                     background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                                     color: '#ffffff', border: 'none', borderRadius: '8px',
-                                    padding: '0.45rem', fontSize: '0.78rem', fontWeight: 800,
-                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
+                                    padding: '0.45rem 0.25rem', fontSize: '0.74rem', fontWeight: 800,
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem',
                                     boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)'
                                   }}
                                 >
-                                  <ShoppingCart style={{ width: 13, height: 13 }} />
-                                  <span>Add to Cart</span>
+                                  <ShoppingCart style={{ width: 12, height: 12 }} />
+                                  <span>Add</span>
                                 </button>
 
                                 <button
                                   onClick={handleOpen}
                                   style={{
-                                    flex: 1,
-                                    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                                    flex: 1.2,
+                                    background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
                                     color: '#ffffff', border: 'none', borderRadius: '8px',
-                                    padding: '0.45rem', fontSize: '0.78rem', fontWeight: 800,
-                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
-                                    boxShadow: '0 2px 6px rgba(37, 99, 235, 0.28)'
+                                    padding: '0.45rem 0.25rem', fontSize: '0.74rem', fontWeight: 800,
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem',
+                                    boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)'
                                   }}
                                 >
-                                  <span>⚡ Buy Now</span>
+                                  <span>👁️ Details</span>
+                                </button>
+
+                                <button
+                                  onClick={handleBuy}
+                                  style={{
+                                    flex: 1,
+                                    background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+                                    color: '#ffffff', border: 'none', borderRadius: '8px',
+                                    padding: '0.45rem 0.25rem', fontSize: '0.74rem', fontWeight: 800,
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem',
+                                    boxShadow: '0 2px 6px rgba(217, 119, 6, 0.28)'
+                                  }}
+                                >
+                                  <span>⚡ Buy</span>
                                 </button>
                               </div>
                             </div>

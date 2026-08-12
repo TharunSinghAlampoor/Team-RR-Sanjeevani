@@ -201,7 +201,10 @@ export const ProductDetailsPage = () => {
 
         const currentProd = validProds.find(p => p && (
           String(p.productId || '').toLowerCase() === String(productId || '').toLowerCase() ||
-          String(p.id || '').toLowerCase() === String(productId || '').toLowerCase()
+          String(p.id || '').toLowerCase() === String(productId || '').toLowerCase() ||
+          String(p._id || '').toLowerCase() === String(productId || '').toLowerCase() ||
+          String(p.prodId || '').toLowerCase() === String(productId || '').toLowerCase() ||
+          (p.name && String(p.name).toLowerCase().includes(String(productId || '').toLowerCase()))
         ));
 
         if (currentProd) {

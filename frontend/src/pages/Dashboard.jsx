@@ -189,10 +189,10 @@ export const Dashboard = () => {
   useEffect(() => {
     let isMounted = true;
 
-    // Safety fallback: max 1.2s loader duration
+    // Safety fallback: max 400ms loader duration for ultra-fast instant rendering
     const safetyTimer = setTimeout(() => {
       if (isMounted) setPageLoading(false);
-    }, 1200);
+    }, 400);
 
     Promise.allSettled([
       fetchCategories(),

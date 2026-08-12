@@ -31,9 +31,11 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         try {
             jdbcTemplate.execute("ALTER TABLE orders MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'PENDING'");
-            logger.info("Successfully updated orders table status column to VARCHAR(50)");
+            jdbcTemplate.execute("UPDATE users SET created_at = NOW() WHERE created_at IS NULL OR created_at = '0000-00-00 00:00:00'");
+            jdbcTemplate.execute("UPDATE users SET updated_at = NOW() WHERE updated_at IS NULL OR updated_at = '0000-00-00 00:00:00'");
+            logger.info("Successfully sanitized order status and user timestamp columns");
         } catch (Exception e) {
-            logger.info("Order status column migration status: {}", e.getMessage());
+            logger.info("Initial schema migration notice: {}", e.getMessage());
         }
 
         try {

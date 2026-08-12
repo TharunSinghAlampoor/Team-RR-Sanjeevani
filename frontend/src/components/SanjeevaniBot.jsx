@@ -681,18 +681,28 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
           }
         } else if (orders.length > 0) {
           // ── Show all orders summary ──
-          const totalSpent = orders.reduce((sum, o) => sum + Number(o.grandTotal || o.totalAmount || 0), 0);
+          const formatStatusBadge = (st) => {
+            const s = String(st || '').toUpperCase();
+            if (s === 'PACKED') return '📦 Packed & Ready';
+            if (s === 'SUCCESS' || s === 'CONFIRMED' || s === 'PAID') return '✅ Order Confirmed';
+            if (s === 'DELIVERED') return '🎉 Delivered';
+            if (s === 'OUT_FOR_DELIVERY') return '🚚 Out for Delivery';
+            if (s === 'SHIPPED') return '🚀 Shipped';
+            if (s === 'CANCELLED') return '❌ Cancelled';
+            return '⏳ ' + (st || 'Processing');
+          };
+
           const orderSummaries = orders.slice(0, 5).map((o, i) => {
-            const status = o.orderStatus || o.paymentStatus || o.status || 'Processing';
+            const statusBadge = formatStatusBadge(o.orderStatus || o.paymentStatus || o.status);
             const total = fmtPrice(o.grandTotal || o.totalAmount);
             const date = fmtDate(o.createdAt || o.orderDate);
-            const items = Array.isArray(o.items) ? o.items.length : 0;
-            return `${i + 1}. #${o.orderId} — ${status} — ${total} — ${date}${items > 0 ? ` (${items} items)` : ''}`;
-          }).join('\n');
+            const itemsCount = Array.isArray(o.items) ? o.items.length : 1;
+            return `${i + 1}. #${o.orderId}\n   • Status: ${statusBadge}\n   • Amount: ${total} (${itemsCount} item${itemsCount > 1 ? 's' : ''})\n   • Date: ${date}`;
+          }).join('\n\n');
 
-          botResponse.text = `📋 Your Orders (${orders.length} total | Total Spent: ${fmtPrice(totalSpent)})\n\n${orderSummaries}${orders.length > 5 ? `\n\n...and ${orders.length - 5} more orders. View all on your orders page.` : ''}`;
+          botResponse.text = `📋 Your Orders Summary (${orders.length} total | Total Spent: ${fmtPrice(totalSpent)})\n\n${orderSummaries}${orders.length > 5 ? `\n\n...and ${orders.length - 5} more orders available in your account.` : ''}`;
           botResponse.actionBtn = {
-            label: '📦 View All Orders & Track',
+            label: '📦 View All Orders & Track Live',
             onClick: () => { setIsOpen(false); if (onOpenOrders) onOpenOrders(); else navigate('/track-order'); }
           };
         } else {
@@ -1323,6 +1333,8 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                     fontSize: '0.88rem',
                     lineHeight: 1.48,
                     fontWeight: 500,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
                     boxShadow: msg.sender === 'user' ? '0 4px 12px rgba(13,92,117,0.25)' : '0 2px 8px rgba(0,0,0,0.04)',
                     border: msg.sender === 'user' ? 'none' : '1px solid #e2e8f0',
                     position: 'relative'

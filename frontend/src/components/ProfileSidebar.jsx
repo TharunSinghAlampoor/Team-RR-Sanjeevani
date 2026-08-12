@@ -353,7 +353,13 @@ export const ProfileSidebar = ({
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.84rem', color: '#334155' }}>
                     <Phone style={{ width: 15, height: 15, color: '#059669' }} />
-                    <span style={{ fontWeight: 700 }}>+91 {phoneNumber || '9876543210'}</span>
+                    <span style={{ fontWeight: 700 }}>
+                      {phoneNumber
+                        ? (phoneNumber.startsWith('+') ? phoneNumber : `+91 ${phoneNumber}`)
+                        : (user?.phoneNumber
+                            ? (user.phoneNumber.startsWith('+') ? user.phoneNumber : `+91 ${user.phoneNumber}`)
+                            : 'N/A')}
+                    </span>
                   </div>
                 </div>
               )}

@@ -37,7 +37,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         try {
-            seedUserIfMissing("Tharun Singh Alampoor", "tharunsingh851@gmail.com", "+919876543212", "Tharun@123", Role.CUSTOMER);
+            seedUserIfMissing("Tharun Singh", "tharunsingh851@gmail.com", "+917702173084", "Tharun@123", Role.CUSTOMER);
             seedUserIfMissing("System Admin", "admin@sanjeevani.com", "+919876543210", "Admin@123", Role.ADMIN);
             seedUserIfMissing("Valued Customer", "user@sanjeevani.com", "+919876543211", "User@123", Role.CUSTOMER);
         } catch (Exception e) {

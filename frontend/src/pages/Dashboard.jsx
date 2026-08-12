@@ -326,7 +326,10 @@ export const Dashboard = () => {
     setIsFavoritesOpen(false);
     setIsCartOpen(false);
     setIsOrdersOpen(false);
-    if (!catIdOrName) return;
+    if (!catIdOrName) {
+      navigate('/category/all-products');
+      return;
+    }
     const slug = toCategorySlug(catIdOrName);
     navigate(`/category/${slug}`);
   }, [navigate]);
@@ -411,17 +414,18 @@ export const Dashboard = () => {
 
   // ─── Pagination for Separate Product Pages ─────────────────────────
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 9;
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory, inStockOnly]);
+  }, [searchQuery, selectedCategory, inStockOnly, itemsPerPage]);
 
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  const totalPages = itemsPerPage >= 999 ? 1 : (Math.ceil(filteredProducts.length / itemsPerPage) || 1);
   const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredProducts, currentPage]);
+    if (itemsPerPage >= 999) return filteredProducts;
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
 
   // ─── Cart Handlers ────────────────────────────────────────────────
   const handleAddToCart = async (productId, quantity = 1) => {

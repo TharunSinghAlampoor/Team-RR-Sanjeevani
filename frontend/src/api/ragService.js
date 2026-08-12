@@ -171,9 +171,9 @@ export const performRAGQuery = async (queryText, userSession = {}) => {
   if (faqMatches.length > 0) {
     synthesizedText = faqMatches.map(f => f.answer).join('\n\n');
   } else if (matchingProducts.length > 0) {
-    synthesizedText = `🔍 Found ${matchingProducts.length} verified product(s) matching your request:`;
+    synthesizedText = `✨ Top Verified Products for "${queryText}":\n\nHere are matching health & medical products available on Sanjeevani Store:`;
   } else {
-    synthesizedText = `I'm Sanjeevani AI Assistant — your 24/7 health guide.\n\nAsk me about medicines, skin care, order status, return policy, payment options, or discount coupons!`;
+    synthesizedText = `💡 Guidance on "${queryText}":\n\nSanjeevani RAG AI Assistant is ready to help! Feel free to ask about:\n• Medicines for any health symptom (Fever, Cold, Pain, Digestion, Allergy, Skin)\n• Sunscreen & Dermocosmetic recommendations\n• Live order tracking (#ORD-XXXXXX)\n• 7-Day Doorstep Returns, Refunds & Payment options`;
   }
 
   return {

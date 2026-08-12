@@ -40,9 +40,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
-        logger.error("Unexpected error: ", ex);
+        logger.error("Unexpected system exception: ", ex);
+        String detailMessage = ex.getMessage();
+        if (detailMessage == null || detailMessage.isBlank()) {
+            detailMessage = ex.getClass().getSimpleName();
+        }
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected error occurred. Please try again later."));
+                .body(ApiResponse.error(detailMessage));
     }
 }

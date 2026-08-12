@@ -966,6 +966,20 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
       ];
     }
     // ─────────────────────────────────────────────────────────
+    // 12.5 EMERGENCY MEDICAL NOTICE
+    // ─────────────────────────────────────────────────────────
+    else if (
+      q.includes('emergency') || q.includes('chest pain') || q.includes('heart attack') || 
+      q.includes('breathing problem') || q.includes('ambulance') || q.includes('108') ||
+      q.includes('severe pain') || q.includes('unconscious') || q.includes('इमरजेंसी') || q.includes('అత్యవసర')
+    ) {
+      botResponse.text = '🚨 EMERGENCY MEDICAL NOTICE 🚨\n\nIf you or someone around you is experiencing a life-threatening medical emergency (e.g. severe chest pain, breathing difficulty, sudden weakness, or severe injury):\n\n☎️ Call National Medical Emergency Helpline: 108\n☎️ Call Ambulance Services: 102 / 112\n\n📍 Please visit the nearest hospital emergency room immediately. Do not delay emergency care.';
+      botResponse.actionBtn = {
+        label: '🚨 Call Emergency Hotline (108)',
+        onClick: () => { window.location.href = 'tel:108'; }
+      };
+    }
+    // ─────────────────────────────────────────────────────────
     // 13. SYMPTOM → MEDICINE RECOMMENDATION ENGINE
     // ─────────────────────────────────────────────────────────
     else if (detectSymptomIntent(q)) {
@@ -1335,29 +1349,58 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                         {msg.products.map((prod) => (
                           <div
                             key={prod.id || prod.productId}
-                            onClick={() => {
-                              setIsOpen(false);
-                              navigate(`/product/${prod.id || prod.productId}`);
-                            }}
                             style={{
                               display: 'flex', alignItems: 'center', gap: '0.65rem',
-                              background: '#f8fafc', padding: '0.5rem 0.65rem',
-                              borderRadius: '10px', border: '1px solid #cbd5e1',
-                              cursor: 'pointer'
+                              background: '#ffffff', padding: '0.55rem 0.75rem',
+                              borderRadius: '12px', border: '1.5px solid #cbd5e1',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
                             }}
                           >
-                            <div style={{ width: 40, height: 40, borderRadius: '6px', overflow: 'hidden', background: '#fff', flexShrink: 0 }}>
+                            <div
+                              onClick={() => {
+                                setIsOpen(false);
+                                navigate(`/product/${prod.id || prod.productId}`);
+                              }}
+                              style={{ width: 42, height: 42, borderRadius: '8px', overflow: 'hidden', background: '#f8fafc', flexShrink: 0, cursor: 'pointer', border: '1px solid #e2e8f0' }}
+                            >
                               <ProductImage src={prod.imageUrl} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                             </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <div
+                              onClick={() => {
+                                setIsOpen(false);
+                                navigate(`/product/${prod.id || prod.productId}`);
+                              }}
+                              style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+                            >
+                              <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {translateData(prod.name)}
                               </p>
-                              <p style={{ margin: 0, fontSize: '0.78rem', color: '#059669', fontWeight: 800 }}>
+                              <p style={{ margin: 0, fontSize: '0.78rem', color: '#059669', fontWeight: 900 }}>
                                 ₹{prod.price}
                               </p>
                             </div>
-                            <ChevronRight style={{ width: 15, height: 15, color: '#64748b' }} />
+                            <button
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                const pId = prod.id || prod.productId;
+                                try {
+                                  await shopService.addToCart(pId, 1);
+                                  handleSendWithText('cart');
+                                } catch (err) {
+                                  navigate(`/product/${pId}`);
+                                }
+                              }}
+                              style={{
+                                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                                color: '#ffffff', border: 'none', borderRadius: '8px',
+                                padding: '0.35rem 0.65rem', fontSize: '0.75rem', fontWeight: 800,
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
+                                boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)'
+                              }}
+                            >
+                              <ShoppingCart style={{ width: 12, height: 12 }} />
+                              <span>Add</span>
+                            </button>
                           </div>
                         ))}
                       </div>

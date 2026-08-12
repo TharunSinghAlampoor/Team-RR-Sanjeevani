@@ -181,98 +181,154 @@ const ProductCard = React.memo(({
         }
       </div>
 
-      {/* Actions: Add to Cart OR Quantity Stepper (- Count + / Remove) */}
+      {/* Actions: Separate Buttons for Add to Cart / Stepper / Buy Now / Separate Remove */}
       <div className="pcard__actions" style={{ marginTop: 'auto', paddingTop: '0.75rem' }}>
         {inCartActive && qty > 0 ? (
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              padding: '0.3rem 0.4rem',
-              borderRadius: '0.8rem',
-              background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              boxShadow: '0 4px 16px rgba(255, 71, 87, 0.38)',
-            }}
-          >
-            {/* Minus / Trash Remove Button */}
-            <button
-              onClick={handleDecrease}
-              title={qty === 1 ? 'Remove from Cart' : 'Decrease Quantity'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', width: '100%' }}>
+            {/* Stepper Pill (- Count +) */}
+            <div
+              onClick={(e) => e.stopPropagation()}
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: '0.55rem',
-                background: 'rgba(255, 255, 255, 0.22)',
+                flex: 1,
+                padding: '0.3rem 0.4rem',
+                borderRadius: '0.75rem',
+                background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
                 color: '#ffffff',
-                border: 'none',
-                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.15s ease',
+                justifyContent: 'space-between',
+                boxShadow: '0 3px 10px rgba(255, 71, 87, 0.32)',
               }}
             >
-              {qty === 1 ? <Trash2 style={{ width: 15, height: 15 }} /> : <Minus style={{ width: 15, height: 15 }} />}
-            </button>
+              <button
+                onClick={handleDecrease}
+                title="Decrease quantity"
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '0.45rem',
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  color: '#ffffff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Minus style={{ width: 14, height: 14 }} />
+              </button>
 
-            {/* Quantity Count Badge */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', userSelect: 'none' }}>
-              <span style={{ fontSize: '0.95rem', fontWeight: 900, color: '#ffffff', lineHeight: 1 }}>{qty}</span>
-              <span style={{ fontSize: '0.58rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.88)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 1 }}>in cart</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', userSelect: 'none' }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 900, color: '#ffffff', lineHeight: 1 }}>{qty}</span>
+                <span style={{ fontSize: '0.55rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.88)', textTransform: 'uppercase' }}>in cart</span>
+              </div>
+
+              <button
+                onClick={handleIncrease}
+                disabled={!inStock}
+                title="Increase quantity"
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '0.45rem',
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  color: '#ffffff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Plus style={{ width: 14, height: 14 }} />
+              </button>
             </div>
 
-            {/* Plus Increase Button */}
+            {/* Separate Distinct Remove Button */}
             <button
-              onClick={handleIncrease}
-              disabled={!inStock}
-              title="Increase Quantity"
+              onClick={(e) => {
+                e.stopPropagation();
+                setQty(0);
+                setIsAddedLocal(false);
+                if (typeof onRemoveFromCart === 'function') {
+                  onRemoveFromCart(pId);
+                } else if (typeof onUpdateQuantity === 'function') {
+                  onUpdateQuantity(pId, 0);
+                }
+              }}
+              title="Remove from Cart"
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: '0.55rem',
-                background: 'rgba(255, 255, 255, 0.22)',
-                color: '#ffffff',
-                border: 'none',
+                padding: '0.55rem 0.65rem',
+                borderRadius: '0.75rem',
+                background: '#fef2f2',
+                color: '#dc2626',
+                border: '1.5px solid #fca5a5',
+                fontWeight: 800,
+                fontSize: '0.78rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'all 0.15s ease',
+                gap: '0.25rem',
+                boxShadow: '0 2px 6px rgba(220, 38, 38, 0.12)',
+                transition: 'all 0.2s ease'
               }}
             >
-              <Plus style={{ width: 15, height: 15 }} />
+              <Trash2 style={{ width: 14, height: 14 }} />
+              <span>Remove</span>
             </button>
           </div>
         ) : (
-          <button
-            disabled={!inStock}
-            onClick={handleCartAdd}
-            className="pcard__btn"
-            style={{
-              width: '100%',
-              padding: '0.72rem',
-              borderRadius: '0.8rem',
-              fontWeight: 800,
-              fontSize: '0.88rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.45rem',
-              cursor: inStock ? 'pointer' : 'not-allowed',
-              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-              background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
-              color: '#ffffff',
-              border: 'none',
-              boxShadow: '0 4px 16px rgba(255, 71, 87, 0.38)',
-            }}
-          >
-            <ShoppingCart style={{ width: 16, height: 16 }} />
-            <span>{t('addToCart')}</span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', width: '100%' }}>
+            <button
+              disabled={!inStock}
+              onClick={handleCartAdd}
+              style={{
+                flex: 1,
+                padding: '0.68rem 0.5rem',
+                borderRadius: '0.75rem',
+                fontWeight: 800,
+                fontSize: '0.84rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.35rem',
+                cursor: inStock ? 'pointer' : 'not-allowed',
+                background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
+                color: '#ffffff',
+                border: 'none',
+                boxShadow: '0 3px 10px rgba(255, 71, 87, 0.32)',
+              }}
+            >
+              <ShoppingCart style={{ width: 15, height: 15 }} />
+              <span>{t('addToCart')}</span>
+            </button>
+
+            {typeof onBuyNow === 'function' && (
+              <button
+                disabled={!inStock}
+                onClick={handleBuy}
+                style={{
+                  padding: '0.68rem 0.75rem',
+                  borderRadius: '0.75rem',
+                  fontWeight: 800,
+                  fontSize: '0.84rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.25rem',
+                  cursor: inStock ? 'pointer' : 'not-allowed',
+                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  boxShadow: '0 3px 10px rgba(37, 99, 235, 0.28)',
+                }}
+              >
+                <span>⚡ Buy</span>
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

@@ -630,8 +630,32 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
       q.includes('ಆರ್ಡರ್') || q.includes('ಟ್ರ್ಯಾಕ್') || q.includes('ಎಲ್ಲಿದೆ')
     ) {
       try {
-        const res = await shopService.getOrders();
-        const orders = (res && res.success && Array.isArray(res.data)) ? res.data : [];
+        let orders = [];
+        try {
+          const res = await shopService.getOrders();
+          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            orders = res.data;
+          }
+        } catch (e) {}
+
+        // Fallback to localStorage orders if API returned empty
+        if (!orders || orders.length === 0) {
+          try {
+            const local1 = JSON.parse(localStorage.getItem('orders') || '[]');
+            const local2 = JSON.parse(localStorage.getItem('user_orders') || '[]');
+            const local3 = JSON.parse(localStorage.getItem('recent_orders') || '[]');
+            const combined = [...local1, ...local2, ...local3];
+            const seen = new Set();
+            orders = combined.filter(o => {
+              if (!o || !o.orderId) return false;
+              if (seen.has(o.orderId)) return false;
+              seen.add(o.orderId);
+              return true;
+            });
+          } catch (e) {}
+        }
+
+        const totalSpent = orders.reduce((sum, o) => sum + (Number(o.grandTotal || o.totalAmount) || 0), 0);
 
         if (specificOrderId) {
           // ── Specific order lookup ──
@@ -641,45 +665,38 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
           );
 
           if (matchedOrder) {
-            const status = matchedOrder.orderStatus || matchedOrder.paymentStatus || matchedOrder.status || 'Processing';
-            const total = fmtPrice(matchedOrder.grandTotal || matchedOrder.totalAmount);
-            const payMethod = matchedOrder.paymentMethod || matchedOrder.paymentMode || 'Online';
-            const address = matchedOrder.shippingAddress || 'Saved Address';
-            const date = fmtDate(matchedOrder.createdAt || matchedOrder.orderDate);
-            const items = Array.isArray(matchedOrder.items) ? matchedOrder.items : [];
-            const itemList = items.length > 0 
-              ? items.map(it => `• ${it.productName || it.name || 'Item'} × ${it.quantity || 1} — ${fmtPrice(it.totalPrice || it.pricePerUnit)}`).join('\n')
-              : '• Order items available on tracking page';
-
-            botResponse.text = `📦 Order #${matchedOrder.orderId}\n\n📅 Date: ${date}\n📊 Status: ${status}\n💰 Total: ${total}\n💳 Payment: ${payMethod}\n📍 Address: ${address}\n\n🛍️ Items:\n${itemList}`;
+            botResponse.text = `📦 Here are the details for Order #${matchedOrder.orderId}:`;
+            botResponse.orderList = [matchedOrder];
             botResponse.actionBtn = {
-              label: `📦 Track Order #${matchedOrder.orderId}`,
+              label: `📦 Track Order #${matchedOrder.orderId} Live ➔`,
               onClick: () => { setIsOpen(false); navigate(`/track-order/${matchedOrder.orderId}`); }
             };
           } else {
-            botResponse.text = `❌ Order #${specificOrderId} was not found. Please check the order ID and try again. You can also view all your orders below.`;
+            botResponse.text = `❌ Order #${specificOrderId} was not found. Here are your recent orders below:`;
+            botResponse.orderList = orders.slice(0, 3);
             botResponse.actionBtn = {
-              label: '📋 View All My Orders',
+              label: '📋 View All Orders ➔',
               onClick: () => { setIsOpen(false); if (onOpenOrders) onOpenOrders(); else navigate('/track-order'); }
             };
           }
         } else if (orders.length > 0) {
-          botResponse.text = `📋 Your Orders (${orders.length} total | Total Spent: ${fmtPrice(totalSpent)}):`;
-          botResponse.orderList = orders.slice(0, 5);
+          botResponse.text = `📋 Here are your recent 3 orders (${orders.length} total | Spent: ${fmtPrice(totalSpent)}):`;
+          botResponse.orderList = orders.slice(0, 3);
           botResponse.actionBtn = {
-            label: '📦 View All Orders & Track Live',
+            label: '📦 View All Orders & Track Live ➔',
             onClick: () => { setIsOpen(false); if (onOpenOrders) onOpenOrders(); else navigate('/track-order'); }
           };
         } else {
-          botResponse.text = '📭 You have no orders yet. Browse our products and place your first order!';
-          botResponse.quickReplies = CATEGORIES.map(c => ({
-            label: `${c.icon} ${c.name}`, action: c.action, catData: c
-          }));
+          botResponse.text = '📭 You have no active orders yet. Browse our products and place your first order!';
+          botResponse.actionBtn = {
+            label: '🏪 Browse Products ➔',
+            onClick: () => { setIsOpen(false); navigate('/dashboard'); }
+          };
         }
       } catch (err) {
         botResponse.text = '📦 View your orders from the Orders section. Click below to open.';
         botResponse.actionBtn = {
-          label: '📋 Open My Orders',
+          label: '📋 Open My Orders ➔',
           onClick: () => { setIsOpen(false); if (onOpenOrders) onOpenOrders(); else navigate('/track-order'); }
         };
       }

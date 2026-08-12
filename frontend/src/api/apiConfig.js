@@ -15,7 +15,7 @@ export const getApiBaseUrl = () => {
       if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
         return envUrl.replace(/\/$/, '');
       }
-      return 'https://sanjeevani-backend-txgo.onrender.com/api';
+      return 'https://sanjeevani-13qs.onrender.com/api';
     }
   }
 

@@ -11,6 +11,16 @@ import shopService from './shopService';
 
 const KNOWLEDGE_BASE_FAQS = [
   {
+    topic: 'how_to_use_app',
+    keywords: ['how to use', 'how it works', 'guide', 'app use', 'features', 'help', 'tutorial', 'instructions', 'about app', 'what is this app'],
+    answer: '📱 How to Use Sanjeevani App & Features:\n\n1. 🔍 Search & Browse Medicines: Type medicine name/symptom in the top search bar or ask Sanjeevani AI Assistant.\n2. 🛒 Place an Order: Click "Add to Cart" ➔ Open Cart ➔ "Proceed to Checkout" ➔ Select Address & Payment ➔ Place Order.\n3. ⚡ Express Buy Now: Tap "Buy Now" on any product card for instant 1-click checkout.\n4. 📋 Upload Prescription: Click "Upload Prescription" to send doctor notes to our pharmacist team.\n5. 📦 Track Orders: Click "My Orders" in the top bar to track live delivery timeline.\n6. 🎙️ Voice & AI Assistant: Tap the microphone icon 🎙️ in Sanjeevani AI to speak in English, Hindi, Telugu, or Kannada!'
+  },
+  {
+    topic: 'how_to_order',
+    keywords: ['how to order', 'buy medicine', 'purchase', 'place order', 'buy now', 'checkout'],
+    answer: '🛒 How to Place an Order on Sanjeevani:\n\n1. Find your item using search or category browsing.\n2. Click "Add to Cart" or "⚡ Buy Now".\n3. In Cart/Checkout, enter your delivery address.\n4. Select Payment method (Razorpay UPI, Debit/Credit Card, or Cash on Delivery).\n5. Enter promo code "SANJEEVANI10" for 10% OFF & click "Place Order"!'
+  },
+  {
     topic: 'shipping_delivery',
     keywords: ['delivery', 'ship', 'shipping', 'track', 'courier', 'arrive', 'deliver', 'when', 'dispatch', 'fast'],
     answer: '🚚 Delivery & Shipping Policy:\n• Standard Delivery: 3 to 5 business days across India.\n• Express Delivery: 1 to 2 days in metro cities.\n• Free Shipping: Available on all orders over ₹499.\n• Real-Time Tracking: Enter your Order ID (e.g. #ORD-0EB650DF) or click "My Orders" in the menu to track live courier location.'

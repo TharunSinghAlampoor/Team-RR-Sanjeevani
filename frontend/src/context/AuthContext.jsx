@@ -102,9 +102,7 @@ export const AuthProvider = ({ children }) => {
             saveSessionCookies(freshName, localToken);
           }
         }).catch(err => {
-          if (err.response && err.response.status === 401) {
-            clearSession();
-          }
+          console.warn("Background getCurrentUser fetch notice:", err?.message || err);
         });
       } else {
         setLoading(false);

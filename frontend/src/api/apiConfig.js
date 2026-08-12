@@ -13,14 +13,14 @@ export const getApiBaseUrl = () => {
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 
     if (!isLocalhost) {
-      if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1') && envUrl.includes('sanjeevani-13qs')) {
+      if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
         return envUrl.replace(/\/$/, '');
       }
       return ACTIVE_LIVE_BACKEND;
     }
   }
 
-  if (envUrl && !envUrl.includes('localhost') && envUrl.includes('sanjeevani-13qs')) {
+  if (envUrl && !envUrl.includes('localhost')) {
     return envUrl.replace(/\/$/, '');
   }
 

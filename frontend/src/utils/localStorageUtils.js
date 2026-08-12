@@ -19,7 +19,8 @@ export const cleanLocalStorage = () => {
         key === 'token' ||
         key === 'user' ||
         key === 'user_role' ||
-        key.startsWith('razorpay');
+        key.startsWith('razorpay') ||
+        key.startsWith('sanjeevani_');
 
       if (!isAllowed) {
         keysToRemove.push(key);

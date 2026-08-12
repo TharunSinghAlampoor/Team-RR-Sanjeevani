@@ -22,7 +22,7 @@ const BuyNowModal = lazy(() => import('../components/BuyNowModal'));
 const CheckoutModal = lazy(() => import('../components/CheckoutModal'));
 const OrdersModal = lazy(() => import('../components/OrdersModal'));
 const OrderSuccessModal = lazy(() => import('../components/OrderSuccessModal'));
-const ProfileSidebar = lazy(() => import('../components/ProfileSidebar'));
+import ProfileSidebar from '../components/ProfileSidebar';
 const SanjeevaniBot = lazy(() => import('../components/SanjeevaniBot'));
 
 import { Search, SlidersHorizontal, RotateCcw, LayoutGrid } from 'lucide-react';

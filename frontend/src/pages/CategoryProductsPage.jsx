@@ -22,7 +22,7 @@ const OrdersModal = lazy(() => import('../components/OrdersModal'));
 const ProductDetailsModal = lazy(() => import('../components/ProductDetailsModal'));
 const CheckoutModal = lazy(() => import('../components/CheckoutModal'));
 const BuyNowModal = lazy(() => import('../components/BuyNowModal'));
-const ProfileSidebar = lazy(() => import('../components/ProfileSidebar'));
+import ProfileSidebar from '../components/ProfileSidebar';
 const SanjeevaniBot = lazy(() => import('../components/SanjeevaniBot'));
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api').replace(/\/$/, '');

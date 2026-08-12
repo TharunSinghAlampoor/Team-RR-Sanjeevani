@@ -10,7 +10,7 @@ import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 import LanguageSelector from './LanguageSelector';
 import { useLanguage } from '../context/LanguageContext';
 
-const ProfileSidebar = lazy(() => import('./ProfileSidebar'));
+import ProfileSidebar from './ProfileSidebar';
 
 export const Navbar = ({
   user,

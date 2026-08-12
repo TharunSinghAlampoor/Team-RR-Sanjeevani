@@ -502,7 +502,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
       symptomName: 'Dental & Oral Care',
       emoji: '🦷',
       triggers: ['tooth', 'teeth', 'dental', 'gum', 'mouth ulcer', 'oral', 'toothache', 'दांत', 'दाँत', 'పంటి', 'ಹಲ್ಲು', 'cavity', 'bad breath'],
-      medicineKeywords: ['toothpaste', 'mouthwash', 'dental', 'clove oil', 'oral', 'sensodyne', 'listerine', 'chlorhexidine', 'tooth', 'gum', 'orajel'],
+      medicineKeywords: ['toothpaste', 'mouthwash', 'sensodyne', 'listerine', 'clove oil', 'chlorhexidine', 'orajel', 'tooth paste', 'dental gel', 'oral gel'],
       advice: 'For toothache, Clove Oil or Ibuprofen provides temporary relief. For mouth ulcers, Orajel or Chlorhexidine mouthwash helps. Use Sensodyne for sensitive teeth. Visit a dentist for persistent dental issues.',
     },
     {
@@ -983,18 +983,18 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
         let medicineMatches = filterAndRankProducts(allProds, queryText);
         const seenIds = new Set(medicineMatches.map(p => p.productId || p.id));
 
-        // 2. Fallback to symptom keywords matching with strict audience filter
+        // 2. Fallback to symptom keywords matching with strict title/category check
         if (medicineMatches.length < 4) {
           const isAdult = q.includes('adult') || q.includes('skin care') || q.includes('skincare') || q.includes('sunscreen') || q.includes('serum') || q.includes('acne') || q.includes('vitamin c');
           const isBaby = q.includes('baby') || q.includes('kid') || q.includes('child') || q.includes('infant') || q.includes('pediatric') || q.includes('toddler');
 
           for (const keyword of symptomResult.medicineKeywords) {
+            if (!keyword || keyword.length < 3) continue;
             for (const p of allProds) {
               if (!p) continue;
               const pId = p.productId || p.id;
               if (seenIds.has(pId)) continue;
               const pName = (p.name || '').toLowerCase();
-              const pDesc = (p.description || '').toLowerCase();
               const pCat = (p.categoryName || '').toLowerCase();
 
               const pIsBaby = pCat.includes('baby') || pCat.includes('kid') || pName.includes('baby') || pName.includes('child') || pName.includes('pediatric') || pCat.includes('pediatric');
@@ -1002,7 +1002,8 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
               if (isAdult && pIsBaby) continue; // EXCLUDE baby products for adult queries!
               if (isBaby && !pIsBaby) continue; // EXCLUDE adult products for baby queries!
 
-              if (pName.includes(keyword) || pDesc.includes(keyword) || pCat.includes(keyword)) {
+              // Only match keyword in product title or category name to avoid description false positives
+              if (pName.includes(keyword) || pCat.includes(keyword)) {
                 medicineMatches.push(p);
                 seenIds.add(pId);
               }

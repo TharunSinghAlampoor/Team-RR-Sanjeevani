@@ -151,9 +151,6 @@ export const shopService = {
 
   // Products
   getProducts: async (params = {}) => {
-    if (!params || Object.keys(params).length === 0) {
-      if (catalogCache && catalogCache.data && catalogCache.data.length > 0) return catalogCache;
-    }
     try {
       const response = await shopClient.get('/products', { params });
       if (response && response.data) {
@@ -162,16 +159,17 @@ export const shopService = {
           : (Array.isArray(response.data) ? response.data : []);
         if (productList.length > 0) {
           const result = { success: true, data: productList };
-          if (!params || Object.keys(params).length === 0) catalogCache = result;
+          catalogCache = result;
           return result;
         }
       }
-      catalogCache = { success: true, data: FALLBACK_CATALOG };
-      return catalogCache;
+      return { success: true, data: FALLBACK_CATALOG };
     } catch (e) {
-      console.warn('Backend products API offline/error, using fallback catalog:', e.message);
-      catalogCache = { success: true, data: FALLBACK_CATALOG };
-      return catalogCache;
+      console.warn('Backend products API notice:', e.message);
+      if (catalogCache && catalogCache.data && catalogCache.data.length > 0) {
+        return catalogCache;
+      }
+      return { success: true, data: FALLBACK_CATALOG };
     }
   },
 

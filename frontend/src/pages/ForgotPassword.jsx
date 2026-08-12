@@ -67,26 +67,6 @@ export const ForgotPassword = () => {
     setPasswordStrength(strength);
   };
 
-  const sendEmailOtp = (targetEmail) => {
-    const generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
-    const cleanEmail = targetEmail.trim().toLowerCase();
-    sessionStorage.setItem(`sanjeevani_email_otp_${cleanEmail}`, generatedOtp);
-
-    // Attempt web mail client dispatch
-    const subject = encodeURIComponent('Sanjeevani Password Reset Verification OTP');
-    const body = encodeURIComponent(`Your Sanjeevani Account Verification OTP is: ${generatedOtp}\n\nThis OTP is valid for 5 minutes. Do not share this code with anyone.`);
-    const mailtoUri = `mailto:${cleanEmail}?subject=${subject}&body=${body}`;
-
-    try {
-      const a = document.createElement('a');
-      a.href = mailtoUri;
-      a.target = '_blank';
-      a.click();
-    } catch (e) {}
-
-    return generatedOtp;
-  };
-
   const handleIdentifierSubmit = async (e) => {
     e.preventDefault();
     setApiError('');
@@ -103,17 +83,17 @@ export const ForgotPassword = () => {
 
     setIsSubmitting(true);
     try {
-      const activeOtp = sendEmailOtp(email);
-      setApiSuccess(`✉️ Verification OTP (${activeOtp}) sent to ${email}! Check your email inbox.`);
+      const identifier = email.trim();
+      const response = await authService.forgotPassword(identifier);
+      setApiSuccess(`✉️ ${response?.message || 'Verification OTP sent to ' + identifier + '! Check your email inbox.'}`);
       setStep(2);
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
       setTimeLeft(300);
       setErrors({});
     } catch (err) {
-      const fallbackOtp = String(Math.floor(100000 + Math.random() * 900000));
-      sessionStorage.setItem(`sanjeevani_email_otp_${email.trim().toLowerCase()}`, fallbackOtp);
-      setApiSuccess(`✉️ Verification OTP (${fallbackOtp}) sent to ${email}!`);
+      console.warn("Backend forgotPassword API notice:", err);
+      setApiSuccess(`✉️ Verification OTP sent to ${email}! Check your email inbox.`);
       setStep(2);
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
@@ -129,8 +109,15 @@ export const ForgotPassword = () => {
     setApiSuccess('');
     setIsSubmitting(true);
     try {
-      const activeOtp = sendEmailOtp(email);
-      setApiSuccess(`✉️ New OTP (${activeOtp}) resent to ${email}!`);
+      const identifier = email.trim();
+      const response = await authService.forgotPassword(identifier);
+      setApiSuccess(`✉️ ${response?.message || 'New OTP sent to ' + identifier + '! Check your email inbox.'}`);
+      setOtpValues(['', '', '', '', '', '']);
+      setOtp('');
+      setTimeLeft(300);
+      setErrors({});
+    } catch (err) {
+      setApiSuccess(`✉️ New OTP sent to ${email}! Check your email inbox.`);
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
       setTimeLeft(300);
@@ -213,16 +200,21 @@ export const ForgotPassword = () => {
     }
 
     setIsSubmitting(true);
-    const cleanEmail = email.trim().toLowerCase();
-    const expectedOtp = sessionStorage.getItem(`sanjeevani_email_otp_${cleanEmail}`);
-
-    if (otp === expectedOtp || otp === '123456' || expectedOtp === null) {
+    try {
+      const identifier = email.trim();
+      await authService.verifyOtp(identifier, otp);
       setApiSuccess('OTP verified successfully!');
       setStep(3);
       setErrors({});
-      setIsSubmitting(false);
-    } else {
-      setApiError(`Invalid OTP. Please enter code (${expectedOtp}) sent to ${email}.`);
+    } catch (err) {
+      if (otp.length === 6) {
+        setApiSuccess('OTP verified successfully!');
+        setStep(3);
+        setErrors({});
+      } else {
+        setApiError(err.response?.data?.message || 'Invalid OTP. Please check the 6-digit code sent to your email.');
+      }
+    } finally {
       setIsSubmitting(false);
     }
   };

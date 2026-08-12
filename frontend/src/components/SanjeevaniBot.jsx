@@ -346,14 +346,16 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
       {
         id: 1,
         sender: 'bot',
-        text: 'Hello! I am Sanjeevani AI Assistant — your healthcare guide. Ask me about medicines for any symptom (fever, cold, pain, etc.), browse products, track orders, payment options, refunds, or store offers!',
+        text: '🙏 Welcome to Sanjeevani Healthcare! How can I assist you today?',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         quickReplies: [
+          { label: '📦 Track My Order', action: 'track_order' },
           { label: '💊 Browse Medicines', action: 'show_categories' },
           { label: '🤒 Medicine for Fever', action: 'symptom_fever' },
           { label: '🤧 Medicine for Cold & Cough', action: 'symptom_cold' },
-          { label: '📦 Track My Order', action: 'track_order' },
-          { label: '💳 Payment & Razorpay Options', action: 'payment_info' },
+          { label: '🛒 My Cart & Checkout', action: 'cart_info' },
+          { label: '❤️ My Wishlist', action: 'wishlist_info' },
+          { label: '💳 Payment Options', action: 'payment_info' },
           { label: '🔄 Return & Refund Policy', action: 'return_policy' },
           { label: '🏷️ Store Offers & Coupons', action: 'offers' },
           { label: '📞 24/7 Support Agent', action: 'contact_support' }

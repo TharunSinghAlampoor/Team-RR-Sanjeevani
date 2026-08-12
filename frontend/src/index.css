@@ -43,8 +43,9 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: smooth !important;
   scroll-padding-top: 85px; /* Offset for fixed sticky navbar */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -55,6 +56,15 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  backface-visibility: hidden;
+}
+
+/* 60FPS Hardware GPU Acceleration for buttery smooth scrolling across all devices */
+.cat-section__grid, .pcard, .cat-hero-card, .cat-section {
+  contain: content;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 *, button, input, select, textarea {

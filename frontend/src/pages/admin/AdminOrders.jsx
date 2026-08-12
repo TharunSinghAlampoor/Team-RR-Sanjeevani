@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag, Search, Filter, Eye, Printer, CheckCircle2, Clock,
-  XCircle, Truck, PackageCheck, AlertTriangle, FileText, MapPin, User, Mail, Phone, X
+  XCircle, Truck, PackageCheck, AlertTriangle, FileText, MapPin, User, Mail, Phone, X,
+  RotateCcw, DollarSign, RefreshCw, Star, ShieldCheck, ArrowRight
 } from 'lucide-react';
 import adminService from '../../api/adminService';
 import BrandLoader from '../../components/BrandLoader';
@@ -15,6 +16,7 @@ export function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
+  const [refundModalOrder, setRefundModalOrder] = useState(null);
   const [toast, setToast] = useState(null);
 
   const loadOrders = async () => {
@@ -40,14 +42,14 @@ export function AdminOrders() {
     if (searchQuery.trim()) {
       const kw = searchQuery.toLowerCase().trim();
       result = result.filter(o =>
-        (o.orderId && o.orderId.toLowerCase().includes(kw)) ||
+        (o.orderId && String(o.orderId).toLowerCase().includes(kw)) ||
         (o.customerName && o.customerName.toLowerCase().includes(kw)) ||
         (o.customerEmail && o.customerEmail.toLowerCase().includes(kw))
       );
     }
 
     if (statusFilter !== 'ALL') {
-      result = result.filter(o => o.status === statusFilter);
+      result = result.filter(o => String(o.status || '').toUpperCase() === statusFilter);
     }
 
     return result;
@@ -63,8 +65,19 @@ export function AdminOrders() {
     }
   };
 
+  const handleProcessRefundOrReplace = async (orderId, newStatus, message) => {
+    try {
+      await adminService.updateOrderStatus(orderId, newStatus);
+      setToast({ type: 'success', title: 'Request Processed', message: message || `Order #${orderId} updated to ${newStatus}.` });
+      setRefundModalOrder(null);
+      loadOrders();
+    } catch (err) {
+      setToast({ type: 'error', title: 'Action Failed', message: err.response?.data?.message || 'Failed to process request.' });
+    }
+  };
+
   if (loading) {
-    return <BrandLoader message="Loading System Orders..." />;
+    return <BrandLoader message="Loading System Orders & Refund Requests..." />;
   }
 
   return (
@@ -72,9 +85,9 @@ export function AdminOrders() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>Order Management Center</h2>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>Order & Refund Control Center</h2>
           <p style={{ color: '#64748b', fontSize: '0.88rem', margin: 0, fontWeight: 500 }}>
-            Manage customer purchases, update order dispatch stages, and print invoices.
+            Manage customer purchases, process returns/refunds/replacements, and print medical tax invoices.
           </p>
         </div>
       </div>
@@ -105,7 +118,7 @@ export function AdminOrders() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ padding: '0.65rem 1rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontSize: '0.85rem', fontWeight: 700 }}
+          style={{ padding: '0.65rem 1rem', borderRadius: '0.65rem', border: '1.5px solid #cbd5e1', fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}
         >
           <option value="ALL">All Statuses</option>
           <option value="PENDING">Pending</option>
@@ -114,6 +127,9 @@ export function AdminOrders() {
           <option value="PACKED">Packed</option>
           <option value="SHIPPED">Shipped</option>
           <option value="DELIVERED">Delivered</option>
+          <option value="RETURN_REQUESTED">🔄 Return Requested</option>
+          <option value="REFUNDED">💰 Refund Processed</option>
+          <option value="REPLACED">📦 Replacement Shipped</option>
           <option value="CANCELLED">Cancelled</option>
         </select>
       </div>
@@ -145,61 +161,152 @@ export function AdminOrders() {
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map(o => (
-                <tr key={o.orderId} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '1rem', fontWeight: 900, color: '#0f172a' }}>{o.orderId}</td>
-                  <td style={{ padding: '1rem' }}>
-                    <div style={{ fontWeight: 800, color: '#0f172a' }}>{o.customerName || 'Customer'}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{o.customerEmail}</div>
-                  </td>
-                  <td style={{ padding: '1rem', fontWeight: 900, color: '#059669' }}>
-                    ₹{Number(o.totalAmount || 0).toLocaleString('en-IN')}
-                  </td>
-                  <td style={{ padding: '1rem' }}>
-                    <span style={{
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: 99,
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      background: o.status === 'DELIVERED' || o.status === 'SUCCESS' ? '#d1fae5' : o.status === 'SHIPPED' || o.status === 'OUT_FOR_DELIVERY' ? '#e0f2fe' : o.status === 'CANCELLED' ? '#fee2e2' : '#fef3c7',
-                      color: o.status === 'DELIVERED' || o.status === 'SUCCESS' ? '#047857' : o.status === 'SHIPPED' || o.status === 'OUT_FOR_DELIVERY' ? '#0284c7' : o.status === 'CANCELLED' ? '#b91c1c' : '#b45309'
-                    }}>
-                      {o.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '1rem' }}>
-                    <select
-                      value={o.status}
-                      onChange={(e) => handleUpdateStatus(o.orderId, e.target.value)}
-                      style={{ padding: '0.35rem 0.65rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.8rem', fontWeight: 700 }}
-                    >
-                      <option value="PENDING">PENDING</option>
-                      <option value="SUCCESS">PAID / SUCCESS</option>
-                      <option value="CONFIRMED">CONFIRMED</option>
-                      <option value="PACKED">PACKED</option>
-                      <option value="SHIPPED">SHIPPED</option>
-                      <option value="OUT_FOR_DELIVERY">OUT FOR DELIVERY</option>
-                      <option value="DELIVERED">DELIVERED</option>
-                      <option value="CANCELLED">CANCELLED</option>
-                    </select>
-                  </td>
-                  <td style={{ padding: '1rem', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <button
-                        onClick={() => setSelectedOrderDetails(o)}
-                        style={{ padding: '0.45rem 0.85rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', background: '#059669', color: '#fff', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', boxShadow: '0 2px 6px rgba(5,150,105,0.25)' }}
+              {filteredOrders.map(o => {
+                const st = String(o.status || '').toUpperCase();
+                const isReturnOrRefund = st === 'RETURN_REQUESTED' || st === 'REFUNDED' || st === 'REPLACED';
+
+                return (
+                  <tr key={o.orderId} style={{ borderBottom: '1px solid #f1f5f9', background: st === 'RETURN_REQUESTED' ? '#fffbeb' : 'transparent' }}>
+                    <td style={{ padding: '1rem', fontWeight: 900, color: '#0f172a' }}>
+                      {o.orderId}
+                      {st === 'RETURN_REQUESTED' && (
+                        <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#d97706', marginTop: 2 }}>
+                          🔄 RETURN REQ
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ fontWeight: 800, color: '#0f172a' }}>{o.customerName || 'Customer'}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{o.customerEmail}</div>
+                    </td>
+                    <td style={{ padding: '1rem', fontWeight: 900, color: '#059669' }}>
+                      ₹{Number(o.totalAmount || 0).toLocaleString('en-IN')}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{
+                        padding: '0.25rem 0.65rem',
+                        borderRadius: 99,
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        background: st === 'DELIVERED' || st === 'SUCCESS' ? '#d1fae5' : st === 'SHIPPED' || st === 'OUT_FOR_DELIVERY' ? '#e0f2fe' : st === 'RETURN_REQUESTED' ? '#fef3c7' : st === 'REFUNDED' || st === 'REPLACED' ? '#f3e8ff' : st === 'CANCELLED' ? '#fee2e2' : '#fef3c7',
+                        color: st === 'DELIVERED' || st === 'SUCCESS' ? '#047857' : st === 'SHIPPED' || st === 'OUT_FOR_DELIVERY' ? '#0284c7' : st === 'RETURN_REQUESTED' ? '#b45309' : st === 'REFUNDED' || st === 'REPLACED' ? '#6b21a8' : st === 'CANCELLED' ? '#b91c1c' : '#b45309'
+                      }}>
+                        {st === 'RETURN_REQUESTED' ? '🔄 RETURN REQUESTED' : st === 'REFUNDED' ? '💰 REFUNDED' : st === 'REPLACED' ? '📦 REPLACED' : st}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <select
+                        value={st}
+                        onChange={(e) => handleUpdateStatus(o.orderId, e.target.value)}
+                        style={{ padding: '0.35rem 0.65rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', fontSize: '0.8rem', fontWeight: 700 }}
                       >
-                        <FileText size={14} />
-                        <span>Tax Invoice</span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        <option value="PENDING">PENDING</option>
+                        <option value="SUCCESS">PAID / SUCCESS</option>
+                        <option value="CONFIRMED">CONFIRMED</option>
+                        <option value="PACKED">PACKED</option>
+                        <option value="SHIPPED">SHIPPED</option>
+                        <option value="OUT_FOR_DELIVERY">OUT FOR DELIVERY</option>
+                        <option value="DELIVERED">DELIVERED</option>
+                        <option value="RETURN_REQUESTED">🔄 RETURN REQUESTED</option>
+                        <option value="REFUNDED">💰 REFUNDED</option>
+                        <option value="REPLACED">📦 REPLACED</option>
+                        <option value="CANCELLED">CANCELLED</option>
+                      </select>
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        {isReturnOrRefund ? (
+                          <button
+                            onClick={() => setRefundModalOrder(o)}
+                            style={{ padding: '0.45rem 0.85rem', borderRadius: '0.5rem', border: '1px solid #d97706', background: '#fffbeb', color: '#b45309', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                          >
+                            <RotateCcw size={14} />
+                            <span>Manage Return</span>
+                          </button>
+                        ) : null}
+
+                        <button
+                          onClick={() => setSelectedOrderDetails(o)}
+                          style={{ padding: '0.45rem 0.85rem', borderRadius: '0.5rem', border: '1px solid #cbd5e1', background: '#059669', color: '#fff', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', boxShadow: '0 2px 6px rgba(5,150,105,0.25)' }}
+                        >
+                          <FileText size={14} />
+                          <span>Tax Invoice</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
       </div>
+
+      {/* Process Refund / Replacement Modal */}
+      {refundModalOrder && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{ background: '#ffffff', borderRadius: '1.25rem', padding: '1.75rem', width: '100%', maxWidth: 520, border: '1.5px solid #e2e8f0', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <RotateCcw size={22} style={{ color: '#d97706' }} />
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>Return & Refund Action</h3>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>Order #{refundModalOrder.orderId}</p>
+                </div>
+              </div>
+              <button onClick={() => setRefundModalOrder(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={20} /></button>
+            </div>
+
+            <div style={{ background: '#f8fafc', borderRadius: '0.75rem', padding: '1rem', marginBottom: '1.25rem', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.4rem' }}>
+                <span style={{ color: '#64748b', fontWeight: 600 }}>Customer Name:</span>
+                <span style={{ fontWeight: 800, color: '#0f172a' }}>{refundModalOrder.customerName}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.4rem' }}>
+                <span style={{ color: '#64748b', fontWeight: 600 }}>Total Order Value:</span>
+                <span style={{ fontWeight: 900, color: '#059669' }}>₹{Number(refundModalOrder.totalAmount || 0).toLocaleString('en-IN')}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                <span style={{ color: '#64748b', fontWeight: 600 }}>Current Stage:</span>
+                <span style={{ fontWeight: 800, color: '#b45309' }}>{refundModalOrder.status}</span>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '1rem' }}>
+              Select resolution action for this customer request:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <button
+                onClick={() => handleProcessRefundOrReplace(refundModalOrder.orderId, 'REFUNDED', 'Refund of ₹' + refundModalOrder.totalAmount + ' approved & processed.')}
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '0.75rem', border: 'none', background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(5,150,105,0.3)' }}
+              >
+                <DollarSign size={18} />
+                <span>Approve & Process Refund (₹{refundModalOrder.totalAmount})</span>
+              </button>
+
+              <button
+                onClick={() => handleProcessRefundOrReplace(refundModalOrder.orderId, 'REPLACED', 'Replacement medicine package created.')}
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '0.75rem', border: 'none', background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: '#ffffff', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(37,99,235,0.3)' }}
+              >
+                <RefreshCw size={18} />
+                <span>Approve & Ship Replacement Package</span>
+              </button>
+
+              <button
+                onClick={() => handleProcessRefundOrReplace(refundModalOrder.orderId, 'DELIVERED', 'Return request rejected. Order remains delivered.')}
+                style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1.5px solid #cbd5e1', background: '#ffffff', color: '#64748b', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+              >
+                <span>Reject Return Request (Keep Delivered)</span>
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Official Medical Tax Invoice Modal */}
       {selectedOrderDetails && (

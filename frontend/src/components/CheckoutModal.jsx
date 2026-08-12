@@ -340,9 +340,24 @@ export const CheckoutModal = ({
         });
         setIsProcessing(false);
         const orderIdVal = orderRes?.data?.orderId || orderRes?.orderId || 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+        const placedOrderObj = orderRes?.data || {
+          orderId: orderIdVal,
+          status: 'SUCCESS',
+          totalAmount: grandTotal,
+          createdAt: new Date().toISOString(),
+          shippingAddress: shippingAddress.trim(),
+          paymentMethod: chosenPaymentMethod,
+          items: payloadItems
+        };
+        try {
+          const existing = JSON.parse(localStorage.getItem('sanjeevani_orders') || '[]');
+          const filtered = existing.filter(o => o && String(o.orderId || o.id) !== String(orderIdVal));
+          localStorage.setItem('sanjeevani_orders', JSON.stringify([placedOrderObj, ...filtered]));
+        } catch (e) {}
+
         setSuccessOrderId(orderIdVal);
-        if (onOrderPlaced) onOrderPlaced(orderRes?.data || { orderId: orderIdVal });
-        if (onPaymentSuccess) onPaymentSuccess(orderRes?.data || { orderId: orderIdVal });
+        if (onOrderPlaced) onOrderPlaced(placedOrderObj);
+        if (onPaymentSuccess) onPaymentSuccess(placedOrderObj);
         return;
       }
 

@@ -917,23 +917,64 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
 
   const handleCreateSampleOrder = async () => {
     setCreatingDemo(true);
+    const newDemoOrder = {
+      orderId: `ORD-${Date.now().toString().slice(-6)}`,
+      status: 'CONFIRMED',
+      totalAmount: 499.00,
+      createdAt: new Date().toISOString(),
+      shippingAddress: 'Flat 402, Block A, Jubilee Hills, Hyderabad - 500033',
+      paymentMethod: 'UPI / Online Payment',
+      customerName: 'Sanjeevani User',
+      customerEmail: 'customer@sanjeevani.com',
+      items: [
+        {
+          productId: 1,
+          productName: 'Protinex Health & Nutrition Powder (Chocolate 500g)',
+          quantity: 1,
+          pricePerUnit: 499.00,
+          totalPrice: 499.00,
+          imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80'
+        }
+      ]
+    };
+
     try {
       const res = await shopService.buyNow({
         productId: 1,
         quantity: 1,
         shippingAddress: 'Flat 402, Block A, Jubilee Hills, Hyderabad - 500033'
       });
-      if (res && res.success) {
-        if (onOrderCreated) {
-          await onOrderCreated();
-        }
-        const updated = await shopService.getOrders();
-        if (updated && updated.success && Array.isArray(updated.data)) {
-          setModalOrders(updated.data);
-        }
+      
+      const createdObj = (res && res.success && res.data) ? res.data : newDemoOrder;
+      
+      // Save locally to device
+      try {
+        const existing = JSON.parse(localStorage.getItem('sanjeevani_orders') || '[]');
+        const filtered = existing.filter(o => o && String(o.orderId || o.id) !== String(createdObj.orderId || createdObj.id));
+        const updated = [createdObj, ...filtered];
+        localStorage.setItem('sanjeevani_orders', JSON.stringify(updated));
+      } catch (e) {}
+
+      if (onOrderCreated) {
+        await onOrderCreated();
+      }
+      
+      const updated = await shopService.getOrders();
+      if (updated && updated.success && Array.isArray(updated.data)) {
+        setModalOrders(updated.data);
       }
     } catch (err) {
-      console.error('Failed to create demo order:', err);
+      console.log('Using fallback demo order:', err);
+      try {
+        const existing = JSON.parse(localStorage.getItem('sanjeevani_orders') || '[]');
+        const filtered = existing.filter(o => o && String(o.orderId || o.id) !== String(newDemoOrder.orderId));
+        const updated = [newDemoOrder, ...filtered];
+        localStorage.setItem('sanjeevani_orders', JSON.stringify(updated));
+      } catch (e) {}
+
+      if (onOrderCreated) {
+        await onOrderCreated();
+      }
     } finally {
       setCreatingDemo(false);
     }
@@ -941,11 +982,21 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
 
   // Deduplicate and sort orders from Latest / Newest first (top) to Oldest last (bottom)
   const sortedOrders = React.useMemo(() => {
-    const listToUse = Array.isArray(modalOrders) && modalOrders.length > 0 ? modalOrders : (Array.isArray(orders) ? orders : []);
-    if (!listToUse.length) return [];
+    let localSaved = [];
+    try {
+      const rawLocal = localStorage.getItem('sanjeevani_orders');
+      if (rawLocal) {
+        const parsed = JSON.parse(rawLocal);
+        if (Array.isArray(parsed)) localSaved = parsed;
+      }
+    } catch (e) {}
+
+    const apiList = Array.isArray(modalOrders) && modalOrders.length > 0 ? modalOrders : (Array.isArray(orders) ? orders : []);
+    const combined = [...apiList, ...localSaved];
+    if (!combined.length) return [];
 
     const uniqueMap = new Map();
-    listToUse.forEach(o => {
+    combined.forEach(o => {
       if (!o) return;
       if (String(o.status || '').toUpperCase() === 'FAILED') return;
       const key = String(o.orderId || o.id || Math.random()).trim().toLowerCase();

@@ -680,27 +680,8 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
             };
           }
         } else if (orders.length > 0) {
-          // ── Show all orders summary ──
-          const formatStatusBadge = (st) => {
-            const s = String(st || '').toUpperCase();
-            if (s === 'PACKED') return '📦 Packed & Ready';
-            if (s === 'SUCCESS' || s === 'CONFIRMED' || s === 'PAID') return '✅ Order Confirmed';
-            if (s === 'DELIVERED') return '🎉 Delivered';
-            if (s === 'OUT_FOR_DELIVERY') return '🚚 Out for Delivery';
-            if (s === 'SHIPPED') return '🚀 Shipped';
-            if (s === 'CANCELLED') return '❌ Cancelled';
-            return '⏳ ' + (st || 'Processing');
-          };
-
-          const orderSummaries = orders.slice(0, 5).map((o, i) => {
-            const statusBadge = formatStatusBadge(o.orderStatus || o.paymentStatus || o.status);
-            const total = fmtPrice(o.grandTotal || o.totalAmount);
-            const date = fmtDate(o.createdAt || o.orderDate);
-            const itemsCount = Array.isArray(o.items) ? o.items.length : 1;
-            return `${i + 1}. #${o.orderId}\n   • Status: ${statusBadge}\n   • Amount: ${total} (${itemsCount} item${itemsCount > 1 ? 's' : ''})\n   • Date: ${date}`;
-          }).join('\n\n');
-
-          botResponse.text = `📋 Your Orders Summary (${orders.length} total | Total Spent: ${fmtPrice(totalSpent)})\n\n${orderSummaries}${orders.length > 5 ? `\n\n...and ${orders.length - 5} more orders available in your account.` : ''}`;
+          botResponse.text = `📋 Your Orders (${orders.length} total | Total Spent: ${fmtPrice(totalSpent)}):`;
+          botResponse.orderList = orders.slice(0, 5);
           botResponse.actionBtn = {
             label: '📦 View All Orders & Track Live',
             onClick: () => { setIsOpen(false); if (onOpenOrders) onOpenOrders(); else navigate('/track-order'); }
@@ -1415,6 +1396,82 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                             </button>
                           </div>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Interactive Structured Order Cards */}
+                    {msg.orderList && msg.orderList.length > 0 && (
+                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                        {msg.orderList.map((ord) => {
+                          const s = String(ord.orderStatus || ord.paymentStatus || ord.status || '').toUpperCase();
+                          let statusLabel = '⏳ Processing';
+                          let statusBg = '#fff7ed';
+                          let statusColor = '#c2410c';
+                          let statusBorder = '#ffedd5';
+
+                          if (s === 'PACKED') {
+                            statusLabel = '📦 Packed & Ready';
+                            statusBg = '#eff6ff';
+                            statusColor = '#1d4ed8';
+                            statusBorder = '#dbeafe';
+                          } else if (s === 'SUCCESS' || s === 'CONFIRMED' || s === 'PAID') {
+                            statusLabel = '✅ Order Confirmed';
+                            statusBg = '#ecfdf5';
+                            statusColor = '#047857';
+                            statusBorder = '#a7f3d0';
+                          } else if (s === 'DELIVERED') {
+                            statusLabel = '🎉 Delivered';
+                            statusBg = '#f0fdf4';
+                            statusColor = '#15803d';
+                            statusBorder = '#bbf7d0';
+                          } else if (s === 'OUT_FOR_DELIVERY') {
+                            statusLabel = '🚚 Out for Delivery';
+                            statusBg = '#fefce8';
+                            statusColor = '#a16207';
+                            statusBorder = '#fef08a';
+                          } else if (s === 'CANCELLED') {
+                            statusLabel = '❌ Cancelled';
+                            statusBg = '#fef2f2';
+                            statusColor = '#b91c1c';
+                            statusBorder = '#fecaca';
+                          }
+
+                          const total = fmtPrice(ord.grandTotal || ord.totalAmount);
+                          const date = fmtDate(ord.createdAt || ord.orderDate);
+                          const itemsCount = Array.isArray(ord.items) ? ord.items.length : 1;
+
+                          return (
+                            <div
+                              key={ord.orderId}
+                              onClick={() => {
+                                setIsOpen(false);
+                                navigate(`/track-order/${ord.orderId}`);
+                              }}
+                              style={{
+                                background: '#ffffff',
+                                padding: '0.65rem 0.85rem',
+                                borderRadius: '12px',
+                                border: '1.5px solid #cbd5e1',
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.35rem'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
+                                <span style={{ fontSize: '0.84rem', fontWeight: 900, color: '#0369a1' }}>#{ord.orderId}</span>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: 99, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
+                                  {statusLabel}
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                                <span style={{ fontWeight: 900, color: '#059669' }}>{total} ({itemsCount} item{itemsCount > 1 ? 's' : ''})</span>
+                                <span style={{ color: '#64748b', fontWeight: 600 }}>{date}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 

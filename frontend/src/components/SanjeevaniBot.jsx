@@ -989,24 +989,23 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
         }
 
         if (medicineMatches.length > 0) {
-          botResponse.text = `${symptomResult.emoji} ${symptomResult.advice}\n\nHere are recommended products available on Sanjeevani for "${symptomResult.symptomName}":`;
+          botResponse.text = `✨ ${symptomResult.emoji} ${symptomResult.symptomName} Healthcare Guide\n\n💡 Clinical Advice:\n${symptomResult.advice}\n\n🛒 Top Recommended Verified Products on Sanjeevani:`;
           botResponse.products = medicineMatches.slice(0, 4);
           botResponse.actionBtn = {
-            label: `🔍 Browse All Medicines for ${symptomResult.symptomName}`,
+            label: `🔍 View All ${symptomResult.symptomName} Products ➔`,
             onClick: () => { setIsOpen(false); navigate('/dashboard'); }
           };
         } else {
-          botResponse.text = `${symptomResult.emoji} ${symptomResult.advice}\n\n⚠️ We couldn't find a specific match in our current inventory for "${symptomResult.symptomName}". Browse our full catalog:`;
-          botResponse.quickReplies = [
-            { label: '💊 Prescriptions & Pharmacy', action: 'cat_prescriptions', catData: CATEGORIES[0] },
-            { label: '🏋️ Nutrition & Health', action: 'cat_nutrition', catData: CATEGORIES[1] },
-            { label: '🩺 Medical Devices', action: 'cat_devices', catData: CATEGORIES[2] },
-          ];
+          botResponse.text = `✨ ${symptomResult.emoji} ${symptomResult.symptomName} Healthcare Guide\n\n💡 Clinical Advice:\n${symptomResult.advice}\n\n🔍 Browse our verified pharmacy catalog for options:`;
+          botResponse.actionBtn = {
+            label: '💊 Browse Full Pharmacy Catalog ➔',
+            onClick: () => { setIsOpen(false); navigate('/dashboard'); }
+          };
         }
       } catch (e) {
-        botResponse.text = `${symptomResult.emoji} ${symptomResult.advice}\n\nBrowse our medicine catalog on Sanjeevani Store.`;
+        botResponse.text = `✨ ${symptomResult.emoji} ${symptomResult.symptomName} Healthcare Guide\n\n💡 Clinical Advice:\n${symptomResult.advice}`;
         botResponse.actionBtn = {
-          label: '💊 Browse Medicines',
+          label: '💊 Browse Medicines ➔',
           onClick: () => { setIsOpen(false); navigate('/dashboard'); }
         };
       }

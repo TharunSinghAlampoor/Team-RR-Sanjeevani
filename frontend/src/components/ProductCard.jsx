@@ -153,13 +153,13 @@ const ProductCard = React.memo(({
             cursor: inStock ? 'pointer' : 'not-allowed',
             transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             background: inCartActive
-              ? 'linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%)'
-              : 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+              ? 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)'
+              : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
             color: '#ffffff',
             border: 'none',
             boxShadow: inCartActive
-              ? '0 4px 16px rgba(124, 58, 237, 0.42)'
-              : '0 4px 16px rgba(139, 92, 246, 0.38)',
+              ? '0 4px 16px rgba(13, 148, 136, 0.42)'
+              : '0 4px 16px rgba(2, 132, 199, 0.38)',
           }}
         >
           {inCartActive ? (

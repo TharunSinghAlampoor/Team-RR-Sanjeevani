@@ -275,6 +275,12 @@ export const ProductDetailsPage = () => {
     return product ? !!favoritesMap[product.productId] : false;
   }, [product, favoritesMap]);
 
+  const isInCart = useMemo(() => {
+    if (!product || !cartItems.length) return false;
+    const pId = String(product.productId || product.id || product._id);
+    return cartItems.some(item => String(item.productId || item.id || item._id) === pId);
+  }, [product, cartItems]);
+
   // Related products from same category
   const relatedProducts = useMemo(() => {
     if (!product || !allProducts.length) return [];

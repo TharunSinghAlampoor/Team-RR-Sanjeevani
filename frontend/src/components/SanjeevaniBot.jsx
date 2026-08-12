@@ -1378,45 +1378,45 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                           <div
                             key={prod.id || prod.productId}
                             style={{
-                              display: 'flex', alignItems: 'center', gap: '0.75rem',
-                              background: '#ffffff', padding: '0.65rem 0.85rem',
-                              borderRadius: '14px', border: '1.5px solid #e2e8f0',
+                              background: '#ffffff',
+                              padding: '0.75rem',
+                              borderRadius: '14px',
+                              border: '1.5px solid #cbd5e1',
                               boxShadow: '0 3px 10px rgba(0,0,0,0.04)',
-                              transition: 'all 0.2s ease'
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.65rem'
                             }}
                           >
+                            {/* Top Row: Image + Title & Rating & Price */}
                             <div
                               onClick={() => {
                                 setIsOpen(false);
                                 navigate(`/product/${prod.id || prod.productId}`);
                               }}
-                              style={{ width: 48, height: 48, borderRadius: '10px', overflow: 'hidden', background: '#f8fafc', flexShrink: 0, cursor: 'pointer', border: '1px solid #e2e8f0', padding: 2 }}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}
                             >
-                              <ProductImage src={prod.imageUrl} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                            </div>
+                              <div style={{ width: 50, height: 50, borderRadius: '10px', overflow: 'hidden', background: '#f8fafc', flexShrink: 0, border: '1px solid #e2e8f0', padding: 2 }}>
+                                <ProductImage src={prod.imageUrl} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                              </div>
 
-                            <div
-                              onClick={() => {
-                                setIsOpen(false);
-                                navigate(`/product/${prod.id || prod.productId}`);
-                              }}
-                              style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
-                            >
-                              <p style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {translateData(prod.name)}
-                              </p>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '2px' }}>
-                                <span style={{ fontSize: '0.82rem', color: '#059669', fontWeight: 900 }}>
-                                  ₹{prod.price}
-                                </span>
-                                <span style={{ fontSize: '0.68rem', fontWeight: 800, background: '#fffbeb', color: '#b45309', padding: '1px 5px', borderRadius: 99, border: '1px solid #fde68a' }}>
-                                  ★ {Number(prod.rating || 4.8).toFixed(1)}
-                                </span>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {translateData(prod.name)}
+                                </p>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.25rem', gap: '0.5rem' }}>
+                                  <span style={{ fontSize: '0.9rem', color: '#059669', fontWeight: 900, whiteSpace: 'nowrap' }}>
+                                    ₹{Number(prod.price || 0).toLocaleString('en-IN')}
+                                  </span>
+                                  <span style={{ fontSize: '0.72rem', fontWeight: 800, background: '#fffbeb', color: '#b45309', padding: '2px 7px', borderRadius: 99, border: '1px solid #fde68a', whiteSpace: 'nowrap' }}>
+                                    ★ {Number(prod.rating || 4.8).toFixed(1)}
+                                  </span>
+                                </div>
                               </div>
                             </div>
 
-                            {/* Dual Buttons: Add to Cart + Buy Now */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                            {/* Bottom Row: Dual Full-Width Action Buttons */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                               <button
                                 onClick={async (e) => {
                                   e.stopPropagation();
@@ -1428,17 +1428,17 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                                     navigate(`/product/${pId}`);
                                   }
                                 }}
-                                title="Add to Cart"
                                 style={{
+                                  flex: 1,
                                   background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                                   color: '#ffffff', border: 'none', borderRadius: '8px',
-                                  padding: '0.38rem 0.65rem', fontSize: '0.74rem', fontWeight: 800,
-                                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
+                                  padding: '0.45rem', fontSize: '0.78rem', fontWeight: 800,
+                                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
                                   boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)'
                                 }}
                               >
-                                <ShoppingCart style={{ width: 12, height: 12 }} />
-                                <span>Add</span>
+                                <ShoppingCart style={{ width: 13, height: 13 }} />
+                                <span>Add to Cart</span>
                               </button>
 
                               <button
@@ -1447,16 +1447,16 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                                   setIsOpen(false);
                                   navigate(`/product/${prod.id || prod.productId}`);
                                 }}
-                                title="Express Buy Now"
                                 style={{
+                                  flex: 1,
                                   background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                                   color: '#ffffff', border: 'none', borderRadius: '8px',
-                                  padding: '0.38rem 0.65rem', fontSize: '0.74rem', fontWeight: 800,
-                                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
+                                  padding: '0.45rem', fontSize: '0.78rem', fontWeight: 800,
+                                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
                                   boxShadow: '0 2px 6px rgba(37, 99, 235, 0.28)'
                                 }}
                               >
-                                ⚡ Buy
+                                <span>⚡ Buy Now</span>
                               </button>
                             </div>
                           </div>

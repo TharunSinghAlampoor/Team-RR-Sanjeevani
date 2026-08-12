@@ -123,11 +123,23 @@ public class AuthService {
             }
         }
 
-        if (userOpt.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
+        if (userOpt.isEmpty()) {
             throw AuthException.unauthorized("Invalid credentials. Please check your email/phone and password.");
         }
 
         User user = userOpt.get();
+        boolean passwordValid = passwordEncoder.matches(request.getPassword(), user.getPassword());
+
+        if (!passwordValid && request.getPassword().equals(user.getPassword())) {
+            passwordValid = true;
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            userRepository.save(user);
+            logger.info("Auto-upgraded plain text password to BCrypt hash for user: {}", user.getEmail());
+        }
+
+        if (!passwordValid) {
+            throw AuthException.unauthorized("Invalid credentials. Please check your email/phone and password.");
+        }
 
         String token = jwtService.generateToken(user.getUserId(), user.getEmail());
 

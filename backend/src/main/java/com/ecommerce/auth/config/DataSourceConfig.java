@@ -58,7 +58,7 @@ public class DataSourceConfig {
             config.setDriverClassName(dbDriver);
         } else {
             logger.warn("Activating embedded H2 database layer (jdbc:h2:mem:sanjeevani_db;MODE=MySQL) for Render service stability.");
-            config.setJdbcUrl("jdbc:h2:mem:sanjeevani_db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1");
+            config.setJdbcUrl("jdbc:h2:mem:sanjeevani_db;MODE=MySQL;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE");
             config.setUsername("sa");
             config.setPassword("");
             config.setDriverClassName("org.h2.Driver");

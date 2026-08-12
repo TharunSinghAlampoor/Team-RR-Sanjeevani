@@ -66,7 +66,7 @@ export const filterAndRankProducts = (allProds, rawQuery) => {
   const isAdultQuery = q.includes('adult') || q.includes('skin care') || q.includes('skincare') || q.includes('sunscreen') || q.includes('serum') || q.includes('acne') || q.includes('vitamin c');
   const isBabyQuery = q.includes('baby') || q.includes('kid') || q.includes('child') || q.includes('infant') || q.includes('pediatric') || q.includes('toddler');
 
-  const stopWords = ['show', 'find', 'search', 'give', 'me', 'want', 'need', 'what', 'is', 'tell', 'about', 'the', 'a', 'an', 'some', 'for', 'please', 'i', 'can', 'you', 'get', 'of', 'in', 'on', 'with'];
+  const stopWords = ['show', 'find', 'search', 'give', 'me', 'want', 'need', 'what', 'is', 'tell', 'about', 'the', 'a', 'an', 'some', 'for', 'please', 'i', 'can', 'you', 'get', 'of', 'in', 'on', 'with', 'care', 'health', 'healthcare', 'product', 'products', 'medicine', 'medicines', 'treatment', 'solution', 'solutions', 'good', 'best', 'top', 'buy', 'item', 'items'];
   const keywords = cleanQ.split(/\s+/).filter(w => !stopWords.includes(w) && w.length > 1);
 
   const scored = allProds.map(p => {

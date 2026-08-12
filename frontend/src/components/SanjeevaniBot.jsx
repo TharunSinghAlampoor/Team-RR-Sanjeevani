@@ -1228,13 +1228,13 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
               bottom: '24px',
               right: '24px',
               zIndex: 10000,
-              width: 'min(410px, calc(100vw - 32px))',
-              height: '600px',
+              width: 'min(420px, calc(100vw - 32px))',
+              height: '610px',
               maxHeight: 'calc(100vh - 48px)',
               background: '#ffffff',
-              borderRadius: '20px',
-              boxShadow: '0 20px 50px rgba(15, 23, 42, 0.22), 0 8px 24px rgba(13, 92, 117, 0.15)',
-              border: '1.5px solid #cbd5e1',
+              borderRadius: '24px',
+              boxShadow: '0 24px 60px rgba(15, 23, 42, 0.28), 0 10px 30px rgba(5, 150, 105, 0.18)',
+              border: '1.5px solid rgba(5, 150, 105, 0.25)',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
@@ -1243,26 +1243,30 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
           >
             {/* 1. Header with Sanjeevani Brand Logo & Voice Controls */}
             <div style={{
-              background: 'linear-gradient(135deg, #0D5C75 0%, #059669 100%)',
+              background: 'linear-gradient(135deg, #064e3b 0%, #059669 50%, #047857 100%)',
               color: '#ffffff',
-              padding: '0.9rem 1.1rem',
+              padding: '0.95rem 1.15rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+              boxShadow: '0 4px 16px rgba(5, 150, 105, 0.25)'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <AnimatedDoctorRoboIcon size={32} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <AnimatedDoctorRoboIcon size={34} />
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.35rem', letterSpacing: '0.5px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.35rem', letterSpacing: '0.5px' }}>
                     SANJEEVANI
-                    <Sparkles style={{ width: 14, height: 14, color: '#fde047' }} />
+                    <Sparkles style={{ width: 15, height: 15, color: '#fde047' }} />
                   </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '1px' }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 6px #4ade80' }} />
+                    <span style={{ fontSize: '0.72rem', color: '#d1fae5', fontWeight: 700 }}>24/7 AI Health Assistant</span>
+                  </div>
                 </div>
               </div>
 
               {/* Controls: Voice On/Off Toggle + Close */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 {/* Text-to-Speech (Agent Talking) Toggle */}
                 <button
                   onClick={() => {
@@ -1272,13 +1276,14 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                   }}
                   title={isVoiceOutputEnabled ? 'Agent Voice ON — Click to mute' : 'Agent Voice OFF — Click to enable'}
                   style={{
-                    background: isVoiceOutputEnabled ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
+                    background: isVoiceOutputEnabled ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.25)',
                     border: '1px solid rgba(255,255,255,0.4)',
-                    borderRadius: '10px',
-                    padding: '0.25rem 0.6rem',
-                    display: 'flex', alignItems: 'center', gap: '0.3rem',
+                    borderRadius: '99px',
+                    padding: '0.3rem 0.7rem',
+                    display: 'flex', alignItems: 'center', gap: '0.35rem',
                     color: '#ffffff', cursor: 'pointer',
-                    fontSize: '0.7rem', fontWeight: 700,
+                    fontSize: '0.72rem', fontWeight: 800,
+                    backdropFilter: 'blur(4px)',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -1293,13 +1298,14 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                     window.speechSynthesis?.cancel();
                   }}
                   style={{
-                    background: 'rgba(255,255,255,0.15)', border: 'none',
-                    borderRadius: '50%', width: 30, height: 30,
+                    background: 'rgba(255,255,255,0.18)', border: 'none',
+                    borderRadius: '50%', width: 32, height: 32,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#ffffff', cursor: 'pointer'
+                    color: '#ffffff', cursor: 'pointer',
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  <X style={{ width: 16, height: 16 }} />
+                  <X style={{ width: 17, height: 17 }} />
                 </button>
               </div>
             </div>
@@ -1309,7 +1315,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
               flex: 1,
               overflowY: 'auto',
               padding: '1rem',
-              background: '#F0FDFA',
+              background: 'linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)',
               display: 'flex',
               flexDirection: 'column',
               gap: '1rem'

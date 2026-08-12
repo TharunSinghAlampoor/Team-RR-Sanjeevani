@@ -107,15 +107,23 @@ export const Login = () => {
       if (response && response.success && response.data) {
         const { token, user } = response.data;
         login(user, token);
-        // Instant background pre-warming of catalog data for sub-1ms page transitions
-        shopService.prefetchCatalog();
+        try {
+          if (shopService && typeof shopService.prefetchCatalog === 'function') {
+            shopService.prefetchCatalog().catch(() => {});
+          }
+        } catch (e) {}
         navigate('/dashboard', { state: { loginSuccess: true, userName: user?.fullName } });
       } else {
         setApiError(response?.message || 'Invalid credentials. Please try again.');
       }
     } catch (err) {
-      if (err.response && err.response.data) {
-        setApiError(err.response.data.message || 'Login failed. Please check your credentials.');
+      console.error('Login Error:', err);
+      if (err.response && err.response.data && err.response.data.message) {
+        setApiError(err.response.data.message);
+      } else if (err.response && err.response.data) {
+        setApiError(typeof err.response.data === 'string' ? err.response.data : 'Login failed. Please check your credentials.');
+      } else if (err.message && !err.message.includes('Network Error')) {
+        setApiError(err.message);
       } else {
         setApiError('Network error. Please check backend connection.');
       }

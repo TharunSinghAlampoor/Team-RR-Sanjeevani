@@ -108,6 +108,21 @@ public class AuthService {
                 identifier
         );
 
+        // Fallback search for phone number variations (+91 vs 10 digits)
+        if (userOpt.isEmpty()) {
+            String digitsOnly = identifier.replaceAll("[^0-9]", "");
+            if (digitsOnly.length() >= 10) {
+                String stripped10 = digitsOnly.substring(digitsOnly.length() - 10);
+                userOpt = userRepository.findByPhoneNumber(stripped10);
+                if (userOpt.isEmpty()) {
+                    userOpt = userRepository.findByPhoneNumber("+91" + stripped10);
+                }
+                if (userOpt.isEmpty()) {
+                    userOpt = userRepository.findByEmail(stripped10);
+                }
+            }
+        }
+
         if (userOpt.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
             throw AuthException.unauthorized("Invalid credentials. Please check your email/phone and password.");
         }

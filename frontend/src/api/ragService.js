@@ -58,6 +58,68 @@ const HF_MODELS = [
   'meta-llama/Llama-3.2-3B-Instruct'
 ];
 
+export const filterAndRankProducts = (allProds, rawQuery) => {
+  if (!allProds || !Array.isArray(allProds)) return [];
+  const q = rawQuery.toLowerCase().trim();
+  const cleanQ = q.replace(/[^a-z0-9\s]/g, '');
+
+  const isAdultQuery = q.includes('adult') || q.includes('skin care') || q.includes('skincare') || q.includes('sunscreen') || q.includes('serum') || q.includes('acne') || q.includes('vitamin c');
+  const isBabyQuery = q.includes('baby') || q.includes('kid') || q.includes('child') || q.includes('infant') || q.includes('pediatric') || q.includes('toddler');
+
+  const stopWords = ['show', 'find', 'search', 'give', 'me', 'want', 'need', 'what', 'is', 'tell', 'about', 'the', 'a', 'an', 'some', 'for', 'please', 'i', 'can', 'you', 'get', 'of', 'in', 'on', 'with'];
+  const keywords = cleanQ.split(/\s+/).filter(w => !stopWords.includes(w) && w.length > 1);
+
+  const scored = allProds.map(p => {
+    if (!p) return { product: p, score: -999 };
+    const name = (p.name || '').toLowerCase();
+    const desc = (p.description || '').toLowerCase();
+    const cat = (p.categoryName || '').toLowerCase();
+    const brand = (p.brand || '').toLowerCase();
+    const fullText = `${name} ${brand} ${desc} ${cat}`;
+    const noSpaceText = fullText.replace(/[^a-z0-9]/g, '');
+
+    // Audience Check
+    const isBabyProduct = cat.includes('baby') || cat.includes('kid') || name.includes('baby') || name.includes('child') || name.includes('pediatric') || name.includes('dermo cream');
+
+    if (isAdultQuery && isBabyProduct) {
+      return { product: p, score: -999 }; // Hard exclude baby products for adult requests!
+    }
+
+    if (isBabyQuery && !isBabyProduct) {
+      return { product: p, score: -999 }; // Exclude non-baby products when explicitly asking for baby care!
+    }
+
+    let score = 0;
+
+    // Exact phrase match
+    if (fullText.includes(q)) score += 50;
+
+    // Exact compound term (e.g. "vitamin c", "sun screen" vs "sunscreen")
+    const noSpaceQ = cleanQ.replace(/\s+/g, '');
+    if (noSpaceQ.length > 3 && noSpaceText.includes(noSpaceQ)) score += 30;
+
+    // Specific multi-word keywords match
+    if (q.includes('vitamin c') && (name.includes('vitamin c') || desc.includes('vitamin c') || cat.includes('vitamin c') || name.includes('serum') || desc.includes('serum'))) {
+      score += 40;
+    }
+
+    for (const kw of keywords) {
+      if (kw.length <= 1) continue;
+      if (name.includes(kw)) score += 15;
+      else if (cat.includes(kw)) score += 10;
+      else if (brand.includes(kw)) score += 10;
+      else if (desc.includes(kw)) score += 5;
+    }
+
+    return { product: p, score };
+  });
+
+  return scored
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.product);
+};
+
 export const performRAGQuery = async (queryText, userSession = {}) => {
   const rawQ = queryText.toLowerCase().trim();
   const cleanQ = rawQ.replace(/[^a-z0-9\s]/g, '');
@@ -74,22 +136,12 @@ export const performRAGQuery = async (queryText, userSession = {}) => {
     faq.keywords.some(kw => cleanQ.includes(kw))
   );
 
-  // B. Search Live Products Database
+  // B. Search Live Products Database with Scored Relevance & Strict Audience Filter
   try {
     const prodRes = await shopService.getProducts();
     const allProds = (prodRes && prodRes.success && Array.isArray(prodRes.data)) ? prodRes.data : [];
 
-    const keywords = cleanQ.split(/\s+/).filter(w => w.length > 2);
-    const noSpaceQuery = cleanQ.replace(/\s+/g, '');
-
-    matchingProducts = allProds.filter(p => {
-      if (!p) return false;
-      const text = `${p.name || ''} ${p.brand || ''} ${p.description || ''} ${p.categoryName || ''}`.toLowerCase();
-      const noSpaceText = text.replace(/[^a-z0-9]/g, '');
-
-      if (text.includes(rawQ) || noSpaceText.includes(noSpaceQuery)) return true;
-      return keywords.some(kw => text.includes(kw));
-    });
+    matchingProducts = filterAndRankProducts(allProds, queryText);
 
     productContext = (matchingProducts.length > 0 ? matchingProducts : allProds.slice(0, 4)).map(p => 
       `• ${p.name} | Price: ₹${p.price} | Rating: ★${p.rating || 4.8} | Category: ${p.categoryName} | Stock: ${p.stock > 0 ? 'In Stock' : 'Out of Stock'}`

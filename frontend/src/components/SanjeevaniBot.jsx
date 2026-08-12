@@ -8,7 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import shopService from '../api/shopService';
-import { performRAGQuery } from '../api/ragService';
+import { performRAGQuery, filterAndRankProducts } from '../api/ragService';
 import ProductImage from './ProductImage';
 
 const SPEECH_LANG_MAP = {
@@ -1033,32 +1033,8 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
       try {
         const res = await shopService.getProducts();
         const allProds = (res && res.success && Array.isArray(res.data)) ? res.data : [];
-        const stopWords = ['show', 'find', 'search', 'give', 'me', 'want', 'need', 'what', 'is', 'tell', 'about', 'the', 'a', 'an', 'some', 'for', 'please', 'i', 'can', 'you', 'get'];
-        const rawClean = translatedQ.toLowerCase();
-        const noSpaceQuery = rawClean.replace(/[^a-z0-9]/g, '');
 
-        const keywords = rawClean
-          .split(/\s+/)
-          .filter(w => !stopWords.includes(w) && w.length > 1);
-
-        const matched = allProds.filter(p => {
-          if (!p) return false;
-          const name = (p.name || '').toLowerCase();
-          const desc = (p.description || '').toLowerCase();
-          const cat = (p.categoryName || '').toLowerCase();
-          const brand = (p.brand || '').toLowerCase();
-          const fullText = `${name} ${desc} ${cat} ${brand}`;
-          const fullNoSpace = fullText.replace(/[^a-z0-9]/g, '');
-
-          // Direct substring or normalized no-space match (e.g. "sun screen" vs "sunscreen")
-          if (fullText.includes(rawQ) || fullNoSpace.includes(noSpaceQuery)) return true;
-
-          // Keyword match
-          if (keywords.length > 0) {
-            return keywords.some(kw => fullText.includes(kw) || fullNoSpace.includes(kw));
-          }
-          return false;
-        });
+        const matched = filterAndRankProducts(allProds, queryText);
 
         if (matched.length > 0) {
           botResponse.text = `🔍 Found ${matched.length} product(s) matching "${queryText}":`;

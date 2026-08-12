@@ -26,7 +26,14 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const isPublicAuthEndpoint = error.config && error.config.url && (
+      error.config.url.includes('/login') ||
+      error.config.url.includes('/register') ||
+      error.config.url.includes('/forgot-password') ||
+      error.config.url.includes('/verify-otp') ||
+      error.config.url.includes('/reset-password')
+    );
+    if (!isPublicAuthEndpoint && error.response && error.response.status === 401) {
       clearSessionCookies();
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');

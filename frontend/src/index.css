@@ -5112,14 +5112,14 @@ body:has(.dashboard-page) {
 
 .pd-btn--buy {
   flex: 1;
-  background: linear-gradient(135deg, #0f766e, #059669);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: #ffffff;
-  box-shadow: 0 4px 16px rgba(15, 118, 110, 0.25);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }
 
 .pd-btn--buy:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.35);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.48);
 }
 
 .pd-btn--buy:disabled {

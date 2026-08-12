@@ -692,7 +692,7 @@ export const ProductDetailsPage = () => {
                 style={{
                   padding: '0.9rem 1.25rem',
                   borderRadius: '0.85rem',
-                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                   border: 'none',
                   color: '#ffffff',
                   fontWeight: 800,
@@ -702,10 +702,10 @@ export const ProductDetailsPage = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '0.5rem',
-                  boxShadow: '0 4px 14px rgba(5, 150, 105, 0.35)',
+                  boxShadow: '0 4px 16px rgba(37, 99, 235, 0.38)',
                   opacity: inStock ? 1 : 0.6
                 }}
-                whileHover={inStock ? { scale: 1.02 } : {}}
+                whileHover={inStock ? { scale: 1.02, boxShadow: '0 8px 24px rgba(37, 99, 235, 0.48)' } : {}}
                 whileTap={inStock ? { scale: 0.97 } : {}}
               >
                 <CreditCard style={{ width: 18, height: 18 }} /> Buy Now

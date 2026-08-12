@@ -722,9 +722,10 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
             guide = '📦 Return Policy:\n• 7-day doorstep return guarantee\n• Free pickup from your address\n• Choose refund or replacement\n• Go to Track Order page to initiate';
           }
 
-          botResponse.text = `${guide}\n\n📋 Your eligible orders:\n${orderList}`;
+          botResponse.text = `${guide}\n\n📋 Select an eligible order below to initiate Return, Refund, or Cancellation:`;
+          botResponse.orderList = eligibleOrders.slice(0, 4);
           botResponse.actionBtn = {
-            label: '📦 Go to Track Order Page',
+            label: '📦 Open Live Tracking & Returns Portal ➔',
             onClick: () => { setIsOpen(false); navigate('/track-order'); }
           };
         } else {
@@ -1545,6 +1546,43 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}>
                                 <span style={{ fontWeight: 900, color: '#059669' }}>{total} ({itemsCount} item{itemsCount > 1 ? 's' : ''})</span>
                                 <span style={{ color: '#64748b', fontWeight: 600 }}>{date}</span>
+                              </div>
+
+                              {/* Dual Action Buttons for Order Card */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsOpen(false);
+                                    navigate(`/track-order/${ord.orderId}`);
+                                  }}
+                                  style={{
+                                    flex: 1,
+                                    background: 'linear-gradient(135deg, #0369a1 0%, #0284c7 100%)',
+                                    color: '#ffffff', border: 'none', borderRadius: '8px',
+                                    padding: '0.38rem 0.5rem', fontSize: '0.74rem', fontWeight: 800,
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'
+                                  }}
+                                >
+                                  <span>📦 Track Package</span>
+                                </button>
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsOpen(false);
+                                    navigate(`/track-order/${ord.orderId}`);
+                                  }}
+                                  style={{
+                                    flex: 1,
+                                    background: '#f8fafc',
+                                    color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '8px',
+                                    padding: '0.38rem 0.5rem', fontSize: '0.74rem', fontWeight: 800,
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'
+                                  }}
+                                >
+                                  <span>🔄 Refund / Return</span>
+                                </button>
                               </div>
                             </div>
                           );

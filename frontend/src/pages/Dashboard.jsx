@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -14,16 +14,16 @@ import BrandLoader from '../components/BrandLoader';
 import ToastNotification from '../components/ToastNotification';
 import { getCookie } from '../utils/cookieUtils';
 
-// Direct modal & drawer imports for instant UI responsiveness
-import ProductDetailsModal from '../components/ProductDetailsModal';
-import CartDrawer from '../components/CartDrawer';
-import FavoritesDrawer from '../components/FavoritesDrawer';
-import BuyNowModal from '../components/BuyNowModal';
-import CheckoutModal from '../components/CheckoutModal';
-import OrdersModal from '../components/OrdersModal';
-import OrderSuccessModal from '../components/OrderSuccessModal';
-import ProfileSidebar from '../components/ProfileSidebar';
-import SanjeevaniBot from '../components/SanjeevaniBot';
+// Lazy-loaded heavy drawers & modals for optimized bundle size & fast initial page load
+const ProductDetailsModal = lazy(() => import('../components/ProductDetailsModal'));
+const CartDrawer = lazy(() => import('../components/CartDrawer'));
+const FavoritesDrawer = lazy(() => import('../components/FavoritesDrawer'));
+const BuyNowModal = lazy(() => import('../components/BuyNowModal'));
+const CheckoutModal = lazy(() => import('../components/CheckoutModal'));
+const OrdersModal = lazy(() => import('../components/OrdersModal'));
+const OrderSuccessModal = lazy(() => import('../components/OrderSuccessModal'));
+const ProfileSidebar = lazy(() => import('../components/ProfileSidebar'));
+const SanjeevaniBot = lazy(() => import('../components/SanjeevaniBot'));
 
 import { Search, SlidersHorizontal, RotateCcw, LayoutGrid } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -411,7 +411,7 @@ export const Dashboard = () => {
 
   // ─── Pagination for Separate Product Pages ─────────────────────────
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 8;
+  const ITEMS_PER_PAGE = 9;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -869,7 +869,6 @@ export const Dashboard = () => {
         <SanjeevaniBot
           onOpenCart={() => setIsCartOpen(true)}
           onOpenOrders={() => setIsOrdersOpen(true)}
-          onOpenPrescriptionModal={() => setIsPrescriptionModalOpen && setIsPrescriptionModalOpen(true)}
         />
         <ToastNotification toast={toast} onClose={() => setToast(null)} />
       </React.Suspense>

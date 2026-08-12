@@ -14,6 +14,7 @@ public class OrderDto {
     private String customerEmail;
     private String customerPhone;
     private String shippingAddress;
+    private String paymentMethod;
     private String paymentId;
     private String referenceNumber;
     private List<OrderItemDto> items;
@@ -39,6 +40,9 @@ public class OrderDto {
 
     public String getShippingAddress() { return shippingAddress; }
     public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 
     public String getPaymentId() { return paymentId; }
     public void setPaymentId(String paymentId) { this.paymentId = paymentId; }

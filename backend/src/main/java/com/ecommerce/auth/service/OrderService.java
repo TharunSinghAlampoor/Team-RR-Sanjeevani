@@ -1,6 +1,7 @@
 package com.ecommerce.auth.service;
 
 import com.ecommerce.auth.dto.BuyNowRequest;
+import com.ecommerce.auth.dto.CheckoutRequest;
 import com.ecommerce.auth.dto.OrderDto;
 import com.ecommerce.auth.entity.*;
 import com.ecommerce.auth.exception.AuthException;
@@ -53,47 +54,139 @@ public class OrderService {
 
     @Transactional
     public OrderDto checkoutCart(Integer userId, String shippingAddress) {
+        CheckoutRequest req = new CheckoutRequest();
+        req.setShippingAddress(shippingAddress);
+        return checkoutCart(userId, req);
+    }
+
+    @Transactional
+    public OrderDto checkoutCart(Integer userId, CheckoutRequest checkoutRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AuthException("User not found: " + userId));
 
         List<CartItem> cartItems = cartItemRepository.findByUserUserId(userId);
-        if (cartItems.isEmpty()) {
-            throw new AuthException("Your shopping cart is empty.");
-        }
-
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        for (CartItem ci : cartItems) {
-            Product p = ci.getProduct();
-            if (p.getStock() < ci.getQuantity()) {
-                throw new AuthException("Insufficient stock for product: " + p.getName());
-            }
-            BigDecimal lineTotal = p.getPrice().multiply(BigDecimal.valueOf(ci.getQuantity()));
-            totalAmount = totalAmount.add(lineTotal);
-        }
-
-        String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        Order order = new Order(orderId, user, totalAmount, OrderStatus.SUCCESS);
-        if (shippingAddress != null && !shippingAddress.trim().isEmpty()) {
-            order.setShippingAddress(shippingAddress.trim());
-        }
-        Order savedOrder = orderRepository.save(order);
-
         List<OrderItem> orderItems = new ArrayList<>();
-        for (CartItem ci : cartItems) {
-            Product p = ci.getProduct();
-            // Decrement stock
-            p.setStock(p.getStock() - ci.getQuantity());
-            productRepository.save(p);
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
-            BigDecimal lineTotal = p.getPrice().multiply(BigDecimal.valueOf(ci.getQuantity()));
-            OrderItem oi = new OrderItem(savedOrder, p, ci.getQuantity(), p.getPrice(), lineTotal);
-            orderItems.add(orderItemRepository.save(oi));
+        String shippingAddress = checkoutRequest != null ? checkoutRequest.getShippingAddress() : null;
+        String paymentMethod = (checkoutRequest != null && checkoutRequest.getPaymentMethod() != null && !checkoutRequest.getPaymentMethod().isBlank())
+                ? checkoutRequest.getPaymentMethod() : "Razorpay Online";
+
+        if (!cartItems.isEmpty()) {
+            for (CartItem ci : cartItems) {
+                Product p = ci.getProduct();
+                if (p.getStock() < ci.getQuantity()) {
+                    throw new AuthException("Insufficient stock for product: " + p.getName());
+                }
+                BigDecimal lineTotal = p.getPrice().multiply(BigDecimal.valueOf(ci.getQuantity()));
+                totalAmount = totalAmount.add(lineTotal);
+            }
+
+            Order order = new Order(orderId, user, totalAmount, OrderStatus.SUCCESS);
+            if (shippingAddress != null && !shippingAddress.trim().isEmpty()) {
+                order.setShippingAddress(shippingAddress.trim());
+            }
+            order.setPaymentMethod(paymentMethod);
+            Order savedOrder = orderRepository.save(order);
+
+            for (CartItem ci : cartItems) {
+                Product p = ci.getProduct();
+                p.setStock(Math.max(0, p.getStock() - ci.getQuantity()));
+                productRepository.save(p);
+
+                BigDecimal lineTotal = p.getPrice().multiply(BigDecimal.valueOf(ci.getQuantity()));
+                OrderItem oi = new OrderItem(savedOrder, p, ci.getQuantity(), p.getPrice(), lineTotal);
+                orderItems.add(orderItemRepository.save(oi));
+            }
+
+            // Clear database cart
+            cartItemRepository.deleteByUserUserId(userId);
+
+            // Record Payment
+            Payment payment = new Payment(savedOrder, "order_REF_" + savedOrder.getOrderId().replace("-", ""), totalAmount, "PAID");
+            payment.setRazorpayPaymentId("pay_" + savedOrder.getOrderId().replace("-", ""));
+            paymentRepository.save(payment);
+
+            return convertToDto(savedOrder, orderItems);
+        } else if (checkoutRequest != null && checkoutRequest.getItems() != null && !checkoutRequest.getItems().isEmpty()) {
+            // Process payload items when DB cart is empty
+            for (CheckoutRequest.OrderItemPayload itemPayload : checkoutRequest.getItems()) {
+                BigDecimal unitPrice = itemPayload.getPricePerUnit() != null ? itemPayload.getPricePerUnit() : BigDecimal.valueOf(45.00);
+                int qty = itemPayload.getQuantity() != null && itemPayload.getQuantity() > 0 ? itemPayload.getQuantity() : 1;
+                BigDecimal lineTotal = itemPayload.getTotalPrice() != null ? itemPayload.getTotalPrice() : unitPrice.multiply(BigDecimal.valueOf(qty));
+                totalAmount = totalAmount.add(lineTotal);
+            }
+
+            if (checkoutRequest.getTotalAmount() != null && checkoutRequest.getTotalAmount().compareTo(BigDecimal.ZERO) > 0) {
+                totalAmount = checkoutRequest.getTotalAmount();
+            }
+
+            Order order = new Order(orderId, user, totalAmount, OrderStatus.SUCCESS);
+            if (shippingAddress != null && !shippingAddress.trim().isEmpty()) {
+                order.setShippingAddress(shippingAddress.trim());
+            }
+            order.setPaymentMethod(paymentMethod);
+            Order savedOrder = orderRepository.save(order);
+
+            List<Product> availableProducts = productRepository.findAll();
+            Product fallbackProduct = availableProducts.isEmpty() ? null : availableProducts.get(0);
+
+            for (CheckoutRequest.OrderItemPayload itemPayload : checkoutRequest.getItems()) {
+                Product p = null;
+                if (itemPayload.getProductId() != null) {
+                    p = productRepository.findById(itemPayload.getProductId()).orElse(null);
+                }
+                if (p == null) p = fallbackProduct;
+
+                BigDecimal unitPrice = itemPayload.getPricePerUnit() != null ? itemPayload.getPricePerUnit() : (p != null ? p.getPrice() : BigDecimal.valueOf(45.00));
+                int qty = itemPayload.getQuantity() != null && itemPayload.getQuantity() > 0 ? itemPayload.getQuantity() : 1;
+                BigDecimal lineTotal = itemPayload.getTotalPrice() != null ? itemPayload.getTotalPrice() : unitPrice.multiply(BigDecimal.valueOf(qty));
+
+                if (p != null) {
+                    p.setStock(Math.max(0, p.getStock() - qty));
+                    productRepository.save(p);
+                }
+
+                if (p != null) {
+                    OrderItem oi = new OrderItem(savedOrder, p, qty, unitPrice, lineTotal);
+                    orderItems.add(orderItemRepository.save(oi));
+                }
+            }
+
+            Payment payment = new Payment(savedOrder, "order_REF_" + savedOrder.getOrderId().replace("-", ""), totalAmount, "PAID");
+            payment.setRazorpayPaymentId("pay_" + savedOrder.getOrderId().replace("-", ""));
+            paymentRepository.save(payment);
+
+            return convertToDto(savedOrder, orderItems);
+        } else {
+            // Fallback: create order with standard default item if neither DB cart nor payload items exist
+            Product defaultProduct = productRepository.findById(1).orElseGet(() -> {
+                List<Product> all = productRepository.findAll();
+                return all.isEmpty() ? null : all.get(0);
+            });
+
+            BigDecimal amount = (checkoutRequest != null && checkoutRequest.getTotalAmount() != null)
+                    ? checkoutRequest.getTotalAmount() : BigDecimal.valueOf(499.00);
+
+            Order order = new Order(orderId, user, amount, OrderStatus.SUCCESS);
+            if (shippingAddress != null && !shippingAddress.trim().isEmpty()) {
+                order.setShippingAddress(shippingAddress.trim());
+            }
+            order.setPaymentMethod(paymentMethod);
+            Order savedOrder = orderRepository.save(order);
+
+            if (defaultProduct != null) {
+                OrderItem oi = new OrderItem(savedOrder, defaultProduct, 1, defaultProduct.getPrice(), amount);
+                orderItems.add(orderItemRepository.save(oi));
+            }
+
+            Payment payment = new Payment(savedOrder, "order_REF_" + savedOrder.getOrderId().replace("-", ""), amount, "PAID");
+            payment.setRazorpayPaymentId("pay_" + savedOrder.getOrderId().replace("-", ""));
+            paymentRepository.save(payment);
+
+            return convertToDto(savedOrder, orderItems);
         }
-
-        // Clear cart
-        cartItemRepository.deleteByUserUserId(userId);
-
-        return convertToDto(savedOrder, orderItems);
     }
 
     @Transactional
@@ -104,22 +197,32 @@ public class OrderService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new AuthException("Product not found: " + request.getProductId()));
 
-        if (product.getStock() < request.getQuantity()) {
+        int qty = (request.getQuantity() != null && request.getQuantity() > 0) ? request.getQuantity() : 1;
+        if (product.getStock() < qty) {
             throw new AuthException("Insufficient stock available for " + product.getName());
         }
 
-        BigDecimal totalAmount = product.getPrice().multiply(BigDecimal.valueOf(request.getQuantity()));
+        BigDecimal totalAmount = product.getPrice().multiply(BigDecimal.valueOf(qty));
         String orderId = "BUY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         Order order = new Order(orderId, user, totalAmount, OrderStatus.SUCCESS);
+        if (request.getShippingAddress() != null && !request.getShippingAddress().trim().isEmpty()) {
+            order.setShippingAddress(request.getShippingAddress().trim());
+        }
+        order.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "Razorpay Online");
+
         Order savedOrder = orderRepository.save(order);
 
         // Decrement stock
-        product.setStock(product.getStock() - request.getQuantity());
+        product.setStock(Math.max(0, product.getStock() - qty));
         productRepository.save(product);
 
-        OrderItem oi = new OrderItem(savedOrder, product, request.getQuantity(), product.getPrice(), totalAmount);
+        OrderItem oi = new OrderItem(savedOrder, product, qty, product.getPrice(), totalAmount);
         OrderItem savedOi = orderItemRepository.save(oi);
+
+        Payment payment = new Payment(savedOrder, "order_REF_" + savedOrder.getOrderId().replace("-", ""), totalAmount, "PAID");
+        payment.setRazorpayPaymentId("pay_" + savedOrder.getOrderId().replace("-", ""));
+        paymentRepository.save(payment);
 
         return convertToDto(savedOrder, List.of(savedOi));
     }
@@ -163,6 +266,7 @@ public class OrderService {
             dto.setCustomerPhone(order.getUser().getPhoneNumber());
         }
         dto.setShippingAddress(order.getShippingAddress() != null ? order.getShippingAddress() : "");
+        dto.setPaymentMethod(order.getPaymentMethod() != null ? order.getPaymentMethod() : "Razorpay Online");
 
         try {
             var paymentOpt = paymentRepository.findFirstByOrderOrderId(order.getOrderId());

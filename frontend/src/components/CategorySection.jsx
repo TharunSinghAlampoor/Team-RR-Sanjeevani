@@ -130,7 +130,7 @@ export const CATEGORY_META = {
   },
 };
 
-const PREVIEW_COUNT = 5;
+const PREVIEW_COUNT = 6;
 
 const SkeletonCard = ({ index }) => (
   <div className="pcard pcard--skeleton" style={{ animationDelay: `${index * 0.08}s` }}>

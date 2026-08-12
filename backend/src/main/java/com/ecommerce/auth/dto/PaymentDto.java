@@ -20,8 +20,16 @@ public class PaymentDto {
     private Integer quantity;
     private String errorDescription;
     private String shippingAddress;
+    private String paymentMethod;
+    private java.util.List<CheckoutRequest.OrderItemPayload> items;
 
     public PaymentDto() {}
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public java.util.List<CheckoutRequest.OrderItemPayload> getItems() { return items; }
+    public void setItems(java.util.List<CheckoutRequest.OrderItemPayload> items) { this.items = items; }
 
     public String getShippingAddress() { return shippingAddress; }
     public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }

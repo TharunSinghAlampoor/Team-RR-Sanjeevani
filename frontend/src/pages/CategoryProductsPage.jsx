@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,21 +8,22 @@ import {
 
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-import CartDrawer from '../components/CartDrawer';
-import FavoritesDrawer from '../components/FavoritesDrawer';
-import OrdersModal from '../components/OrdersModal';
-import ProductDetailsModal from '../components/ProductDetailsModal';
-import CheckoutModal from '../components/CheckoutModal';
-import BuyNowModal from '../components/BuyNowModal';
 import BrandLoader from '../components/BrandLoader';
 import ToastNotification from '../components/ToastNotification';
-import ProfileSidebar from '../components/ProfileSidebar';
-import SanjeevaniBot from '../components/SanjeevaniBot';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getCookie } from '../utils/cookieUtils';
 import shopService from '../api/shopService';
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
+
+const CartDrawer = lazy(() => import('../components/CartDrawer'));
+const FavoritesDrawer = lazy(() => import('../components/FavoritesDrawer'));
+const OrdersModal = lazy(() => import('../components/OrdersModal'));
+const ProductDetailsModal = lazy(() => import('../components/ProductDetailsModal'));
+const CheckoutModal = lazy(() => import('../components/CheckoutModal'));
+const BuyNowModal = lazy(() => import('../components/BuyNowModal'));
+const ProfileSidebar = lazy(() => import('../components/ProfileSidebar'));
+const SanjeevaniBot = lazy(() => import('../components/SanjeevaniBot'));
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api').replace(/\/$/, '');
 
@@ -52,7 +53,7 @@ export function CategoryProductsPage() {
   const [sortBy, setSortBy] = useState('recommended');
   const [inStockOnly, setInStockOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 12;
 
   // Cart, Favorites & Drawers state
   const [cartItems, setCartItems] = useState([]);
@@ -77,13 +78,14 @@ export function CategoryProductsPage() {
     return map;
   }, [cartItems]);
 
-  // Reset drawers & pagination on route/filter change
+  // Reset drawers & pagination on route/filter change and scroll to top
   useEffect(() => {
     setIsFavoritesOpen(false);
     setIsCartOpen(false);
     setIsOrdersOpen(false);
     setSearchQuery('');
     setCurrentPage(1);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [categoryId]);
 
   useEffect(() => {
@@ -133,14 +135,17 @@ export function CategoryProductsPage() {
     }
   }, [cartItems, favorites, updateShoppingState]);
 
-  // Fetch products & categories
+  // Fetch products & categories immediately on mount and category change
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
 
-    const safetyTimer = setTimeout(() => {
-      if (isMounted) setLoading(false);
-    }, 1200);
+    // Immediately load existing cached products or catalog so UI renders instantly
+    shopService.getProducts({}).then(res => {
+      if (isMounted && res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+        setAllProducts(res.data);
+        setLoading(false);
+      }
+    }).catch(() => {});
 
     Promise.allSettled([
       shopService.getProducts({}),
@@ -151,18 +156,26 @@ export function CategoryProductsPage() {
     ])
       .then((results) => {
         if (!isMounted) return;
-        const prodsRes = results[0]?.status === 'fulfilled' ? results[0].value : [];
-        const catsRes = results[1]?.status === 'fulfilled' ? results[1].value : [];
+        const prodsRes = results[0]?.status === 'fulfilled' ? results[0].value : null;
+        const catsRes = results[1]?.status === 'fulfilled' ? results[1].value : null;
 
-        const prodsList = prodsRes && prodsRes.success && Array.isArray(prodsRes.data)
-          ? prodsRes.data
-          : (Array.isArray(prodsRes) ? prodsRes : (prodsRes && Array.isArray(prodsRes.data) ? prodsRes.data : []));
-        const catsList = catsRes && catsRes.success && Array.isArray(catsRes.data)
-          ? catsRes.data
-          : (Array.isArray(catsRes) ? catsRes : (catsRes && Array.isArray(catsRes.data) ? catsRes.data : []));
+        if (prodsRes) {
+          const prodsList = prodsRes.success && Array.isArray(prodsRes.data)
+            ? prodsRes.data
+            : (Array.isArray(prodsRes) ? prodsRes : []);
+          if (prodsList.length > 0) {
+            setAllProducts(prodsList);
+          }
+        }
 
-        setAllProducts(prodsList);
-        setCategories(catsList);
+        if (catsRes) {
+          const catsList = catsRes.success && Array.isArray(catsRes.data)
+            ? catsRes.data
+            : (Array.isArray(catsRes) ? catsRes : []);
+          if (catsList.length > 0) {
+            setCategories(catsList);
+          }
+        }
       })
       .catch((err) => {
         console.error('Fetch category products error:', err);
@@ -173,9 +186,8 @@ export function CategoryProductsPage() {
 
     return () => {
       isMounted = false;
-      clearTimeout(safetyTimer);
     };
-  }, [fetchCart, fetchFavorites, fetchOrders]);
+  }, [categoryId, fetchCart, fetchFavorites, fetchOrders]);
 
   // Determine current active category meta
   const currentCatMeta = useMemo(() => {
@@ -465,32 +477,6 @@ export function CategoryProductsPage() {
       />
 
       <main className="dashboard-main" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
-        {/* Row 1: Back Button Pinned to Far-Left Screen Corner */}
-        <div style={{ width: '100%', padding: '0 2rem', marginBottom: '1rem', display: 'flex', justifyContent: 'flex-start' }}>
-          <motion.div whileHover={{ x: -4 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              to="/dashboard"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                padding: '0.5rem 1.1rem',
-                borderRadius: '0.75rem',
-                background: '#ffffff',
-                border: '1.5px solid #a7f3d0',
-                color: '#047857',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                textDecoration: 'none',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <ArrowLeft style={{ width: 18, height: 18, color: '#059669' }} />
-              <span>Back</span>
-            </Link>
-          </motion.div>
-        </div>
 
 
 
@@ -606,99 +592,122 @@ export function CategoryProductsPage() {
 
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
-      {/* Drawers & Modals */}
-      {isCartOpen && (
-        <CartDrawer
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          cartItems={cartItems}
-          onUpdateQuantity={handleUpdateQuantity}
-          onRemoveItem={handleRemoveFromCart}
-          onCheckout={() => {
-            setIsCartOpen(false);
-            setIsCheckoutOpen(true);
-          }}
-          onProceedToCheckout={() => {
-            setIsCartOpen(false);
-            setIsCheckoutOpen(true);
-          }}
-        />
-      )}
+      <Suspense fallback={null}>
+        {isCartOpen && (
+          <CartDrawer
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            cartItems={cartItems}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemoveItem={handleRemoveFromCart}
+            onCheckout={() => {
+              setIsCartOpen(false);
+              setIsCheckoutOpen(true);
+            }}
+            onProceedToCheckout={() => {
+              setIsCartOpen(false);
+              setIsCheckoutOpen(true);
+            }}
+          />
+        )}
 
-      {isFavoritesOpen && (
-        <FavoritesDrawer
-          isOpen={isFavoritesOpen}
-          onClose={() => setIsFavoritesOpen(false)}
-          favorites={favorites}
-          onRemoveFavorite={async (prodId) => {
-            try {
-              await shopService.removeFavorite(prodId);
-              fetchFavorites();
-            } catch (e) { console.error(e); }
-          }}
-          onAddToCart={handleAddToCart}
-          onOpenDetails={(p) => setSelectedProductDetails(p)}
-        />
-      )}
+        {isFavoritesOpen && (
+          <FavoritesDrawer
+            isOpen={isFavoritesOpen}
+            onClose={() => setIsFavoritesOpen(false)}
+            favorites={favorites}
+            onRemoveFavorite={async (prodId) => {
+              try {
+                await shopService.removeFavorite(prodId);
+                fetchFavorites();
+              } catch (e) { console.error(e); }
+            }}
+            onAddToCart={handleAddToCart}
+            onOpenDetails={(p) => setSelectedProductDetails(p)}
+          />
+        )}
 
-      {selectedProductDetails && (
-        <ProductDetailsModal
-          product={selectedProductDetails}
-          relatedProducts={allProducts.filter(p => p.categoryName === selectedProductDetails.categoryName && (p.productId || p.id) !== (selectedProductDetails.productId || selectedProductDetails.id))}
-          isFavorite={favorites.some(f => (f.productId || f.id) === (selectedProductDetails.productId || selectedProductDetails.id))}
-          onClose={() => setSelectedProductDetails(null)}
-          onToggleFavorite={handleToggleFavorite}
-          onAddToCart={handleAddToCart}
-          onBuyNow={handleStartBuyNow}
-          onSelectProduct={(p) => setSelectedProductDetails(p)}
-        />
-      )}
+        {selectedProductDetails && (
+          <ProductDetailsModal
+            product={selectedProductDetails}
+            relatedProducts={allProducts.filter(p => p.categoryName === selectedProductDetails.categoryName && (p.productId || p.id) !== (selectedProductDetails.productId || selectedProductDetails.id))}
+            isFavorite={favorites.some(f => (f.productId || f.id) === (selectedProductDetails.productId || selectedProductDetails.id))}
+            onClose={() => setSelectedProductDetails(null)}
+            onToggleFavorite={handleToggleFavorite}
+            onAddToCart={handleAddToCart}
+            onBuyNow={handleStartBuyNow}
+            onSelectProduct={(p) => setSelectedProductDetails(p)}
+          />
+        )}
 
-      {isOrdersOpen && (
-        <OrdersModal
-          orders={orders}
-          onClose={() => setIsOrdersOpen(false)}
-        />
-      )}
+        {isOrdersOpen && (
+          <OrdersModal
+            isOpen={isOrdersOpen}
+            orders={orders}
+            onClose={() => setIsOrdersOpen(false)}
+          />
+        )}
 
-      {isCheckoutOpen && (
-        <CheckoutModal
-          cartItems={cartItems}
-          onClose={() => setIsCheckoutOpen(false)}
-          onOrderComplete={() => {
-            fetchCart();
-            fetchOrders();
-            setIsCheckoutOpen(false);
-          }}
-        />
-      )}
+        {isCheckoutOpen && (
+          <CheckoutModal
+            cartItems={cartItems}
+            onClose={() => setIsCheckoutOpen(false)}
+            onOrderComplete={() => {
+              fetchCart();
+              fetchOrders();
+              setIsCheckoutOpen(false);
+            }}
+          />
+        )}
 
-      {isBuyNowOpen && buyNowProduct && (
-        <BuyNowModal
-          product={buyNowProduct}
-          onClose={() => {
-            setIsBuyNowOpen(false);
-            setBuyNowProduct(null);
-          }}
-          onOrderComplete={() => {
-            setIsBuyNowOpen(false);
-            setBuyNowProduct(null);
-          }}
-        />
-      )}
+        {isBuyNowOpen && buyNowProduct && (
+          <BuyNowModal
+            product={buyNowProduct}
+            onClose={() => {
+              setIsBuyNowOpen(false);
+              setBuyNowProduct(null);
+            }}
+            onOrderComplete={() => {
+              setIsBuyNowOpen(false);
+              setBuyNowProduct(null);
+            }}
+          />
+        )}
 
-      {isOrdersOpen && (
-        <OrdersModal
-          isOpen={isOrdersOpen}
-          orders={orders}
-          onClose={() => setIsOrdersOpen(false)}
+        <SanjeevaniBot
+          onOpenCart={() => setIsCartOpen(true)}
+          onOpenOrders={() => setIsOrdersOpen(true)}
         />
-      )}
+      </Suspense>
 
-      <SanjeevaniBot
-        onOpenCart={() => setIsCartOpen(true)}
-        onOpenOrders={() => setIsOrdersOpen(true)}
-      />
+      {/* ── RESPONSIVE MEDIA QUERIES FOR ALL DEVICE VIEWPORTS (3 PRODUCTS PER ROW ON LAPTOP & PC) ── */}
+      <style>{`
+        @media (max-width: 640px) {
+          .cat-section__grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.75rem !important;
+          }
+          .dashboard-main {
+            padding-top: 0.85rem !important;
+            padding-bottom: 5rem !important;
+          }
+        }
+        @media (min-width: 641px) and (max-width: 1023px) {
+          .cat-section__grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 1.25rem !important;
+          }
+        }
+        @media (min-width: 1024px) {
+          .cat-section__grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 1.6rem !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

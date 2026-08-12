@@ -172,13 +172,36 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // 1. Instantly purge local session state for sub-10ms UI response on all devices
-    clearSession();
+    // 1. Capture token before local session clear
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token') || token;
 
-    // 2. Non-blocking async backend notification
+    // 2. Issue browser-guaranteed keepalive logout request so backend MySQL deletes token from jwt_tokens table
+    if (activeToken) {
+      try {
+        const rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        const logoutUrl = `${rawBase.replace(/\/$/, '')}/auth/logout`;
+        const authHeader = activeToken.startsWith('Bearer ') ? activeToken : `Bearer ${activeToken}`;
+        
+        fetch(logoutUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authHeader,
+          },
+          keepalive: true,
+        }).catch(() => {});
+      } catch (e) {
+        console.warn('Keepalive logout error:', e);
+      }
+    }
+
+    // 3. Call authService.logout() backup call
     authService.logout().catch(() => {});
 
-    // 3. Instant hard redirect to login page (bypasses component transition delays)
+    // 4. Instantly purge local session state & cookies
+    clearSession();
+
+    // 5. Instant redirect to login page
     if (typeof window !== 'undefined' && window.location.pathname !== '/login' && window.location.pathname !== '/admin/login') {
       window.location.href = '/login';
     }

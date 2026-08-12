@@ -19,6 +19,7 @@ const styles = {
     zIndex: 0,
     overflow: 'hidden',
     pointerEvents: 'none',
+    contain: 'strict',
     background: 'linear-gradient(135deg, #d1fae5 0%, #e0f7ed 20%, #ecfdf5 40%, #e0f2fe 60%, #ede9fe 80%, #d1fae5 100%)',
   },
 };
@@ -32,6 +33,7 @@ const AnimatedMedicalBackground = () => {
           position: absolute;
           border-radius: 50%;
           transform: translateZ(0);
+          will-change: transform;
           pointer-events: none;
         }
 

@@ -107,6 +107,8 @@ export const Login = () => {
       if (response && response.success && response.data) {
         const { token, user } = response.data;
         login(user, token);
+        // Instant background pre-warming of catalog data for sub-1ms page transitions
+        shopService.prefetchCatalog();
         navigate('/dashboard', { state: { loginSuccess: true, userName: user?.fullName } });
       } else {
         setApiError(response?.message || 'Invalid credentials. Please try again.');

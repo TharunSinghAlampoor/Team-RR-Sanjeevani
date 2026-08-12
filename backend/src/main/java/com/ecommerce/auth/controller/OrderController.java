@@ -2,6 +2,7 @@ package com.ecommerce.auth.controller;
 
 import com.ecommerce.auth.dto.ApiResponse;
 import com.ecommerce.auth.dto.BuyNowRequest;
+import com.ecommerce.auth.dto.CheckoutRequest;
 import com.ecommerce.auth.dto.OrderDto;
 import com.ecommerce.auth.service.OrderService;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +32,9 @@ public class OrderController {
     @PostMapping("/checkout")
     public ResponseEntity<ApiResponse<OrderDto>> checkoutCart(
             @AuthenticationPrincipal Integer userId,
-            @RequestBody(required = false) Map<String, String> body) {
+            @RequestBody(required = false) CheckoutRequest checkoutRequest) {
         Integer effectiveUserId = (userId != null) ? userId : 1;
-        String shippingAddress = (body != null && body.containsKey("shippingAddress")) ? body.get("shippingAddress") : null;
-        OrderDto order = orderService.checkoutCart(effectiveUserId, shippingAddress);
+        OrderDto order = orderService.checkoutCart(effectiveUserId, checkoutRequest);
         return ResponseEntity.ok(ApiResponse.success("Order placed successfully from cart", order));
     }
 

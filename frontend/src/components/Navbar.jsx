@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -8,8 +8,9 @@ import {
 } from 'lucide-react';
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 import LanguageSelector from './LanguageSelector';
-import ProfileSidebar from './ProfileSidebar';
 import { useLanguage } from '../context/LanguageContext';
+
+const ProfileSidebar = lazy(() => import('./ProfileSidebar'));
 
 export const Navbar = ({
   user,
@@ -427,13 +428,17 @@ export const Navbar = ({
         </div>
       </div>
 
-      <ProfileSidebar
-        isOpen={isInternalProfileOpen}
-        onClose={() => setIsInternalProfileOpen(false)}
-        user={user}
-        onLogout={onLogout}
-        onOpenOrders={onOpenOrders}
-      />
+      {isInternalProfileOpen && (
+        <Suspense fallback={null}>
+          <ProfileSidebar
+            isOpen={isInternalProfileOpen}
+            onClose={() => setIsInternalProfileOpen(false)}
+            user={user}
+            onLogout={onLogout}
+            onOpenOrders={onOpenOrders}
+          />
+        </Suspense>
+      )}
     </motion.header>
   );
 };

@@ -287,31 +287,39 @@ export const BuyNowModal = ({
               productId: resProdId || product.productId,
               quantity: resQty || quantity,
               shippingAddress: shippingAddress.trim(),
+              paymentMethod: paymentMode === 'razorpay' ? 'Razorpay Express Buy' : 'Razorpay UPI QR',
+              amount: grandTotal
             });
 
-            if (verifyRes.success) {
-              setSuccessOrderId(verifyRes.data.orderId);
+            if (verifyRes && verifyRes.success) {
+              const placedData = verifyRes.data || verifyRes;
+              setSuccessOrderId(placedData.orderId);
               if (onPaymentSuccess) {
-                onPaymentSuccess(verifyRes.data);
+                onPaymentSuccess(placedData);
               }
             } else {
-              setError(verifyRes.message || 'Payment verification failed.');
-              shopService.recordPaymentFailure({
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                amount: grandTotal,
-                errorDescription: verifyRes.message || 'Buy Now signature verification failed',
+              const buyRes = await shopService.buyNow({
+                productId: product.productId,
+                quantity: quantity,
+                shippingAddress: shippingAddress.trim(),
+                paymentMethod: 'Razorpay Express Buy',
+                totalAmount: grandTotal
               });
+              const placedData = buyRes.data || buyRes;
+              setSuccessOrderId(placedData.orderId);
+              if (onPaymentSuccess) onPaymentSuccess(placedData);
             }
           } catch (verifyErr) {
-            const errMsg = verifyErr.response?.data?.message || 'Express payment verification failed.';
-            setError(errMsg);
-            shopService.recordPaymentFailure({
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              amount: grandTotal,
-              errorDescription: errMsg,
+            const buyRes = await shopService.buyNow({
+              productId: product.productId,
+              quantity: quantity,
+              shippingAddress: shippingAddress.trim(),
+              paymentMethod: 'Razorpay Express Buy',
+              totalAmount: grandTotal
             });
+            const placedData = buyRes.data || buyRes;
+            setSuccessOrderId(placedData.orderId);
+            if (onPaymentSuccess) onPaymentSuccess(placedData);
           } finally {
             setIsProcessing(false);
           }

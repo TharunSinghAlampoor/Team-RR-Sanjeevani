@@ -11,6 +11,8 @@ import com.ecommerce.auth.repository.ProductImageRepository;
 import com.ecommerce.auth.repository.ProductRepository;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +39,7 @@ public class ProductService {
         this.productImageRepository = productImageRepository;
     }
 
+    @Cacheable(value = "categories")
     public List<CategoryDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
         Map<String, CategoryDto> canonicalMap = new LinkedHashMap<>();
@@ -72,6 +75,7 @@ public class ProductService {
         return name;
     }
 
+    @Cacheable(value = "products", key = "{#query, #categoryId, #minPrice, #maxPrice, #inStock}")
     public List<ProductDto> getProducts(String query, Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, Boolean inStock) {
         List<Product> products = productRepository.searchAndFilterProducts(
                 (query != null && !query.trim().isEmpty()) ? query.trim() : null,
@@ -98,6 +102,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "product_details", key = "#id")
     public ProductDto getProductById(Integer id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AuthException("Product not found with id: " + id));
@@ -131,6 +136,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = {"products", "categories", "product_details"}, allEntries = true)
     @Transactional
     public Map<String, Object> importProductsFromPdf(MultipartFile file, Integer categoryId) {
         if (file.isEmpty()) {

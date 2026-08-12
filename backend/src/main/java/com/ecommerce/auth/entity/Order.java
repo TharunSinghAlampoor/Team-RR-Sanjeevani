@@ -5,7 +5,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+    @Index(name = "idx_order_user", columnList = "user_id"),
+    @Index(name = "idx_order_status", columnList = "order_status"),
+    @Index(name = "idx_order_created", columnList = "created_at")
+})
 public class Order {
 
     @Id
@@ -25,6 +29,9 @@ public class Order {
 
     @Column(name = "shipping_address", length = 512)
     private String shippingAddress;
+
+    @Column(name = "payment_method", length = 100)
+    private String paymentMethod = "Razorpay Online";
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -91,6 +98,14 @@ public class Order {
 
     public void setShippingAddress(String shippingAddress) {
         this.shippingAddress = shippingAddress;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public LocalDateTime getCreatedAt() {

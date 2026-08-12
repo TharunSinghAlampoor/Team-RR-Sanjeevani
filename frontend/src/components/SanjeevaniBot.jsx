@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bot, X, Send, Sparkles, ShoppingBag, Truck, FileText, 
   HelpCircle, RefreshCw, ChevronRight, MessageSquare, ShieldCheck, 
-  ArrowRight, HeartPulse, Mic, MicOff, Volume2, VolumeX, Globe, LayoutGrid
+  ArrowRight, HeartPulse, Mic, MicOff, Volume2, VolumeX, LayoutGrid
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
@@ -256,7 +256,7 @@ const AnimatedDoctorRoboIcon = ({ size = 68, style = {} }) => {
   );
 };
 
-export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModal }) => {
+export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -319,20 +319,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
     }
   };
 
-  // Handle in-bot language switch & announce speech in new language
-  const handleInBotLanguageChange = (newLang) => {
-    changeLanguage(newLang);
-    const announcements = {
-      en: 'Language changed to English. I am ready to assist you in English.',
-      hi: 'भाषा हिंदी में बदल दी गई है। मैं आपकी सहायता हिंदी में करने के लिए तैयार हूँ।',
-      te: 'భాష తెలుగులోకి మార్చబడింది. నేను మీకు తెలుగులో సహాయం చేయడానికి సిద్ధంగా ఉన్నాను.',
-      kn: 'ಭಾಷೆಯನ್ನು ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿಸಲಾಗಿದೆ. ನಾನು ನಿಮಗೆ ಕನ್ನಡದಲ್ಲಿ ಸಹಾಯ ಮಾಡಲು ಸಿದ್ಧನಾಗಿದ್ದೇನೆ.'
-    };
-    const announceMsg = announcements[newLang] || announcements['en'];
-    setTimeout(() => {
-      speakText(announceMsg);
-    }, 200);
-  };
+
 
   // Toggle Voice Input (Microphone)
   const toggleListening = () => {
@@ -359,13 +346,17 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
       {
         id: 1,
         sender: 'bot',
-        text: 'Hello! I am Sanjeevani, your AI Healthcare & Pharmacy Assistant. Select a category below or ask anything by typing or speaking in your language!',
+        text: 'Hello! I am Sanjeevani AI Assistant — your healthcare guide. Ask me about medicines for any symptom (fever, cold, pain, etc.), browse products, track orders, payment options, refunds, or store offers!',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         quickReplies: [
-          { label: 'Find Medicines & Categories', action: 'show_categories' },
-          { label: 'Track My Order', action: 'track_order' },
-          { label: 'Return & Refund Policy', action: 'return_policy' },
-          { label: 'Offers & Discounts', action: 'offers' }
+          { label: '💊 Browse Medicines', action: 'show_categories' },
+          { label: '🤒 Medicine for Fever', action: 'symptom_fever' },
+          { label: '🤧 Medicine for Cold & Cough', action: 'symptom_cold' },
+          { label: '📦 Track My Order', action: 'track_order' },
+          { label: '💳 Payment & Razorpay Options', action: 'payment_info' },
+          { label: '🔄 Return & Refund Policy', action: 'return_policy' },
+          { label: '🏷️ Store Offers & Coupons', action: 'offers' },
+          { label: '📞 24/7 Support Agent', action: 'contact_support' }
         ]
       }
     ]);
@@ -409,7 +400,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
 
       const displayList = filtered.length > 0 ? filtered : allProds.slice(0, 3);
 
-      botResponse.text = `${catItem.icon} Here are top products in ${catItem.name}:`;
+      botResponse.text = `${catItem.icon} Here are top verified products in ${catItem.name}:`;
       botResponse.products = displayList.slice(0, 3);
       botResponse.actionBtn = {
         label: `Browse All ${catItem.name} Products ➔`,
@@ -434,7 +425,179 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
     if (botResponse.text) speakText(botResponse.text);
   };
 
-  // Intelligent Sanjeevani Bot Engine with Spoken Indic Speech Understanding
+  // ── SYMPTOM → MEDICINE RECOMMENDATION KNOWLEDGE BASE ──────────────────
+  const SYMPTOM_MEDICINE_MAP = [
+    {
+      symptomName: 'Fever',
+      emoji: '🤒',
+      triggers: ['fever', 'temperature', 'bukhar', 'बुखार', 'ज्वर', 'జ్వరం', 'ಜ್ವರ', 'tapman'],
+      medicineKeywords: ['paracetamol', 'dolo', 'crocin', 'calpol', 'acetaminophen', 'ibuprofen', 'meftal', 'combiflam', 'disprin', 'aspirin', 'antipyretic', 'fever'],
+      advice: 'For fever, commonly recommended OTC medicines include Paracetamol (Dolo 650, Crocin), Ibuprofen, or Meftal-Spas. Stay hydrated and rest. Consult a doctor if fever persists beyond 3 days or exceeds 103°F.',
+    },
+    {
+      symptomName: 'Cold & Flu',
+      emoji: '🤧',
+      triggers: ['cold', 'flu', 'cough', 'sneez', 'runny nose', 'sardi', 'सर्दी', 'खांसी', 'जुकाम', 'నీళ్ళు', 'జలుబు', 'దగ్గు', 'ಶೀತ', 'ಕೆಮ್ಮು', 'nasal', 'congestion', 'blocked nose', 'sinus'],
+      medicineKeywords: ['cetirizine', 'sinarest', 'vicks', 'benadryl', 'cough syrup', 'levocetrizine', 'montelu', 'montelukast', 'allegra', 'cold', 'flu', 'cough', 'nasal', 'otrivin', 'nasivion', 'strepsils', 'honitus', 'cheston'],
+      advice: 'For cold & flu, try Cetirizine, Sinarest, or Vicks Action 500. For cough, Benadryl or Honitus syrup can help. Steam inhalation and warm fluids provide relief. See a doctor if symptoms last more than 7 days.',
+    },
+    {
+      symptomName: 'Headache & Migraine',
+      emoji: '🤕',
+      triggers: ['headache', 'head ache', 'migraine', 'head pain', 'sir dard', 'सिरदर्द', 'सिर दर्द', 'తలనొప్పి', 'ಹೆಡೆನೋವು', 'ತಲೆನೋವು'],
+      medicineKeywords: ['paracetamol', 'dolo', 'saridon', 'disprin', 'crocin', 'ibuprofen', 'migraine', 'headache', 'sumatriptan', 'combiflam', 'dart', 'nise'],
+      advice: 'For headaches, Paracetamol (Dolo 650), Saridon, Disprin, or Ibuprofen are commonly used. For migraines, consult a doctor for Sumatriptan or specialized treatment. Avoid screen time and rest in a dark room.',
+    },
+    {
+      symptomName: 'Body Pain & Muscle Pain',
+      emoji: '💪',
+      triggers: ['body pain', 'muscle pain', 'back pain', 'joint pain', 'pain', 'ache', 'dard', 'दर्द', 'कमर दर्द', 'जोड़ों का दर्द', 'నొప్పి', 'ನೋವು', 'sprain', 'strain', 'leg pain', 'knee pain', 'shoulder pain', 'neck pain'],
+      medicineKeywords: ['ibuprofen', 'diclofenac', 'combiflam', 'volini', 'moov', 'flexon', 'pain relief', 'muscle', 'pain', 'spray', 'gel', 'ointment', 'move', 'brufen', 'meftal', 'nise', 'aceclofenac', 'thiocolchicoside', 'relaxant'],
+      advice: 'For body & muscle pain, try Ibuprofen, Combiflam, or Diclofenac tablets. For topical relief, Volini Spray or Moov cream work well. Apply ice for acute injuries. See a doctor for persistent or severe pain.',
+    },
+    {
+      symptomName: 'Stomach & Digestion Issues',
+      emoji: '🤢',
+      triggers: ['stomach', 'gastric', 'acidity', 'gas', 'bloating', 'indigestion', 'nausea', 'vomit', 'diarrhea', 'loose motion', 'constipation', 'pet dard', 'पेट दर्द', 'गैस', 'एसिडिटी', 'కడుపు', 'ಹೊಟ್ಟೆ', 'digestion', 'heartburn', 'ulcer'],
+      medicineKeywords: ['antacid', 'omeprazole', 'pantoprazole', 'eno', 'gelusil', 'digene', 'ranitidine', 'domperidone', 'ondansetron', 'ors', 'electrolyte', 'loperamide', 'isabgol', 'dulcolax', 'lactulose', 'stomach', 'gastric', 'acidity', 'probiotic', 'gut'],
+      advice: 'For acidity/gastric, try Eno, Gelusil, or Pantoprazole. For nausea, Domperidone helps. For diarrhea, take ORS (Electral) and stay hydrated. For constipation, Isabgol or Lactulose syrup may help. Consult a doctor if symptoms persist.',
+    },
+    {
+      symptomName: 'Allergy',
+      emoji: '🤧',
+      triggers: ['allergy', 'allergic', 'rash', 'hives', 'itching', 'itch', 'urticaria', 'एलर्जी', 'खुजली', 'అలెర్జీ', 'ಅಲರ್ಜಿ', 'skin rash', 'swelling'],
+      medicineKeywords: ['cetirizine', 'levocetrizine', 'allegra', 'fexofenadine', 'montelukast', 'antihistamine', 'allergy', 'calamine', 'loratadine', 'chlorpheniramine', 'itch', 'anti-allergy'],
+      advice: 'For allergies, Cetirizine, Levocetrizine, or Allegra (Fexofenadine) are commonly prescribed antihistamines. For skin rashes, Calamine lotion soothes itching. Avoid known allergens and consult a doctor for recurring allergies.',
+    },
+    {
+      symptomName: 'Diabetes Care',
+      emoji: '💉',
+      triggers: ['diabetes', 'sugar', 'blood sugar', 'glucose', 'diabetic', 'मधुमेह', 'शुगर', 'డయాబెటిస్', 'షుగర్', 'ಮಧುಮೇಹ', 'insulin', 'hba1c', 'a1c'],
+      medicineKeywords: ['metformin', 'glimepiride', 'insulin', 'glucometer', 'sugar', 'diabetes', 'diabetic', 'glucose', 'test strip', 'lancet', 'glycomet', 'januvia', 'sitagliptin', 'voglibose'],
+      advice: 'For diabetes management, Metformin and Glimepiride are commonly prescribed. Monitor blood sugar regularly with a Glucometer. Follow a low-sugar diet and exercise regularly. Always consult your doctor before changing diabetes medication.',
+    },
+    {
+      symptomName: 'Blood Pressure',
+      emoji: '❤️',
+      triggers: ['blood pressure', 'bp', 'hypertension', 'high bp', 'low bp', 'रक्तचाप', 'ब्लड प्रेशर', 'బీపీ', 'రక్తపోటు', 'ಬಿಪಿ', 'ರಕ್ತದೊತ್ತಡ'],
+      medicineKeywords: ['amlodipine', 'telmisartan', 'losartan', 'atenolol', 'bp monitor', 'blood pressure', 'sphygmomanometer', 'ramipril', 'enalapril', 'hypertension', 'olmesartan', 'nebivolol'],
+      advice: 'For blood pressure management, Amlodipine, Telmisartan, or Losartan are commonly prescribed. Regular monitoring with a BP monitor is essential. Reduce salt intake, exercise, and manage stress. Never stop BP medication without consulting your doctor.',
+    },
+    {
+      symptomName: 'Skin Care & Infections',
+      emoji: '✨',
+      triggers: ['skin', 'acne', 'pimple', 'fungal', 'ringworm', 'eczema', 'psoriasis', 'dark spot', 'pigmentation', 'sunscreen', 'moistur', 'त्वचा', 'मुहासे', 'చర్మం', 'ಚರ್ಮ', 'face wash', 'skin infection', 'wound', 'burn', 'cut'],
+      medicineKeywords: ['clotrimazole', 'ketoconazole', 'fluconazole', 'benzoyl peroxide', 'salicylic', 'retinol', 'moisturizer', 'sunscreen', 'serum', 'cream', 'lotion', 'skin', 'face wash', 'aloe', 'neem', 'betadine', 'soframycin', 'mupirocin', 'derma', 'anti-fungal', 'antifungal'],
+      advice: 'For acne, Benzoyl Peroxide or Salicylic Acid face washes help. For fungal infections, Clotrimazole cream is effective. Always use sunscreen (SPF 30+) daily. For persistent skin issues, consult a dermatologist.',
+    },
+    {
+      symptomName: 'Eye Care',
+      emoji: '👁️',
+      triggers: ['eye', 'eyes', 'vision', 'eyedrop', 'eye drop', 'dry eye', 'redness', 'conjunctivitis', 'आंख', 'కంటి', 'ಕಣ್ಣು', 'eye pain', 'eye infection', 'blurry'],
+      medicineKeywords: ['eye drop', 'eyedrop', 'tear', 'ciprofloxacin', 'moxifloxacin', 'tobramycin', 'eye', 'vision', 'lubricant', 'itone', 'refresh'],
+      advice: 'For dry eyes, lubricating eye drops (Refresh Tears) help. For infections, antibiotic drops like Ciprofloxacin may be needed. Avoid rubbing your eyes and reduce screen time. See an ophthalmologist for persistent issues.',
+    },
+    {
+      symptomName: 'Vitamin & Nutrition Deficiency',
+      emoji: '💊',
+      triggers: ['vitamin', 'calcium', 'iron', 'zinc', 'omega', 'supplement', 'immunity', 'immune', 'weakness', 'fatigue', 'tired', 'energy', 'विटामिन', 'कैल्शियम', 'విటమిన్', 'ವಿಟಮಿನ್', 'protein', 'multivitamin', 'b12', 'd3', 'folic'],
+      medicineKeywords: ['vitamin', 'calcium', 'iron', 'zinc', 'omega', 'supplement', 'multivitamin', 'becosule', 'shelcal', 'revital', 'ensure', 'protinex', 'b12', 'd3', 'folic acid', 'biotin', 'immunity', 'immune', 'antioxidant', 'protein', 'nutrition'],
+      advice: 'Common supplements include Vitamin D3 + Calcium (Shelcal), Multivitamins (Revital, Becosule), Iron (for anemia), Omega-3 (for heart health), and Protein powders (Protinex, Ensure). Consult a doctor for proper dosage based on blood reports.',
+    },
+    {
+      symptomName: 'Baby & Kids Care',
+      emoji: '👶',
+      triggers: ['baby', 'child', 'kid', 'infant', 'toddler', 'newborn', 'pediatric', 'बच्चा', 'शिशु', 'పిల్ల', 'బేబీ', 'ಮಗು', 'ಶಿಶು', 'baby fever', 'baby cold', 'diaper', 'rash'],
+      medicineKeywords: ['calpol', 'baby', 'infant', 'pediatric', 'gripe water', 'diaper', 'cerelac', 'lactogen', 'baby cream', 'baby oil', 'baby soap', 'kids', 'child'],
+      advice: 'For baby fever, Calpol (Paracetamol syrup) is commonly used. For diaper rash, Zinc Oxide cream helps. Always use pediatric-formulated medicines for children. Consult a pediatrician before giving any medication to infants.',
+    },
+    {
+      symptomName: 'Dental & Oral Care',
+      emoji: '🦷',
+      triggers: ['tooth', 'teeth', 'dental', 'gum', 'mouth ulcer', 'oral', 'toothache', 'दांत', 'दाँत', 'పంటి', 'ಹಲ್ಲು', 'cavity', 'bad breath'],
+      medicineKeywords: ['toothpaste', 'mouthwash', 'dental', 'clove oil', 'oral', 'sensodyne', 'listerine', 'chlorhexidine', 'tooth', 'gum', 'orajel'],
+      advice: 'For toothache, Clove Oil or Ibuprofen provides temporary relief. For mouth ulcers, Orajel or Chlorhexidine mouthwash helps. Use Sensodyne for sensitive teeth. Visit a dentist for persistent dental issues.',
+    },
+    {
+      symptomName: 'Respiratory & Asthma',
+      emoji: '🫁',
+      triggers: ['asthma', 'breathing', 'breathless', 'wheezing', 'inhaler', 'respiratory', 'oxygen', 'दमा', 'सांस', 'ఆస్తమా', 'ಆಸ್ತಮಾ', 'shortness of breath', 'chest tightness', 'bronchitis'],
+      medicineKeywords: ['inhaler', 'nebulizer', 'salbutamol', 'budesonide', 'montelukast', 'asthma', 'respiratory', 'oxygen', 'oximeter', 'pulse oximeter', 'bronchodilator', 'levosalbutamol', 'formoterol'],
+      advice: 'For asthma, Salbutamol inhalers provide quick relief. Budesonide is used for long-term control. A pulse oximeter helps monitor oxygen levels. Always carry your rescue inhaler. Consult a pulmonologist for proper asthma management.',
+    },
+    {
+      symptomName: 'Wound & First Aid',
+      emoji: '🩹',
+      triggers: ['wound', 'injury', 'first aid', 'bandage', 'antiseptic', 'dressing', 'cut', 'bleeding', 'burn', 'घाव', 'चोट', 'గాయం', 'ಗಾಯ'],
+      medicineKeywords: ['bandage', 'dettol', 'betadine', 'antiseptic', 'band-aid', 'cotton', 'gauze', 'first aid', 'wound', 'savlon', 'hydrogen peroxide', 'povidone', 'crepe', 'surgical'],
+      advice: 'For minor wounds, clean with Savlon/Dettol antiseptic, apply Betadine (Povidone-Iodine), and cover with a sterile bandage. For burns, run cool water and apply Burnol or Silver Sulfadiazine cream. Seek medical help for deep or infected wounds.',
+    },
+    {
+      symptomName: 'Women\'s Health',
+      emoji: '👩',
+      triggers: ['period', 'menstrual', 'cramp', 'pcod', 'pcos', 'pregnancy', 'prenatal', 'postnatal', 'menopause', 'पीरियड', 'मासिक', 'నెలసరి', 'ಮಾಸಿಕ', 'contracepti'],
+      medicineKeywords: ['meftal spas', 'mefenamic', 'folic acid', 'iron', 'calcium', 'prenatal', 'sanitary', 'pad', 'tampon', 'panty liner', 'intimate wash', 'cranberry'],
+      advice: 'For menstrual cramps, Meftal-Spas (Mefenamic Acid + Dicyclomine) is commonly used. Folic Acid and Iron supplements are essential during pregnancy. Always consult a gynecologist for PCOD/PCOS management or prenatal care.',
+    },
+    {
+      symptomName: 'Hair Care',
+      emoji: '💇',
+      triggers: ['hair', 'hair fall', 'hair loss', 'dandruff', 'bald', 'बालों', 'बाल झड़ना', 'జుట్టు', 'ಕೂದಲು', 'scalp'],
+      medicineKeywords: ['biotin', 'minoxidil', 'ketoconazole', 'hair', 'shampoo', 'anti-dandruff', 'scalp', 'follicle', 'hair oil', 'hair serum'],
+      advice: 'For hair fall, Biotin supplements and Minoxidil solution are commonly recommended. For dandruff, Ketoconazole shampoo works well. Maintain a protein-rich diet and manage stress. Consult a dermatologist for severe hair loss.',
+    },
+    {
+      symptomName: 'Sleep & Stress',
+      emoji: '😴',
+      triggers: ['sleep', 'insomnia', 'stress', 'anxiety', 'depression', 'mental health', 'tension', 'neend', 'नींद', 'तनाव', 'నిద్ర', 'ಒತ್ತಡ', 'ನಿದ್ರೆ', 'calm', 'relax', 'panic'],
+      medicineKeywords: ['melatonin', 'ashwagandha', 'sleep', 'calm', 'stress', 'anxiety', 'lavender', 'chamomile', 'valerian', 'magnesium', 'zincovit'],
+      advice: 'For better sleep, Melatonin supplements or Ashwagandha can help. Practice good sleep hygiene - avoid screens 1 hour before bed, maintain a regular schedule. For anxiety/depression, please consult a psychiatrist for proper treatment. You are not alone.',
+    },
+    {
+      symptomName: 'Thyroid',
+      emoji: '🦋',
+      triggers: ['thyroid', 'hypothyroid', 'hyperthyroid', 'tsh', 'थायराइड', 'థైరాయిడ్', 'ಥೈರಾಯ್ಡ್'],
+      medicineKeywords: ['thyroxine', 'levothyroxine', 'thyronorm', 'thyroid', 'eltroxin'],
+      advice: 'For hypothyroidism, Levothyroxine (Thyronorm/Eltroxin) is the standard treatment. Take it on an empty stomach, 30 minutes before breakfast. Regular TSH monitoring every 3-6 months is essential. Never change dosage without doctor consultation.',
+    },
+    {
+      symptomName: 'Infection & Antibiotic',
+      emoji: '🦠',
+      triggers: ['infection', 'antibiotic', 'bacterial', 'viral', 'संक्रमण', 'ఇన్ఫెక్షన్', 'ಸೋಂಕು', 'uti', 'urinary', 'throat infection', 'ear infection'],
+      medicineKeywords: ['amoxicillin', 'azithromycin', 'ciprofloxacin', 'cefixime', 'metronidazole', 'antibiotic', 'anti-bacterial', 'doxycycline', 'norfloxacin', 'ofloxacin', 'augmentin'],
+      advice: 'Antibiotics require a valid prescription. Common antibiotics include Amoxicillin, Azithromycin, and Cefixime. Never self-medicate with antibiotics - complete the full course as prescribed by your doctor. Upload your prescription on Sanjeevani for quick dispensing.',
+    },
+  ];
+
+  // Detect if user query matches any symptom/health condition
+  const detectSymptomIntent = (queryText) => {
+    const q = queryText.toLowerCase();
+    // Also detect generic "medicine for X" or "tablet for X" patterns
+    const medicineForPattern = q.match(/(?:medicine|tablet|syrup|capsule|cream|drop|spray|gel|ointment|remedy|treatment|cure|dawai|dawa|goli)\s+(?:for|of|to)\s+(.+)/);
+    const forMedicinePattern = q.match(/(.+?)\s+(?:ke liye|ka ilaj|ki dawa|medicine|tablet|remedy|treatment|ke lie|ka dawa)/);
+    const whatToTakePattern = q.match(/(?:what|which|suggest|recommend|give|need|want)\s+(?:medicine|tablet|for)\s+(.+)/);
+
+    for (const entry of SYMPTOM_MEDICINE_MAP) {
+      // Direct trigger match
+      if (entry.triggers.some(trigger => q.includes(trigger))) {
+        return {
+          ...entry,
+          symptomTerms: entry.triggers.filter(t => t.length > 2),
+        };
+      }
+      // "medicine for X" pattern match
+      const extractedSymptom = medicineForPattern?.[1] || forMedicinePattern?.[1] || whatToTakePattern?.[1] || '';
+      if (extractedSymptom && entry.triggers.some(trigger => extractedSymptom.includes(trigger))) {
+        return {
+          ...entry,
+          symptomTerms: entry.triggers.filter(t => t.length > 2),
+        };
+      }
+    }
+    return null;
+  };
+
+  // High-Level Application-Specific Sanjeevani AI Bot Engine
   const processQuery = async (queryText) => {
     setIsTyping(true);
     const rawQ = queryText.toLowerCase().trim();
@@ -459,31 +622,25 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    // Extract any specific Order ID pattern (e.g. FAIL-BAA14DA2, ORD-102948, ORD-XXXXXX, FAIL-XXXXXX)
-    const orderIdMatch = queryText.match(/(?:FAIL|ORD|ord|fail)-[A-Za-z0-9]{4,16}/i) || 
+    // Extract Order ID pattern (e.g. FAIL-BAA14DA2, ORD-102948, BUY-XXXXXX)
+    const orderIdMatch = queryText.match(/(?:FAIL|ORD|BUY|ord|fail|buy)-[A-Za-z0-9]{4,16}/i) || 
                           queryText.match(/[A-Za-z0-9]{4,8}-[A-Za-z0-9]{4,12}/i);
     const specificOrderId = orderIdMatch ? orderIdMatch[0].toUpperCase() : null;
 
-    // Category Prompt Trigger
+    // Helper: format currency
+    const fmtPrice = (v) => `₹${Number(v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    // Helper: format date
+    const fmtDate = (d) => { try { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return 'N/A'; } };
+
+    // ─────────────────────────────────────────────────────────
+    // 1. MY ORDERS — Show all orders with real data
+    // ─────────────────────────────────────────────────────────
     if (
-      !specificOrderId && (
-        q.includes('category') || q.includes('categories') || q.includes('find medicine') || 
-        q.includes('search_products') || q.includes('show_categories') || q.includes('browse') ||
-        q.includes('दवा') || q.includes('मందులు') || q.includes('ಔಷಧ') ||
-        q.includes('उत्पाद') || q.includes('ఉత్పత్తి') || q.includes('ಉತ್ಪನ್ನ')
-      )
-    ) {
-      botResponse.text = 'Please select a healthcare category below to browse verified products:';
-      botResponse.quickReplies = CATEGORIES.map(c => ({
-        label: `${c.icon} ${c.name}`,
-        action: c.action,
-        catData: c
-      }));
-    }
-    // Order Tracking & Specific Order ID Query
-    else if (
       specificOrderId ||
-      q.includes('track') || q.includes('order') || q.includes('status') || q.includes('delivery') || q.includes('where is my package') ||
+      q.includes('my order') || q.includes('my orders') || q.includes('order history') || q.includes('all orders') ||
+      q.includes('show order') || q.includes('list order') || q.includes('recent order') || q.includes('last order') ||
+      q.includes('track') || q.includes('order status') || q.includes('delivery') || q.includes('where is my') ||
+      q.includes('how many order') || q.includes('total order') || q.includes('order count') ||
       q.includes('ऑर्डर') || q.includes('ट्रैक') || q.includes('स्थिति') || q.includes('कहाँ') ||
       q.includes('ఆర్డర్') || q.includes('ట్రాక్') || q.includes('ఎక్కడ') ||
       q.includes('ಆರ್ಡರ್') || q.includes('ಟ್ರ್ಯಾಕ್') || q.includes('ಎಲ್ಲಿದೆ')
@@ -493,120 +650,421 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
         const orders = (res && res.success && Array.isArray(res.data)) ? res.data : [];
 
         if (specificOrderId) {
-          // Look up exact order in user's list
+          // ── Specific order lookup ──
           const matchedOrder = orders.find(o => 
             (o.orderId && o.orderId.toUpperCase() === specificOrderId) ||
             (o.orderId && o.orderId.toUpperCase().includes(specificOrderId))
           );
 
           if (matchedOrder) {
-            const status = matchedOrder.orderStatus || matchedOrder.paymentStatus || 'Processing';
-            const total = Number(matchedOrder.grandTotal || matchedOrder.totalAmount || 0).toFixed(2);
-            botResponse.text = `Order #${matchedOrder.orderId}: Current Status is "${status}". Total Amount: ₹${total}. Delivery Address: ${matchedOrder.shippingAddress || 'Saved Address'}.`;
+            const status = matchedOrder.orderStatus || matchedOrder.paymentStatus || matchedOrder.status || 'Processing';
+            const total = fmtPrice(matchedOrder.grandTotal || matchedOrder.totalAmount);
+            const payMethod = matchedOrder.paymentMethod || matchedOrder.paymentMode || 'Online';
+            const address = matchedOrder.shippingAddress || 'Saved Address';
+            const date = fmtDate(matchedOrder.createdAt || matchedOrder.orderDate);
+            const items = Array.isArray(matchedOrder.items) ? matchedOrder.items : [];
+            const itemList = items.length > 0 
+              ? items.map(it => `• ${it.productName || it.name || 'Item'} × ${it.quantity || 1} — ${fmtPrice(it.totalPrice || it.pricePerUnit)}`).join('\n')
+              : '• Order items available on tracking page';
+
+            botResponse.text = `📦 Order #${matchedOrder.orderId}\n\n📅 Date: ${date}\n📊 Status: ${status}\n💰 Total: ${total}\n💳 Payment: ${payMethod}\n📍 Address: ${address}\n\n🛍️ Items:\n${itemList}`;
             botResponse.actionBtn = {
-              label: `Track Order #${matchedOrder.orderId}`,
-              onClick: () => {
-                setIsOpen(false);
-                navigate(`/track-order/${matchedOrder.orderId}`);
-              }
+              label: `📦 Track Order #${matchedOrder.orderId}`,
+              onClick: () => { setIsOpen(false); navigate(`/track-order/${matchedOrder.orderId}`); }
             };
           } else {
-            botResponse.text = `Order #${specificOrderId} was not found under your active account. You can view all your orders or check tracking details below.`;
+            botResponse.text = `❌ Order #${specificOrderId} was not found. Please check the order ID and try again. You can also view all your orders below.`;
             botResponse.actionBtn = {
-              label: 'View All My Orders',
-              onClick: () => {
-                setIsOpen(false);
-                if (onOpenOrders) onOpenOrders();
-                else navigate('/track-order');
-              }
+              label: '📋 View All My Orders',
+              onClick: () => { setIsOpen(false); if (onOpenOrders) onOpenOrders(); else navigate('/track-order'); }
             };
           }
         } else if (orders.length > 0) {
-          const latest = orders[0];
-          botResponse.text = `Your latest order #${latest.orderId} is currently ${latest.orderStatus || 'In Transit'}. You can track live delivery status on your tracking page.`;
+          // ── Show all orders summary ──
+          const totalSpent = orders.reduce((sum, o) => sum + Number(o.grandTotal || o.totalAmount || 0), 0);
+          const orderSummaries = orders.slice(0, 5).map((o, i) => {
+            const status = o.orderStatus || o.paymentStatus || o.status || 'Processing';
+            const total = fmtPrice(o.grandTotal || o.totalAmount);
+            const date = fmtDate(o.createdAt || o.orderDate);
+            const items = Array.isArray(o.items) ? o.items.length : 0;
+            return `${i + 1}. #${o.orderId} — ${status} — ${total} — ${date}${items > 0 ? ` (${items} items)` : ''}`;
+          }).join('\n');
+
+          botResponse.text = `📋 Your Orders (${orders.length} total | Total Spent: ${fmtPrice(totalSpent)})\n\n${orderSummaries}${orders.length > 5 ? `\n\n...and ${orders.length - 5} more orders. View all on your orders page.` : ''}`;
           botResponse.actionBtn = {
-            label: `View Order Details #${latest.orderId}`,
-            onClick: () => {
-              setIsOpen(false);
-              navigate(`/track-order/${latest.orderId}`);
-            }
+            label: '📦 View All Orders & Track',
+            onClick: () => { setIsOpen(false); if (onOpenOrders) onOpenOrders(); else navigate('/track-order'); }
           };
         } else {
-          botResponse.text = 'You currently have no active orders. Would you like to browse our healthcare products or place a new order?';
+          botResponse.text = '📭 You have no orders yet. Browse our products and place your first order!';
           botResponse.quickReplies = CATEGORIES.map(c => ({
-            label: `${c.icon} ${c.name}`,
-            action: c.action,
-            catData: c
+            label: `${c.icon} ${c.name}`, action: c.action, catData: c
           }));
         }
       } catch (err) {
-        botResponse.text = 'You can track all your active orders directly from your Orders drawer or Track Order page.';
+        botResponse.text = '📦 View your orders from the Orders section. Click below to open.';
         botResponse.actionBtn = {
-          label: 'Open Orders',
-          onClick: () => {
-            setIsOpen(false);
-            if (onOpenOrders) onOpenOrders();
-            else navigate('/track-order');
-          }
+          label: '📋 Open My Orders',
+          onClick: () => { setIsOpen(false); if (onOpenOrders) onOpenOrders(); else navigate('/track-order'); }
         };
       }
     }
-    // Return & Refund Policy
+    // ─────────────────────────────────────────────────────────
+    // 2. REFUND & REPLACEMENT — Show real order data + guide
+    // ─────────────────────────────────────────────────────────
     else if (
-      q.includes('return') || q.includes('refund') || q.includes('replace') || q.includes('cancel') ||
-      q.includes('रिफंड') || q.includes('वापस') || q.includes('रीफंड') || q.includes('రిటర్న్')
+      q.includes('refund') || q.includes('return') || q.includes('replace') || q.includes('exchange') ||
+      q.includes('damaged') || q.includes('wrong item') || q.includes('broken') || q.includes('defective') ||
+      q.includes('money back') || q.includes('cancel order') || q.includes('cancel my order') ||
+      q.includes('रिफंड') || q.includes('वापस') || q.includes('बदलो') || q.includes('రీఫండ్') || q.includes('ಮರಳಿ')
     ) {
-      botResponse.text = 'Sanjeevani offers a 100% Doorstep Instant Return & Replacement Guarantee for damaged, wrong, or expired items within 7 days of delivery with zero questions asked.';
-      botResponse.quickReplies = [
-        { label: 'Check Order Support', action: 'track_order' },
-        { label: 'Talk to Support Agent', action: 'contact_support' }
-      ];
+      try {
+        const res = await shopService.getOrders();
+        const orders = (res && res.success && Array.isArray(res.data)) ? res.data : [];
+        const eligibleOrders = orders.filter(o => {
+          const status = (o.orderStatus || o.paymentStatus || o.status || '').toUpperCase();
+          return status !== 'CANCELLED' && status !== 'REFUNDED' && status !== 'RETURNED';
+        });
+
+        if (eligibleOrders.length > 0) {
+          const orderList = eligibleOrders.slice(0, 4).map((o, i) => {
+            const status = o.orderStatus || o.paymentStatus || o.status || 'Delivered';
+            return `${i + 1}. #${o.orderId} — ${status} — ${fmtPrice(o.grandTotal || o.totalAmount)} — ${fmtDate(o.createdAt)}`;
+          }).join('\n');
+
+          const isRefund = q.includes('refund') || q.includes('money back') || q.includes('रिफंड');
+          const isReplace = q.includes('replace') || q.includes('exchange') || q.includes('बदलो');
+          const isCancel = q.includes('cancel');
+
+          let guide = '';
+          if (isCancel) {
+            guide = '🚫 To cancel an order:\n1. Go to Track Order page\n2. Select the order\n3. Click "Cancel Order"\n4. Refund will be processed within 3-5 business days to your original payment method.';
+          } else if (isRefund) {
+            guide = '💸 Refund Policy:\n• 7-day return window from delivery\n• Full refund to original payment method\n• Refund processed within 3-5 business days\n• Go to Track Order → Select Order → Click "Request Refund"';
+          } else if (isReplace) {
+            guide = '🔄 Replacement Policy:\n• Free replacement within 7 days of delivery\n• Available for damaged/defective/wrong items\n• Go to Track Order → Select Order → Click "Request Replacement"\n• New item shipped within 2-3 business days';
+          } else {
+            guide = '📦 Return Policy:\n• 7-day doorstep return guarantee\n• Free pickup from your address\n• Choose refund or replacement\n• Go to Track Order page to initiate';
+          }
+
+          botResponse.text = `${guide}\n\n📋 Your eligible orders:\n${orderList}`;
+          botResponse.actionBtn = {
+            label: '📦 Go to Track Order Page',
+            onClick: () => { setIsOpen(false); navigate('/track-order'); }
+          };
+        } else {
+          botResponse.text = '📦 Sanjeevani offers a 7-day Doorstep Return & Instant Refund Guarantee.\n\n• Full refund to your original payment method\n• Free replacement for damaged/wrong items\n• No questions asked return policy\n\nYou currently have no active orders eligible for return/refund.';
+          botResponse.quickReplies = [
+            { label: '💊 Browse Medicines', action: 'show_categories' },
+            { label: '📞 Contact Support', action: 'contact_support' },
+          ];
+        }
+      } catch (err) {
+        botResponse.text = '📦 Sanjeevani offers a 7-day return & instant refund guarantee. Go to Track Order page to request a refund or replacement.';
+        botResponse.actionBtn = {
+          label: '📦 Track & Request Support',
+          onClick: () => { setIsOpen(false); navigate('/track-order'); }
+        };
+      }
     }
-    // Payment & Offers
+    // ─────────────────────────────────────────────────────────
+    // 3. CART — Show real cart data
+    // ─────────────────────────────────────────────────────────
     else if (
-      q.includes('payment') || q.includes('offer') || q.includes('discount') || q.includes('upi') || q.includes('cod') ||
+      q.includes('cart') || q.includes('my cart') || q.includes('shopping cart') || q.includes('items in cart') ||
+      q.includes('cart total') || q.includes('checkout') || q.includes('buy now') || q.includes('how to buy') ||
+      q.includes('place order') || q.includes('कार्ट') || q.includes('కార్ట్') || q.includes('ಕಾರ್ಟ್')
+    ) {
+      try {
+        const res = await shopService.getCart();
+        const cartItems = (res && res.success && Array.isArray(res.data)) ? res.data : [];
+
+        if (cartItems.length > 0) {
+          const totalAmount = cartItems.reduce((sum, item) => {
+            const price = Number(item.price || item.productPrice || item.product?.price || 0);
+            const qty = Number(item.quantity || 1);
+            return sum + (price * qty);
+          }, 0);
+
+          const itemList = cartItems.slice(0, 5).map((item, i) => {
+            const name = item.productName || item.product?.name || item.name || 'Product';
+            const price = fmtPrice(item.price || item.productPrice || item.product?.price);
+            const qty = item.quantity || 1;
+            return `${i + 1}. ${name} × ${qty} — ${price}`;
+          }).join('\n');
+
+          botResponse.text = `🛒 Your Cart (${cartItems.length} items | Total: ${fmtPrice(totalAmount)})\n\n${itemList}${cartItems.length > 5 ? `\n...and ${cartItems.length - 5} more items` : ''}\n\n💡 To checkout: Open cart → Enter address → Choose payment (Razorpay/COD) → Confirm!`;
+          botResponse.actionBtn = {
+            label: '🛒 Open Cart & Checkout',
+            onClick: () => { setIsOpen(false); if (onOpenCart) onOpenCart(); }
+          };
+        } else {
+          botResponse.text = '🛒 Your cart is empty! Browse our products and add items to start shopping.';
+          botResponse.quickReplies = CATEGORIES.map(c => ({
+            label: `${c.icon} ${c.name}`, action: c.action, catData: c
+          }));
+        }
+      } catch (err) {
+        botResponse.text = '🛒 To buy on Sanjeevani: click "Add to Cart" or "Buy Now" on any product → enter address → choose Razorpay or COD → confirm!';
+        botResponse.actionBtn = {
+          label: '🛒 Open My Cart',
+          onClick: () => { setIsOpen(false); if (onOpenCart) onOpenCart(); }
+        };
+      }
+    }
+    // ─────────────────────────────────────────────────────────
+    // 4. WISHLIST / FAVORITES — Show real data
+    // ─────────────────────────────────────────────────────────
+    else if (
+      q.includes('wishlist') || q.includes('favorite') || q.includes('favourit') || q.includes('saved') || q.includes('liked') ||
+      q.includes('पसंदीदा') || q.includes('ఫేవరేట్') || q.includes('ಮೆಚ್ಚಿನ')
+    ) {
+      try {
+        const res = await shopService.getFavorites();
+        const favItems = (res && res.success && Array.isArray(res.data)) ? res.data : [];
+
+        if (favItems.length > 0) {
+          const itemList = favItems.slice(0, 5).map((item, i) => {
+            const name = item.productName || item.product?.name || item.name || 'Product';
+            const price = fmtPrice(item.price || item.productPrice || item.product?.price);
+            return `${i + 1}. ❤️ ${name} — ${price}`;
+          }).join('\n');
+
+          botResponse.text = `❤️ Your Wishlist (${favItems.length} items)\n\n${itemList}${favItems.length > 5 ? `\n...and ${favItems.length - 5} more items` : ''}\n\n💡 Tap the heart icon on any product to add/remove from wishlist.`;
+        } else {
+          botResponse.text = '❤️ Your wishlist is empty! Tap the heart ♡ icon on any product to save it to your favorites.';
+          botResponse.quickReplies = CATEGORIES.map(c => ({
+            label: `${c.icon} ${c.name}`, action: c.action, catData: c
+          }));
+        }
+      } catch (err) {
+        botResponse.text = '❤️ View your saved favorites by tapping the heart icon in the navbar. Add products to your wishlist by tapping the ♡ icon on any product card.';
+      }
+    }
+    // ─────────────────────────────────────────────────────────
+    // 5. PRESCRIPTION (without upload)
+    // ─────────────────────────────────────────────────────────
+    else if (
+      q.includes('prescription') || q.includes('rx') || q.includes('doctor note') || 
+      q.includes('पर्च') || q.includes('पर्ची') || q.includes('ప్రిస్క్రిప్షన్')
+    ) {
+      botResponse.text = 'For prescription-based medicines, please consult your doctor. You can browse our Prescriptions & Pharmacy category for available OTC medicines.';
+      botResponse.actionBtn = {
+        label: '💊 Browse Prescriptions & Pharmacy',
+        onClick: () => { setIsOpen(false); navigate('/category/prescriptions-pharmacy'); }
+      };
+    }
+    // ─────────────────────────────────────────────────────────
+    // 6. PAYMENT & RAZORPAY — Detailed payment info
+    // ─────────────────────────────────────────────────────────
+    else if (
+      q.includes('payment') || q.includes('razorpay') || q.includes('upi') || q.includes('card') || 
+      q.includes('credit') || q.includes('debit') || q.includes('cod') || q.includes('cash on delivery') || 
+      q.includes('pay') || q.includes('net banking') || q.includes('gpay') || q.includes('phonepe') ||
+      q.includes('भुगतान') || q.includes('पेमेंट') || q.includes('చెల్లింపు') || q.includes('ಪಾವತಿ')
+    ) {
+      botResponse.text = '💳 Payment Methods on Sanjeevani:\n\n✅ Razorpay Online Payment:\n• UPI (Google Pay, PhonePe, Paytm)\n• Credit/Debit Cards (Visa, Mastercard, RuPay)\n• Net Banking (All major banks)\n• Wallets (Paytm, Amazon Pay)\n\n✅ Cash on Delivery (COD):\n• Pay in cash when your order arrives\n• Available on orders up to ₹5,000\n\n🔒 All transactions are 100% encrypted & secure via Razorpay payment gateway.';
+      botResponse.actionBtn = {
+        label: '🛒 Go to Cart & Checkout',
+        onClick: () => { setIsOpen(false); if (onOpenCart) onOpenCart(); }
+      };
+    }
+    // ─────────────────────────────────────────────────────────
+    // 7. OFFERS, COUPONS & DISCOUNTS
+    // ─────────────────────────────────────────────────────────
+    else if (
+      q.includes('offer') || q.includes('coupon') || q.includes('discount') || q.includes('promo') || 
+      q.includes('deal') || q.includes('free delivery') || q.includes('save') || q.includes('sale') ||
       q.includes('ऑफर') || q.includes('छूट') || q.includes('ఆఫర్') || q.includes('ಆಫರ್')
     ) {
-      botResponse.text = 'We support Razorpay Online Payments (UPI, Credit/Debit Cards, Net Banking) and Cash on Delivery (COD). Free Express Delivery is unlocked on all orders above ₹500!';
-      botResponse.quickReplies = CATEGORIES.map(c => ({
-        label: `${c.icon} ${c.name}`,
-        action: c.action,
-        catData: c
-      }));
+      botResponse.text = '🏷️ Active Sanjeevani Store Offers:\n\n🎫 SANJEEVANI50 → ₹50 OFF on orders above ₹400\n🎫 HEALTH10 → 10% Instant Discount on orders above ₹300\n🎫 FIRST100 → ₹100 OFF on first order above ₹750\n🎫 FREESHIP → Free Express Delivery on all orders!\n\n💡 Apply coupon code at checkout to avail the discount.';
+      botResponse.actionBtn = {
+        label: '🛒 Shop Now & Apply Coupon',
+        onClick: () => { setIsOpen(false); navigate('/dashboard'); }
+      };
     }
-    // Contact Support
+    // ─────────────────────────────────────────────────────────
+    // 8. CONTACT SUPPORT
+    // ─────────────────────────────────────────────────────────
     else if (
-      q.includes('contact') || q.includes('call') || q.includes('agent') || q.includes('help') || q.includes('number') ||
+      q.includes('contact') || q.includes('call') || q.includes('agent') || q.includes('help') || 
+      q.includes('number') || q.includes('phone') || q.includes('email') || q.includes('support') ||
+      q.includes('complaint') || q.includes('issue') || q.includes('problem') ||
       q.includes('संपर्क') || q.includes('मदद') || q.includes('సహాయం') || q.includes('ಸಹಾಯ')
     ) {
-      botResponse.text = 'Sanjeevani Healthcare Support Team is available 24/7. Call us toll-free at 1800-SANJEEVANI (+91 1800-726-5338) or email support@sanjeevani.com.';
+      botResponse.text = '📞 Sanjeevani Support — Available 24/7\n\n☎️ Toll-Free: 1800-SANJEEVANI (+91 1800-726-5338)\n📧 Email: support@sanjeevani.com\n💬 Live Chat: You\'re talking to me right now!\n\n🕐 Response Time:\n• Chat: Instant\n• Email: Within 2 hours\n• Phone: No wait time\n\nHow else can I help you?';
+      botResponse.quickReplies = [
+        { label: '📦 Track My Order', action: 'track_order' },
+        { label: '🔄 Refund/Return', action: 'return_policy' },
+        { label: '💊 Browse Medicines', action: 'show_categories' },
+      ];
     }
-    // Fallback Product Search Query
+    // ─────────────────────────────────────────────────────────
+    // 9. CATEGORIES & MEDICINE BROWSING
+    // ─────────────────────────────────────────────────────────
+    else if (
+      q.includes('category') || q.includes('categories') || q.includes('find medicine') || q.includes('browse') ||
+      q.includes('all products') || q.includes('shop') || q.includes('store') ||
+      q.includes('दवा') || q.includes('मందులు') || q.includes('ಔಷಧ')
+    ) {
+      try {
+        const res = await shopService.getProducts();
+        const allProds = (res && res.success && Array.isArray(res.data)) ? res.data : [];
+        botResponse.text = `🏪 Sanjeevani Store — ${allProds.length} products available\n\nSelect a category to browse:`;
+      } catch (e) {
+        botResponse.text = 'Select a healthcare category below to browse products:';
+      }
+      botResponse.quickReplies = CATEGORIES.map(c => ({
+        label: `${c.icon} ${c.name}`, action: c.action, catData: c
+      }));
+    }
+    // ─────────────────────────────────────────────────────────
+    // 10. ACCOUNT & PROFILE INFO
+    // ─────────────────────────────────────────────────────────
+    else if (
+      q.includes('account') || q.includes('profile') || q.includes('my info') || q.includes('settings') ||
+      q.includes('password') || q.includes('change password') || q.includes('login') || q.includes('logout') || q.includes('sign') ||
+      q.includes('अकाउंट') || q.includes('ప్రొఫైల్') || q.includes('ಪ್ರೊಫೈಲ್')
+    ) {
+      botResponse.text = '👤 Account & Profile:\n\n• View/edit profile: Tap your avatar in the top-right corner\n• Change password: Profile → Change Password\n• View orders: Profile → My Orders\n• View wishlist: Tap the heart icon in navbar\n• Language: Change from the globe icon in navbar\n• Logout: Profile → Logout\n\n🔒 Your data is securely encrypted and protected.';
+      botResponse.quickReplies = [
+        { label: '📦 My Orders', action: 'track_order' },
+        { label: '❤️ My Wishlist', action: 'wishlist_info' },
+        { label: '🛒 My Cart', action: 'cart_info' },
+      ];
+    }
+    // ─────────────────────────────────────────────────────────
+    // 11. DELIVERY & SHIPPING INFO
+    // ─────────────────────────────────────────────────────────
+    else if (
+      q.includes('deliver') || q.includes('shipping') || q.includes('ship') || q.includes('when will') ||
+      q.includes('how long') || q.includes('estimated') || q.includes('dispatch') || q.includes('courier') ||
+      q.includes('डिलीवरी') || q.includes('డెలివరీ') || q.includes('ಡೆಲಿವರಿ')
+    ) {
+      botResponse.text = '🚚 Delivery & Shipping Info:\n\n📦 Standard Delivery: 3-5 business days\n⚡ Express Delivery: 1-2 business days\n🆓 Free shipping on all orders!\n\n📍 We deliver across India — enter your pincode at checkout to check availability.\n\n📋 Track your delivery in real-time from the Track Order page.';
+      botResponse.actionBtn = {
+        label: '📦 Track My Deliveries',
+        onClick: () => { setIsOpen(false); navigate('/track-order'); }
+      };
+    }
+    // ─────────────────────────────────────────────────────────
+    // 12. GREETINGS & GENERAL
+    // ─────────────────────────────────────────────────────────
+    else if (
+      q.includes('hello') || q.includes('hi') || q.includes('hey') || q.includes('good morning') || 
+      q.includes('good evening') || q.includes('good afternoon') || q.includes('thanks') || q.includes('thank you') ||
+      q.includes('namaste') || q.includes('नमस्ते') || q.includes('నమస్కారం') || q.includes('ನಮಸ್ಕಾರ')
+    ) {
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
+      botResponse.text = `🙏 ${greeting}! I'm Sanjeevani AI Assistant. I can help you with:\n\n💊 Find medicines for any symptom\n📦 Check your order status & details\n🛒 View your cart & checkout\n❤️ View your wishlist\n🔄 Request refund or replacement\n💳 Payment options (Razorpay/COD)\n🏷️ Store offers & coupons\n📞 Contact support\n\nWhat would you like to know?`;
+      botResponse.quickReplies = [
+        { label: '💊 Browse Medicines', action: 'show_categories' },
+        { label: '🤒 Medicine for Fever', action: 'symptom_fever' },
+        { label: '📦 My Orders', action: 'track_order' },
+        { label: '🛒 My Cart', action: 'cart_info' },
+      ];
+    }
+    // ─────────────────────────────────────────────────────────
+    // 13. SYMPTOM → MEDICINE RECOMMENDATION ENGINE
+    // ─────────────────────────────────────────────────────────
+    else if (detectSymptomIntent(q)) {
+      const symptomResult = detectSymptomIntent(q);
+      try {
+        const res = await shopService.getProducts();
+        const allProds = (res && res.success && Array.isArray(res.data)) ? res.data : [];
+
+        const medicineMatches = [];
+        const seenIds = new Set();
+
+        for (const keyword of symptomResult.medicineKeywords) {
+          for (const p of allProds) {
+            if (seenIds.has(p.productId)) continue;
+            const pName = (p.name || '').toLowerCase();
+            const pDesc = (p.description || '').toLowerCase();
+            const pCat = (p.categoryName || '').toLowerCase();
+            if (pName.includes(keyword) || pDesc.includes(keyword) || pCat.includes(keyword)) {
+              medicineMatches.push(p);
+              seenIds.add(p.productId);
+            }
+          }
+        }
+
+        for (const p of allProds) {
+          if (seenIds.has(p.productId)) continue;
+          const pDesc = (p.description || '').toLowerCase();
+          if (symptomResult.symptomTerms.some(term => pDesc.includes(term))) {
+            medicineMatches.push(p);
+            seenIds.add(p.productId);
+          }
+        }
+
+        if (medicineMatches.length > 0) {
+          botResponse.text = `${symptomResult.emoji} ${symptomResult.advice}\n\nHere are recommended products available on Sanjeevani for "${symptomResult.symptomName}":`;
+          botResponse.products = medicineMatches.slice(0, 4);
+          botResponse.actionBtn = {
+            label: `🔍 Browse All Medicines for ${symptomResult.symptomName}`,
+            onClick: () => { setIsOpen(false); navigate('/dashboard'); }
+          };
+        } else {
+          botResponse.text = `${symptomResult.emoji} ${symptomResult.advice}\n\n⚠️ We couldn't find a specific match in our current inventory for "${symptomResult.symptomName}". Browse our full catalog:`;
+          botResponse.quickReplies = [
+            { label: '💊 Prescriptions & Pharmacy', action: 'cat_prescriptions', catData: CATEGORIES[0] },
+            { label: '🏋️ Nutrition & Health', action: 'cat_nutrition', catData: CATEGORIES[1] },
+            { label: '🩺 Medical Devices', action: 'cat_devices', catData: CATEGORIES[2] },
+          ];
+        }
+      } catch (e) {
+        botResponse.text = `${symptomResult.emoji} ${symptomResult.advice}\n\nBrowse our medicine catalog on Sanjeevani Store.`;
+        botResponse.actionBtn = {
+          label: '💊 Browse Medicines',
+          onClick: () => { setIsOpen(false); navigate('/dashboard'); }
+        };
+      }
+    }
+    // ─────────────────────────────────────────────────────────
+    // 14. PRODUCT SEARCH — Search real products
+    // ─────────────────────────────────────────────────────────
     else {
       try {
         const res = await shopService.getProducts();
         const allProds = (res && res.success && Array.isArray(res.data)) ? res.data : [];
-        const cleanTerm = translatedQ.replace(/^(show|find|search|give|me|want|need)\s+/g, '').trim();
+        const cleanTerm = translatedQ.replace(/^(show|find|search|give|me|want|need|what is|tell me about)\s+/g, '').trim();
 
         const matched = allProds.filter(p => {
           const name = (p.name || '').toLowerCase();
+          const desc = (p.description || '').toLowerCase();
           const cat = (p.categoryName || '').toLowerCase();
-          return name.includes(rawQ) || name.includes(cleanTerm) || cat.includes(cleanTerm);
+          const brand = (p.brand || '').toLowerCase();
+          return name.includes(rawQ) || name.includes(cleanTerm) || desc.includes(cleanTerm) || cat.includes(cleanTerm) || brand.includes(cleanTerm);
         });
 
         if (matched.length > 0) {
-          botResponse.text = `Here are products matching "${queryText}":`;
-          botResponse.products = matched.slice(0, 3);
+          botResponse.text = `🔍 Found ${matched.length} product(s) matching "${queryText}":`;
+          botResponse.products = matched.slice(0, 4);
+          if (matched.length > 4) {
+            botResponse.actionBtn = {
+              label: `View all ${matched.length} results`,
+              onClick: () => { setIsOpen(false); navigate('/dashboard'); }
+            };
+          }
         } else {
-          botResponse.text = `Please select a category below to browse medicines & healthcare products on Sanjeevani Store:`;
-          botResponse.quickReplies = CATEGORIES.map(c => ({
-            label: `${c.icon} ${c.name}`,
-            action: c.action,
-            catData: c
-          }));
+          botResponse.text = `I'm Sanjeevani AI Assistant — I can help you with:\n\n💊 Medicines — "medicine for fever", "cold tablet"\n📦 Orders — "my orders", "track order"\n🛒 Cart — "my cart", "checkout"\n❤️ Wishlist — "my wishlist"\n🔄 Returns — "refund", "replace"\n💳 Payment — "payment options"\n🏷️ Offers — "store offers"\n📞 Support — "contact support"\n\nTry asking one of these!`;
+          botResponse.quickReplies = [
+            { label: '💊 Browse Medicines', action: 'show_categories' },
+            { label: '🤒 Medicine for Fever', action: 'symptom_fever' },
+            { label: '📦 My Orders', action: 'track_order' },
+            { label: '🛒 My Cart', action: 'cart_info' },
+            { label: '🔄 Refund/Return', action: 'return_policy' },
+            { label: '📞 Support', action: 'contact_support' }
+          ];
         }
       } catch (e) {
-        botResponse.text = 'Search thousands of verified medicines and health devices directly on Sanjeevani Store.';
+        botResponse.text = 'Search for medicines and health products on Sanjeevani Store.';
+        botResponse.actionBtn = {
+          label: '🏪 Go to Store',
+          onClick: () => { setIsOpen(false); navigate('/dashboard'); }
+        };
       }
     }
 
@@ -655,9 +1113,24 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
     if (action === 'view_cart') {
       setIsOpen(false);
       if (onOpenCart) onOpenCart();
-    } else if (action === 'upload_rx') {
-      setIsOpen(false);
-      if (onOpenPrescriptionModal) onOpenPrescriptionModal();
+    } else if (action === 'symptom_fever') {
+      processQuery('medicine for fever');
+    } else if (action === 'symptom_cold') {
+      processQuery('medicine for cold and cough');
+    } else if (action === 'cart_info') {
+      processQuery('my cart');
+    } else if (action === 'wishlist_info') {
+      processQuery('my wishlist');
+    } else if (action === 'return_policy') {
+      processQuery('refund and return policy');
+    } else if (action === 'track_order') {
+      processQuery('my orders');
+    } else if (action === 'payment_info') {
+      processQuery('payment options');
+    } else if (action === 'contact_support') {
+      processQuery('contact support');
+    } else if (action === 'offers') {
+      processQuery('store offers');
     } else if (action === 'show_categories') {
       processQuery('categories');
     } else {
@@ -764,48 +1237,37 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenPrescriptionModa
                 </div>
               </div>
 
-              {/* Controls */}
+              {/* Controls: Voice On/Off Toggle + Close */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                {/* Language Switcher Badge */}
-                <select
-                  value={language}
-                  onChange={(e) => handleInBotLanguageChange(e.target.value)}
-                  style={{
-                    background: 'rgba(255,255,255,0.2)',
-                    color: '#ffffff',
-                    border: '1px solid rgba(255,255,255,0.4)',
-                    borderRadius: '8px',
-                    padding: '0.2rem 0.4rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    outline: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <option value="en" style={{ color: '#0f172a' }}>English</option>
-                  <option value="hi" style={{ color: '#0f172a' }}>हिंदी</option>
-                  <option value="te" style={{ color: '#0f172a' }}>తెలుగు</option>
-                  <option value="kn" style={{ color: '#0f172a' }}>ಕನ್ನಡ</option>
-                </select>
-
-                {/* Text-to-Speech Toggle */}
+                {/* Text-to-Speech (Agent Talking) Toggle */}
                 <button
-                  onClick={() => setIsVoiceOutputEnabled(!isVoiceOutputEnabled)}
-                  title={isVoiceOutputEnabled ? 'Voice Output ON' : 'Voice Output OFF'}
+                  onClick={() => {
+                    const next = !isVoiceOutputEnabled;
+                    setIsVoiceOutputEnabled(next);
+                    if (!next) window.speechSynthesis?.cancel();
+                  }}
+                  title={isVoiceOutputEnabled ? 'Agent Voice ON — Click to mute' : 'Agent Voice OFF — Click to enable'}
                   style={{
-                    background: isVoiceOutputEnabled ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
+                    background: isVoiceOutputEnabled ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
                     border: '1px solid rgba(255,255,255,0.4)',
-                    borderRadius: '50%', width: 30, height: 30,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#ffffff', cursor: 'pointer'
+                    borderRadius: '10px',
+                    padding: '0.25rem 0.6rem',
+                    display: 'flex', alignItems: 'center', gap: '0.3rem',
+                    color: '#ffffff', cursor: 'pointer',
+                    fontSize: '0.7rem', fontWeight: 700,
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  {isVoiceOutputEnabled ? <Volume2 style={{ width: 15, height: 15 }} /> : <VolumeX style={{ width: 15, height: 15 }} />}
+                  {isVoiceOutputEnabled ? <Volume2 style={{ width: 14, height: 14 }} /> : <VolumeX style={{ width: 14, height: 14 }} />}
+                  <span>{isVoiceOutputEnabled ? 'Voice ON' : 'Voice OFF'}</span>
                 </button>
 
                 {/* Close Button */}
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    window.speechSynthesis?.cancel();
+                  }}
                   style={{
                     background: 'rgba(255,255,255,0.15)', border: 'none',
                     borderRadius: '50%', width: 30, height: 30,

@@ -979,28 +979,31 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
         const res = await shopService.getProducts();
         const allProds = (res && res.success && Array.isArray(res.data)) ? res.data : [];
 
-        const medicineMatches = [];
-        const seenIds = new Set();
+        // 1. Try Scored & Ranked Product Filter with Strict Audience Check
+        let medicineMatches = filterAndRankProducts(allProds, queryText);
+        const seenIds = new Set(medicineMatches.map(p => p.productId || p.id));
 
-        for (const keyword of symptomResult.medicineKeywords) {
-          for (const p of allProds) {
-            if (seenIds.has(p.productId)) continue;
-            const pName = (p.name || '').toLowerCase();
-            const pDesc = (p.description || '').toLowerCase();
-            const pCat = (p.categoryName || '').toLowerCase();
-            if (pName.includes(keyword) || pDesc.includes(keyword) || pCat.includes(keyword)) {
-              medicineMatches.push(p);
-              seenIds.add(p.productId);
+        // 2. Fallback to symptom keywords matching with strict audience filter
+        if (medicineMatches.length < 4) {
+          const isAdult = q.includes('adult') || q.includes('skin care') || q.includes('skincare') || q.includes('sunscreen') || q.includes('serum') || q.includes('acne') || q.includes('vitamin c');
+          
+          for (const keyword of symptomResult.medicineKeywords) {
+            for (const p of allProds) {
+              if (!p) continue;
+              const pId = p.productId || p.id;
+              if (seenIds.has(pId)) continue;
+              const pName = (p.name || '').toLowerCase();
+              const pDesc = (p.description || '').toLowerCase();
+              const pCat = (p.categoryName || '').toLowerCase();
+
+              const isBaby = pCat.includes('baby') || pCat.includes('kid') || pName.includes('baby') || pName.includes('child') || pName.includes('pediatric');
+              if (isAdult && isBaby) continue; // EXCLUDE baby products for adult queries!
+
+              if (pName.includes(keyword) || pDesc.includes(keyword) || pCat.includes(keyword)) {
+                medicineMatches.push(p);
+                seenIds.add(pId);
+              }
             }
-          }
-        }
-
-        for (const p of allProds) {
-          if (seenIds.has(p.productId)) continue;
-          const pDesc = (p.description || '').toLowerCase();
-          if (symptomResult.symptomTerms.some(term => pDesc.includes(term))) {
-            medicineMatches.push(p);
-            seenIds.add(p.productId);
           }
         }
 

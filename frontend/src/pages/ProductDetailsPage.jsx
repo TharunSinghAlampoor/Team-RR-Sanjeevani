@@ -667,9 +667,11 @@ export const ProductDetailsPage = () => {
                   style={{
                     padding: '0.9rem 1.25rem',
                     borderRadius: '0.85rem',
-                    background: '#ECFDF5',
-                    border: '1.5px solid #059669',
-                    color: '#059669',
+                    background: isInCart
+                      ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+                      : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    border: 'none',
+                    color: '#ffffff',
                     fontWeight: 800,
                     fontSize: '0.95rem',
                     cursor: inStock ? 'pointer' : 'not-allowed',
@@ -677,12 +679,25 @@ export const ProductDetailsPage = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '0.5rem',
+                    boxShadow: isInCart
+                      ? '0 4px 16px rgba(124, 58, 237, 0.38)'
+                      : '0 4px 16px rgba(5, 150, 105, 0.32)',
                     opacity: inStock ? 1 : 0.6
                   }}
                   whileHover={inStock ? { scale: 1.02 } : {}}
                   whileTap={inStock ? { scale: 0.97 } : {}}
                 >
-                  <ShoppingCart style={{ width: 18, height: 18 }} /> Add to Cart
+                  {isInCart ? (
+                    <>
+                      <CheckCircle2 style={{ width: 18, height: 18, color: '#ffffff' }} />
+                      <span>✓ Added to Cart</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart style={{ width: 18, height: 18 }} />
+                      <span>Add to Cart</span>
+                    </>
+                  )}
                 </motion.button>
               )}
 

@@ -37,14 +37,6 @@ public class DataInitializer implements CommandLineRunner {
         } catch (Exception e) {
             logger.info("Initial schema migration notice: {}", e.getMessage());
         }
-
-        try {
-            seedUserIfMissing("Tharun Singh", "tharunsingh851@gmail.com", "+917702173084", "Tharun@123", Role.CUSTOMER);
-            seedUserIfMissing("System Admin", "admin@sanjeevani.com", "+919876543210", "Admin@123", Role.ADMIN);
-            seedUserIfMissing("Valued Customer", "user@sanjeevani.com", "+919876543211", "User@123", Role.CUSTOMER);
-        } catch (Exception e) {
-            logger.warn("User seeding status: {}", e.getMessage());
-        }
     }
 
     private void seedUserIfMissing(String fullName, String email, String phone, String rawPassword, Role role) {

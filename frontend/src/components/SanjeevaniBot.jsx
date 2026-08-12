@@ -980,11 +980,11 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
         const allProds = (res && res.success && Array.isArray(res.data)) ? res.data : [];
 
         // 1. Try Scored & Ranked Product Filter with Strict Audience Check
-        let medicineMatches = filterAndRankProducts(allProds, queryText);
-        const seenIds = new Set(medicineMatches.map(p => p.productId || p.id));
+        let rawMatches = filterAndRankProducts(allProds, queryText);
+        const seenIds = new Set(rawMatches.map(p => p.productId || p.id));
 
         // 2. Fallback to symptom keywords matching with strict title/category check
-        if (medicineMatches.length < 4) {
+        if (rawMatches.length < 4) {
           const isAdult = q.includes('adult') || q.includes('skin care') || q.includes('skincare') || q.includes('sunscreen') || q.includes('serum') || q.includes('acne') || q.includes('vitamin c');
           const isBaby = q.includes('baby') || q.includes('kid') || q.includes('child') || q.includes('infant') || q.includes('pediatric') || q.includes('toddler');
 
@@ -1004,12 +1004,25 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
 
               // Only match keyword in product title or category name to avoid description false positives
               if (pName.includes(keyword) || pCat.includes(keyword)) {
-                medicineMatches.push(p);
+                rawMatches.push(p);
                 seenIds.add(pId);
               }
             }
           }
         }
+
+        // 3. STRICT SYMPTOM VALIDATION — Ensure matched products strictly match symptom topic
+        const medicineMatches = rawMatches.filter(p => {
+          if (!p) return false;
+          const pName = (p.name || '').toLowerCase();
+          const pCat = (p.categoryName || '').toLowerCase();
+
+          if (symptomResult.symptomName.includes('Dental')) {
+            return pName.includes('tooth') || pName.includes('teeth') || pName.includes('dental') || pName.includes('sensodyne') || pName.includes('mouthwash') || pName.includes('listerine') || pName.includes('clove');
+          }
+
+          return symptomResult.medicineKeywords.some(kw => kw.length >= 3 && (pName.includes(kw) || pCat.includes(kw)));
+        });
 
         if (medicineMatches.length > 0) {
           botResponse.text = `✨ ${symptomResult.emoji} ${symptomResult.symptomName} Healthcare Guide\n\n💡 Clinical Advice:\n${symptomResult.advice}\n\n🛒 Top Recommended Verified Products on Sanjeevani:`;
@@ -1020,6 +1033,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
           };
         } else {
           botResponse.text = `✨ ${symptomResult.emoji} ${symptomResult.symptomName} Healthcare Guide\n\n💡 Clinical Advice:\n${symptomResult.advice}\n\n🔍 Browse our verified pharmacy catalog for options:`;
+          botResponse.products = null;
           botResponse.actionBtn = {
             label: '💊 Browse Full Pharmacy Catalog ➔',
             onClick: () => { setIsOpen(false); navigate('/dashboard'); }

@@ -403,8 +403,10 @@ export const Dashboard = () => {
   const cartItemsMap = useMemo(() => {
     const map = {};
     (cartItems || []).forEach(item => {
-      const pId = item.productId || item.product?.productId;
-      if (pId) map[pId] = true;
+      const pId = item.productId || item.product?.productId || item.id;
+      if (pId) {
+        map[pId] = (map[pId] || 0) + (item.quantity || 1);
+      }
     });
     return map;
   }, [cartItems]);
@@ -458,6 +460,15 @@ export const Dashboard = () => {
         setToast({ type: 'cart-remove', title: 'Removed from Cart', message: 'Item removed from your cart.' });
       }
     } catch (err) { console.error(err); }
+  };
+
+  const handleRemoveFromCartByProductId = async (productId) => {
+    const item = (cartItems || []).find(i => String(i.productId || i.product?.productId || i.id) === String(productId));
+    if (item && (item.id || item.cartItemId)) {
+      await handleRemoveCartItem(item.id || item.cartItemId);
+    } else {
+      setCartItems(prev => prev.filter(i => String(i.productId || i.id) !== String(productId)));
+    }
   };
 
   // ─── Favorite Handlers ────────────────────────────────────────────
@@ -687,8 +698,11 @@ export const Dashboard = () => {
                       product={product}
                       index={i}
                       isFavorite={!!favoritesMap[product.productId]}
+                      isInCart={!!cartItemsMap[product.productId]}
+                      cartQuantity={cartItemsMap[product.productId] || 0}
                       onToggleFavorite={handleToggleFavorite}
                       onAddToCart={handleAddToCart}
+                      onRemoveFromCart={handleRemoveFromCartByProductId}
                       onBuyNow={handleStartBuyNow}
                       onOpenDetails={handleOpenDetails}
                     />

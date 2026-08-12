@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, CreditCard, ShieldAlert, CheckCircle2, AlertCircle, Heart, Star, ChevronRight } from 'lucide-react';
+import { ShoppingCart, ShieldAlert, CheckCircle2, AlertCircle, Heart, Star, Plus, Minus, Trash2 } from 'lucide-react';
 import ProductImage from './ProductImage';
 import { resolveBrandName } from '../utils/brandUtils';
 import { useLanguage } from '../context/LanguageContext';
@@ -8,11 +8,14 @@ import { useLanguage } from '../context/LanguageContext';
 const ProductCard = React.memo(({
   product,
   onAddToCart,
+  onUpdateQuantity,
+  onRemoveFromCart,
   onBuyNow,
   onOpenDetails,
   onToggleFavorite,
   isFavorite = false,
   isInCart = false,
+  cartQuantity = 0,
   compact = false,
   index = 0,
 }) => {
@@ -20,38 +23,82 @@ const ProductCard = React.memo(({
   const { t, translateData } = useLanguage();
 
   const inStock = Boolean(product.stock && product.stock > 0);
-  const [imgError, setImgError] = useState(false);
   const [isAddedLocal, setIsAddedLocal] = useState(false);
+  const [qty, setQty] = useState(cartQuantity || (isInCart ? 1 : 0));
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (cartQuantity > 0) {
+      setQty(cartQuantity);
+      setIsAddedLocal(true);
+    } else if (isInCart) {
+      setQty(prev => (prev > 0 ? prev : 1));
+      setIsAddedLocal(true);
+    } else {
+      setQty(0);
+      setIsAddedLocal(false);
+    }
+  }, [cartQuantity, isInCart]);
+
+  const pId = product.productId || product.id || product._id;
 
   const handleCardClick = useCallback((e) => {
     if (e && e.stopPropagation) e.stopPropagation();
-    const targetId = product?.productId || product?.id;
     if (typeof onOpenDetails === 'function') {
       onOpenDetails(product);
-    } else if (targetId) {
-      navigate(`/product/${targetId}`);
+    } else if (pId) {
+      navigate(`/product/${pId}`);
     }
-  }, [onOpenDetails, product, navigate]);
+  }, [onOpenDetails, product, pId, navigate]);
 
-  const handleCart = useCallback((e) => {
-    e.stopPropagation();
+  const handleCartAdd = useCallback((e) => {
+    if (e) e.stopPropagation();
+    setQty(1);
     setIsAddedLocal(true);
-    if (onAddToCart) onAddToCart(product.productId, 1);
-  }, [onAddToCart, product.productId]);
+    if (onAddToCart) onAddToCart(pId, 1);
+  }, [onAddToCart, pId]);
 
-  const handleBuy = useCallback((e) => {
-    e.stopPropagation();
-    onBuyNow(product);
-  }, [onBuyNow, product]);
+  const handleDecrease = useCallback((e) => {
+    if (e) e.stopPropagation();
+    const newQ = qty - 1;
+    if (newQ <= 0) {
+      setQty(0);
+      setIsAddedLocal(false);
+      if (typeof onRemoveFromCart === 'function') {
+        onRemoveFromCart(pId);
+      } else if (typeof onUpdateQuantity === 'function') {
+        onUpdateQuantity(pId, 0);
+      } else if (typeof onAddToCart === 'function') {
+        onAddToCart(pId, -qty);
+      }
+    } else {
+      setQty(newQ);
+      if (typeof onUpdateQuantity === 'function') {
+        onUpdateQuantity(pId, newQ);
+      } else if (typeof onAddToCart === 'function') {
+        onAddToCart(pId, -1);
+      }
+    }
+  }, [qty, pId, onRemoveFromCart, onUpdateQuantity, onAddToCart]);
+
+  const handleIncrease = useCallback((e) => {
+    if (e) e.stopPropagation();
+    const newQ = qty + 1;
+    setQty(newQ);
+    if (typeof onUpdateQuantity === 'function') {
+      onUpdateQuantity(pId, newQ);
+    } else if (typeof onAddToCart === 'function') {
+      onAddToCart(pId, 1);
+    }
+  }, [qty, pId, onUpdateQuantity, onAddToCart]);
 
   const handleWishlist = useCallback((e) => {
-    e.stopPropagation();
-    if (onToggleFavorite) onToggleFavorite(product.productId);
-  }, [onToggleFavorite, product.productId]);
+    if (e) e.stopPropagation();
+    if (onToggleFavorite) onToggleFavorite(pId);
+  }, [onToggleFavorite, pId]);
 
   const brandName = resolveBrandName(product);
-  const inCartActive = isInCart || isAddedLocal;
+  const inCartActive = isInCart || isAddedLocal || qty > 0;
 
   return (
     <div
@@ -65,7 +112,7 @@ const ProductCard = React.memo(({
         </span>
       )}
 
-      {/* Wishlist Heart Button — top right */}
+      {/* Wishlist Heart Button */}
       <button
         onClick={handleWishlist}
         title={isFavorite ? 'Remove from Wishlist' : 'Add to Wishlist'}
@@ -134,46 +181,99 @@ const ProductCard = React.memo(({
         }
       </div>
 
-      {/* Actions: Add to Cart */}
+      {/* Actions: Add to Cart OR Quantity Stepper (- Count + / Remove) */}
       <div className="pcard__actions" style={{ marginTop: 'auto', paddingTop: '0.75rem' }}>
-        <button
-          disabled={!inStock}
-          onClick={handleCart}
-          className="pcard__btn"
-          style={{
-            width: '100%',
-            padding: '0.72rem',
-            borderRadius: '0.8rem',
-            fontWeight: 800,
-            fontSize: '0.88rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.45rem',
-            cursor: inStock ? 'pointer' : 'not-allowed',
-            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-            background: inCartActive
-              ? 'linear-gradient(135deg, #ff6b81 0%, #ff4757 100%)'
-              : 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
-            color: '#ffffff',
-            border: 'none',
-            boxShadow: inCartActive
-              ? '0 4px 16px rgba(255, 107, 129, 0.42)'
-              : '0 4px 16px rgba(255, 71, 87, 0.38)',
-          }}
-        >
-          {inCartActive ? (
-            <>
-              <CheckCircle2 style={{ width: 17, height: 17, color: '#ffffff' }} />
-              <span>✓ {t('addedToCart')}</span>
-            </>
-          ) : (
-            <>
-              <ShoppingCart style={{ width: 16, height: 16 }} />
-              <span>{t('addToCart')}</span>
-            </>
-          )}
-        </button>
+        {inCartActive && qty > 0 ? (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              padding: '0.3rem 0.4rem',
+              borderRadius: '0.8rem',
+              background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              boxShadow: '0 4px 16px rgba(255, 71, 87, 0.38)',
+            }}
+          >
+            {/* Minus / Trash Remove Button */}
+            <button
+              onClick={handleDecrease}
+              title={qty === 1 ? 'Remove from Cart' : 'Decrease Quantity'}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: '0.55rem',
+                background: 'rgba(255, 255, 255, 0.22)',
+                color: '#ffffff',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {qty === 1 ? <Trash2 style={{ width: 15, height: 15 }} /> : <Minus style={{ width: 15, height: 15 }} />}
+            </button>
+
+            {/* Quantity Count Badge */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', userSelect: 'none' }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: 900, color: '#ffffff', lineHeight: 1 }}>{qty}</span>
+              <span style={{ fontSize: '0.58rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.88)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 1 }}>in cart</span>
+            </div>
+
+            {/* Plus Increase Button */}
+            <button
+              onClick={handleIncrease}
+              disabled={!inStock}
+              title="Increase Quantity"
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: '0.55rem',
+                background: 'rgba(255, 255, 255, 0.22)',
+                color: '#ffffff',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Plus style={{ width: 15, height: 15 }} />
+            </button>
+          </div>
+        ) : (
+          <button
+            disabled={!inStock}
+            onClick={handleCartAdd}
+            className="pcard__btn"
+            style={{
+              width: '100%',
+              padding: '0.72rem',
+              borderRadius: '0.8rem',
+              fontWeight: 800,
+              fontSize: '0.88rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem',
+              cursor: inStock ? 'pointer' : 'not-allowed',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+              background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
+              color: '#ffffff',
+              border: 'none',
+              boxShadow: '0 4px 16px rgba(255, 71, 87, 0.38)',
+            }}
+          >
+            <ShoppingCart style={{ width: 16, height: 16 }} />
+            <span>{t('addToCart')}</span>
+          </button>
+        )}
       </div>
     </div>
   );

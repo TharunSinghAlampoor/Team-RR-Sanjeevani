@@ -179,11 +179,13 @@ export function CategoryProductsPage() {
 
   // Determine current active category meta
   const currentCatMeta = useMemo(() => {
-    const rawStr = String(categoryId || '').trim().toLowerCase();
-    const numId = parseInt(rawStr, 10);
+    let rawStr = String(categoryId || '').trim();
+    try { rawStr = decodeURIComponent(rawStr).trim(); } catch (e) {}
+    const lowerRaw = rawStr.toLowerCase();
+    const numId = parseInt(lowerRaw, 10);
 
     // 0. All products / All categories check
-    if (rawStr === 'all' || rawStr === 'all-products' || rawStr === 'all-categories' || rawStr === '0' || rawStr === 'all products') {
+    if (lowerRaw === 'all' || lowerRaw === 'all-products' || lowerRaw === 'all-categories' || lowerRaw === '0' || lowerRaw === 'all products') {
       return {
         id: 'all-products',
         isAll: true,
@@ -244,12 +246,15 @@ export function CategoryProductsPage() {
 
     // Only filter by category if NOT in All Products mode
     if (!isAllMode) {
-      prods = prods.filter(p => {
+      const matched = prods.filter(p => {
         if (!p) return false;
+
+        let rawDecodedCat = String(categoryId || '');
+        try { rawDecodedCat = decodeURIComponent(rawDecodedCat); } catch (e) {}
 
         const pCatName = p.categoryName || p.category?.categoryName || p.category?.name || '';
         const pSlug = toCategorySlug(pCatName);
-        const rawSlug = toCategorySlug(categoryId);
+        const rawSlug = toCategorySlug(rawDecodedCat);
         const targetSlug = toCategorySlug(targetCategoryName);
 
         // 1. Direct slug match (e.g. "skin-care" === "skin-care")
@@ -266,7 +271,7 @@ export function CategoryProductsPage() {
         // 3. Numeric ID match if available
         const targetCatId = Number(currentCatMeta.id);
         const pCatId = Number(p.categoryId || p.category?.categoryId);
-        if (!isNaN(targetCatId) && !isNaN(pCatId) && targetCatId === pCatId) {
+        if (!isNaN(targetCatId) && !isNaN(pCatId) && targetCatId > 0 && pCatId > 0 && targetCatId === pCatId) {
           return true;
         }
 
@@ -274,7 +279,7 @@ export function CategoryProductsPage() {
         if (pCatName && targetCategoryName) {
           const pLower = pCatName.toLowerCase().replace(/[^a-z0-9]/g, '');
           const targetLower = targetCategoryName.toLowerCase().replace(/[^a-z0-9]/g, '');
-          const rawLower = String(categoryId).toLowerCase().replace(/[^a-z0-9]/g, '');
+          const rawLower = rawDecodedCat.toLowerCase().replace(/[^a-z0-9]/g, '');
           if (pLower.includes(targetLower) || targetLower.includes(pLower) || pLower.includes(rawLower) || rawLower.includes(pLower)) {
             return true;
           }
@@ -282,6 +287,9 @@ export function CategoryProductsPage() {
 
         return false;
       });
+
+      // If category filter returns products, use them; otherwise fallback to showing full catalog so page is NEVER blank!
+      prods = matched.length > 0 ? matched : prods;
     }
 
     // Multi-keyword search query

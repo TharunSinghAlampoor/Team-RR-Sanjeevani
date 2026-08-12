@@ -134,18 +134,18 @@ const ProductCard = React.memo(({
         }
       </div>
 
-      {/* Actions: Add to Cart Only */}
-      <div className="pcard__actions" style={{ marginTop: '0.75rem' }}>
+      {/* Actions: Add to Cart */}
+      <div className="pcard__actions" style={{ marginTop: 'auto', paddingTop: '0.75rem' }}>
         <button
           disabled={!inStock}
           onClick={handleCart}
           className="pcard__btn"
           style={{
             width: '100%',
-            padding: '0.68rem',
-            borderRadius: '0.75rem',
-            fontWeight: 900,
-            fontSize: '0.86rem',
+            padding: '0.72rem',
+            borderRadius: '0.8rem',
+            fontWeight: 800,
+            fontSize: '0.88rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -154,12 +154,12 @@ const ProductCard = React.memo(({
             transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             background: inCartActive
               ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
-              : 'linear-gradient(135deg, #FF6B55 0%, #E63946 100%)',
+              : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
             color: '#ffffff',
             border: 'none',
             boxShadow: inCartActive
-              ? '0 4px 14px rgba(16, 185, 129, 0.35)'
-              : '0 4px 14px rgba(230, 57, 70, 0.35)',
+              ? '0 4px 16px rgba(16, 185, 129, 0.38)'
+              : '0 4px 16px rgba(5, 150, 105, 0.32)',
           }}
         >
           {inCartActive ? (

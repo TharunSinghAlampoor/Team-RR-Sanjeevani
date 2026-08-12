@@ -1,12 +1,9 @@
 package com.ecommerce.auth.config;
 
-import com.ecommerce.auth.entity.Role;
-import com.ecommerce.auth.entity.User;
-import com.ecommerce.auth.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,17 +11,10 @@ public class DataInitializer implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
 
-    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final JdbcTemplate jdbcTemplate;
 
-    public DataInitializer(
-            org.springframework.jdbc.core.JdbcTemplate jdbcTemplate,
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
+    public DataInitializer(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -38,20 +28,4 @@ public class DataInitializer implements CommandLineRunner {
             logger.info("Initial schema migration notice: {}", e.getMessage());
         }
     }
-
-    private void seedUserIfMissing(String fullName, String email, String phone, String rawPassword, Role role) {
-        java.util.Optional<User> existing = userRepository.findByEmail(email.toLowerCase());
-        if (existing.isEmpty()) {
-            User user = new User(
-                    fullName,
-                    email.toLowerCase(),
-                    phone,
-                    passwordEncoder.encode(rawPassword),
-                    role
-            );
-            userRepository.save(user);
-            logger.info("Seeded user account: {} ({})", fullName, email);
-        }
-    }
 }
-

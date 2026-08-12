@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DriverManager;
 
 @Configuration
 public class DataSourceConfig {
@@ -33,36 +31,13 @@ public class DataSourceConfig {
     @Bean
     @Primary
     public DataSource dataSource() {
-        logger.info("Testing primary database connection at URL: {}", dbUrl);
-
-        boolean canConnectToPrimary = false;
-        try {
-            Class.forName(dbDriver);
-            DriverManager.setLoginTimeout(3);
-            try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
-                if (conn != null && !conn.isClosed()) {
-                    canConnectToPrimary = true;
-                    logger.info("Successfully connected to primary MySQL database at {}", dbUrl);
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("Primary MySQL database connection check failed ({}: {}). Switching to cloud-resilient embedded H2 MySQL mode to prevent deployment exit.", e.getClass().getSimpleName(), e.getMessage());
-        }
+        logger.info("Initializing MySQL DataSource connection at URL: {}", dbUrl);
 
         HikariConfig config = new HikariConfig();
-
-        if (canConnectToPrimary) {
-            config.setJdbcUrl(dbUrl);
-            config.setUsername(dbUser);
-            config.setPassword(dbPassword);
-            config.setDriverClassName(dbDriver);
-        } else {
-            logger.warn("Activating embedded H2 database layer (jdbc:h2:mem:sanjeevani_db;MODE=MySQL) for Render service stability.");
-            config.setJdbcUrl("jdbc:h2:mem:sanjeevani_db;MODE=MySQL;DB_CLOSE_DELAY=-1;DEFAULT_NULL_ORDERING=HIGH");
-            config.setUsername("sa");
-            config.setPassword("");
-            config.setDriverClassName("org.h2.Driver");
-        }
+        config.setJdbcUrl(dbUrl);
+        config.setUsername(dbUser);
+        config.setPassword(dbPassword);
+        config.setDriverClassName(dbDriver);
 
         config.setMaximumPoolSize(20);
         config.setMinimumIdle(5);

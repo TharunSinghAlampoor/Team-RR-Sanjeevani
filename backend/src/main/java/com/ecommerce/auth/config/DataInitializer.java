@@ -57,13 +57,6 @@ public class DataInitializer implements CommandLineRunner {
             );
             userRepository.save(user);
             logger.info("Seeded user account: {} ({})", fullName, email);
-        } else {
-            User user = existing.get();
-            if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-                user.setPassword(passwordEncoder.encode(rawPassword));
-                userRepository.save(user);
-                logger.info("Updated password hash for user account: {}", email);
-            }
         }
     }
 }

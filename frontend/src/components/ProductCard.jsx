@@ -289,55 +289,31 @@ const ProductCard = React.memo(({
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', width: '100%' }}>
-            <button
-              disabled={!inStock}
-              onClick={handleCartAdd}
-              style={{
-                flex: 1,
-                padding: '0.68rem 0.5rem',
-                borderRadius: '0.75rem',
-                fontWeight: 800,
-                fontSize: '0.84rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.35rem',
-                cursor: inStock ? 'pointer' : 'not-allowed',
-                background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
-                color: '#ffffff',
-                border: 'none',
-                boxShadow: '0 3px 10px rgba(255, 71, 87, 0.32)',
-              }}
-            >
-              <ShoppingCart style={{ width: 15, height: 15 }} />
-              <span>{t('addToCart')}</span>
-            </button>
-
-            {typeof onBuyNow === 'function' && (
-              <button
-                disabled={!inStock}
-                onClick={handleBuy}
-                style={{
-                  padding: '0.68rem 0.75rem',
-                  borderRadius: '0.75rem',
-                  fontWeight: 800,
-                  fontSize: '0.84rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.25rem',
-                  cursor: inStock ? 'pointer' : 'not-allowed',
-                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                  color: '#ffffff',
-                  border: 'none',
-                  boxShadow: '0 3px 10px rgba(37, 99, 235, 0.28)',
-                }}
-              >
-                <span>⚡ Buy</span>
-              </button>
-            )}
-          </div>
+          <button
+            disabled={!inStock}
+            onClick={handleCartAdd}
+            className="pcard__btn"
+            style={{
+              width: '100%',
+              padding: '0.72rem',
+              borderRadius: '0.8rem',
+              fontWeight: 800,
+              fontSize: '0.88rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem',
+              cursor: inStock ? 'pointer' : 'not-allowed',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+              background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
+              color: '#ffffff',
+              border: 'none',
+              boxShadow: '0 4px 16px rgba(255, 71, 87, 0.38)',
+            }}
+          >
+            <ShoppingCart style={{ width: 16, height: 16 }} />
+            <span>{t('addToCart')}</span>
+          </button>
         )}
       </div>
     </div>

@@ -904,7 +904,7 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
 
   React.useEffect(() => {
     let isMounted = true;
-    if (Array.isArray(orders) && orders.length > 0) {
+    if (Array.isArray(orders)) {
       setModalOrders(orders);
     }
     shopService.getOrders().then(res => {

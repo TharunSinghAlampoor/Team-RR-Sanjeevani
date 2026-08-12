@@ -97,6 +97,15 @@ const ProductCard = React.memo(({
     if (onToggleFavorite) onToggleFavorite(pId);
   }, [onToggleFavorite, pId]);
 
+  const handleBuy = useCallback((e) => {
+    if (e) e.stopPropagation();
+    if (typeof onBuyNow === 'function') {
+      onBuyNow(product);
+    } else {
+      handleCardClick(e);
+    }
+  }, [onBuyNow, product, handleCardClick]);
+
   const brandName = resolveBrandName(product);
   const inCartActive = isInCart || isAddedLocal || qty > 0;
 

@@ -1355,15 +1355,56 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                     background: msg.sender === 'user' ? 'linear-gradient(135deg, #0D5C75 0%, #0369a1 100%)' : '#ffffff',
                     color: msg.sender === 'user' ? '#ffffff' : '#1A2E35',
                     fontSize: '0.88rem',
-                    lineHeight: 1.48,
+                    lineHeight: 1.5,
                     fontWeight: 500,
-                    whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word',
                     boxShadow: msg.sender === 'user' ? '0 4px 12px rgba(13,92,117,0.25)' : '0 2px 8px rgba(0,0,0,0.04)',
                     border: msg.sender === 'user' ? 'none' : '1px solid #e2e8f0',
                     position: 'relative'
                   }}>
-                    {translateData(msg.text)}
+                    {msg.sender === 'user' ? (
+                      translateData(msg.text)
+                    ) : (
+                      <>
+                        {(() => {
+                          const translated = translateData(msg.text || '');
+                          const lines = translated.split('\n');
+                          return lines.map((line, index) => {
+                            const trimmed = line.trim();
+                            if (!trimmed) {
+                              return <div key={index} style={{ height: '0.35rem' }} />;
+                            }
+
+                            const isBullet = /^[•\-\*]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed);
+                            const isHeader = /^[\#✨💡📋📦🛒💳🔄🚨🚚]\s*/.test(trimmed) || (trimmed.endsWith(':') && trimmed.length < 50);
+
+                            if (isBullet) {
+                              const cleanText = trimmed.replace(/^[•\-\*]\s+/, '').replace(/^\d+\.\s+/, '');
+                              return (
+                                <div key={index} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem', margin: '0.2rem 0 0.2rem 0.2rem' }}>
+                                  <span style={{ color: '#059669', fontWeight: 900, fontSize: '0.88rem', lineHeight: 1.35 }}>•</span>
+                                  <span style={{ flex: 1, fontSize: '0.85rem', lineHeight: 1.45, color: '#334155' }}>{cleanText}</span>
+                                </div>
+                              );
+                            }
+
+                            if (isHeader) {
+                              return (
+                                <div key={index} style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a', margin: '0.35rem 0 0.2rem 0', lineHeight: 1.4 }}>
+                                  {trimmed}
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <p key={index} style={{ margin: '0 0 0.35rem 0', fontSize: '0.85rem', lineHeight: 1.48, color: '#334155' }}>
+                                {trimmed}
+                              </p>
+                            );
+                          });
+                        })()}
+                      </>
+                    )}
 
                     {/* Speaker Read Aloud Button */}
                     {msg.sender === 'bot' && (

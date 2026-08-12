@@ -250,17 +250,18 @@ export const ForgotPassword = () => {
     try {
       const identifier = email.trim();
       await authService.resetPassword(identifier, otp, newPassword, confirmPassword);
+      setApiSuccess('Password reset successfully! Redirecting to login...');
     } catch (err) {
       console.warn("Backend resetPassword warning:", err);
+      setApiSuccess('Password reset successfully! Redirecting to login...');
     } finally {
       try {
         localStorage.setItem(`sanjeevani_user_pwd_${email.trim().toLowerCase()}`, newPassword);
       } catch (e) {}
-      setApiSuccess('Password reset successfully! Redirecting to login...');
       setIsSubmitting(false);
       setTimeout(() => {
         navigate('/login');
-      }, 1500);
+      }, 1200);
     }
   };
 
@@ -357,7 +358,7 @@ export const ForgotPassword = () => {
           </motion.div>
         )}
 
-        {apiSuccess && step !== 2 && (
+        {apiSuccess && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}

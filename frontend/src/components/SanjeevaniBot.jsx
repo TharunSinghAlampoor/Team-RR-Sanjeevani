@@ -1371,17 +1371,18 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                       </button>
                     )}
 
-                    {/* Products Grid */}
+                    {/* Amazon Rufus-Style Interactive Product Cards */}
                     {msg.products && msg.products.length > 0 && (
-                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                         {msg.products.map((prod) => (
                           <div
                             key={prod.id || prod.productId}
                             style={{
-                              display: 'flex', alignItems: 'center', gap: '0.65rem',
-                              background: '#ffffff', padding: '0.55rem 0.75rem',
-                              borderRadius: '12px', border: '1.5px solid #cbd5e1',
-                              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                              display: 'flex', alignItems: 'center', gap: '0.75rem',
+                              background: '#ffffff', padding: '0.65rem 0.85rem',
+                              borderRadius: '14px', border: '1.5px solid #e2e8f0',
+                              boxShadow: '0 3px 10px rgba(0,0,0,0.04)',
+                              transition: 'all 0.2s ease'
                             }}
                           >
                             <div
@@ -1389,10 +1390,11 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                                 setIsOpen(false);
                                 navigate(`/product/${prod.id || prod.productId}`);
                               }}
-                              style={{ width: 42, height: 42, borderRadius: '8px', overflow: 'hidden', background: '#f8fafc', flexShrink: 0, cursor: 'pointer', border: '1px solid #e2e8f0' }}
+                              style={{ width: 48, height: 48, borderRadius: '10px', overflow: 'hidden', background: '#f8fafc', flexShrink: 0, cursor: 'pointer', border: '1px solid #e2e8f0', padding: 2 }}
                             >
                               <ProductImage src={prod.imageUrl} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                             </div>
+
                             <div
                               onClick={() => {
                                 setIsOpen(false);
@@ -1400,75 +1402,109 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                               }}
                               style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
                             >
-                              <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <p style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {translateData(prod.name)}
                               </p>
-                              <p style={{ margin: 0, fontSize: '0.78rem', color: '#059669', fontWeight: 900 }}>
-                                ₹{prod.price}
-                              </p>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '2px' }}>
+                                <span style={{ fontSize: '0.82rem', color: '#059669', fontWeight: 900 }}>
+                                  ₹{prod.price}
+                                </span>
+                                <span style={{ fontSize: '0.68rem', fontWeight: 800, background: '#fffbeb', color: '#b45309', padding: '1px 5px', borderRadius: 99, border: '1px solid #fde68a' }}>
+                                  ★ {Number(prod.rating || 4.8).toFixed(1)}
+                                </span>
+                              </div>
                             </div>
-                            <button
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                const pId = prod.id || prod.productId;
-                                try {
-                                  await shopService.addToCart(pId, 1);
-                                  handleSendWithText('cart');
-                                } catch (err) {
-                                  navigate(`/product/${pId}`);
-                                }
-                              }}
-                              style={{
-                                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                                color: '#ffffff', border: 'none', borderRadius: '8px',
-                                padding: '0.35rem 0.65rem', fontSize: '0.75rem', fontWeight: 800,
-                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
-                                boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)'
-                              }}
-                            >
-                              <ShoppingCart style={{ width: 12, height: 12 }} />
-                              <span>Add</span>
-                            </button>
+
+                            {/* Dual Buttons: Add to Cart + Buy Now */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  const pId = prod.id || prod.productId;
+                                  try {
+                                    await shopService.addToCart(pId, 1);
+                                    handleSendWithText('cart');
+                                  } catch (err) {
+                                    navigate(`/product/${pId}`);
+                                  }
+                                }}
+                                title="Add to Cart"
+                                style={{
+                                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                                  color: '#ffffff', border: 'none', borderRadius: '8px',
+                                  padding: '0.38rem 0.65rem', fontSize: '0.74rem', fontWeight: 800,
+                                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
+                                  boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)'
+                                }}
+                              >
+                                <ShoppingCart style={{ width: 12, height: 12 }} />
+                                <span>Add</span>
+                              </button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsOpen(false);
+                                  navigate(`/product/${prod.id || prod.productId}`);
+                                }}
+                                title="Express Buy Now"
+                                style={{
+                                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                                  color: '#ffffff', border: 'none', borderRadius: '8px',
+                                  padding: '0.38rem 0.65rem', fontSize: '0.74rem', fontWeight: 800,
+                                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem',
+                                  boxShadow: '0 2px 6px rgba(37, 99, 235, 0.28)'
+                                }}
+                              >
+                                ⚡ Buy
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    {/* Interactive Structured Order Cards */}
+                    {/* Amazon-Style Order Delivery Status Cards */}
                     {msg.orderList && msg.orderList.length > 0 && (
-                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                         {msg.orderList.map((ord) => {
                           const s = String(ord.orderStatus || ord.paymentStatus || ord.status || '').toUpperCase();
                           let statusLabel = '⏳ Processing';
                           let statusBg = '#fff7ed';
                           let statusColor = '#c2410c';
                           let statusBorder = '#ffedd5';
+                          let progressPct = '25%';
 
                           if (s === 'PACKED') {
                             statusLabel = '📦 Packed & Ready';
                             statusBg = '#eff6ff';
                             statusColor = '#1d4ed8';
                             statusBorder = '#dbeafe';
+                            progressPct = '50%';
                           } else if (s === 'SUCCESS' || s === 'CONFIRMED' || s === 'PAID') {
                             statusLabel = '✅ Order Confirmed';
                             statusBg = '#ecfdf5';
                             statusColor = '#047857';
                             statusBorder = '#a7f3d0';
-                          } else if (s === 'DELIVERED') {
-                            statusLabel = '🎉 Delivered';
-                            statusBg = '#f0fdf4';
-                            statusColor = '#15803d';
-                            statusBorder = '#bbf7d0';
+                            progressPct = '35%';
                           } else if (s === 'OUT_FOR_DELIVERY') {
                             statusLabel = '🚚 Out for Delivery';
                             statusBg = '#fefce8';
                             statusColor = '#a16207';
                             statusBorder = '#fef08a';
+                            progressPct = '80%';
+                          } else if (s === 'DELIVERED') {
+                            statusLabel = '🎉 Delivered';
+                            statusBg = '#f0fdf4';
+                            statusColor = '#15803d';
+                            statusBorder = '#bbf7d0';
+                            progressPct = '100%';
                           } else if (s === 'CANCELLED') {
                             statusLabel = '❌ Cancelled';
                             statusBg = '#fef2f2';
                             statusColor = '#b91c1c';
                             statusBorder = '#fecaca';
+                            progressPct = '0%';
                           }
 
                           const total = fmtPrice(ord.grandTotal || ord.totalAmount);
@@ -1484,22 +1520,28 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                               }}
                               style={{
                                 background: '#ffffff',
-                                padding: '0.65rem 0.85rem',
-                                borderRadius: '12px',
+                                padding: '0.75rem 0.9rem',
+                                borderRadius: '14px',
                                 border: '1.5px solid #cbd5e1',
-                                boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                                boxShadow: '0 3px 10px rgba(0,0,0,0.04)',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '0.35rem'
+                                gap: '0.45rem'
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
-                                <span style={{ fontSize: '0.84rem', fontWeight: 900, color: '#0369a1' }}>#{ord.orderId}</span>
-                                <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: 99, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
+                                <span style={{ fontSize: '0.86rem', fontWeight: 900, color: '#0369a1' }}>#{ord.orderId}</span>
+                                <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 9px', borderRadius: 99, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
                                   {statusLabel}
                                 </span>
                               </div>
+
+                              {/* Progress Line */}
+                              <div style={{ width: '100%', height: 4, background: '#f1f5f9', borderRadius: 99, overflow: 'hidden', margin: '2px 0' }}>
+                                <div style={{ width: progressPct, height: '100%', background: 'linear-gradient(90deg, #10b981, #059669)', transition: 'width 0.4s ease' }} />
+                              </div>
+
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}>
                                 <span style={{ fontWeight: 900, color: '#059669' }}>{total} ({itemsCount} item{itemsCount > 1 ? 's' : ''})</span>
                                 <span style={{ color: '#64748b', fontWeight: 600 }}>{date}</span>

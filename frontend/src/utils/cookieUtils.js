@@ -142,29 +142,17 @@ export const clearSessionCookies = () => {
   eraseCookie('auth_token');
   eraseCookie('user_name');
   eraseCookie('shopping_counts');
-  purgeUnwantedCookies();
 };
 
-// Automatically sweep unwanted cookies on load
-if (typeof document !== 'undefined') {
-  purgeUnwantedCookies();
-}
-
 function _purgeAllVariants(name) {
-  if (!name) return;
+  if (!name || typeof document === 'undefined') return;
   const past = 'Thu, 01 Jan 1970 00:00:00 UTC';
   const hostname = typeof window !== 'undefined' && window.location ? window.location.hostname : '';
-  const domains = ['', hostname, `.${hostname}`, 'localhost', '.localhost', '127.0.0.1', '.127.0.0.1'];
-  const paths = ['/', '', '/api', '/api/'];
-  const sameSites = ['; SameSite=Lax', '; SameSite=Strict', '; SameSite=None; Secure', ''];
 
-  domains.forEach((dom) => {
-    paths.forEach((path) => {
-      sameSites.forEach((sameSite) => {
-        const domainAttr = dom ? `; domain=${dom}` : '';
-        const pathAttr = path ? `; path=${path}` : '';
-        document.cookie = `${name}=; expires=${past}${pathAttr}${domainAttr}${sameSite}`;
-      });
-    });
-  });
+  document.cookie = `${name}=; expires=${past}; path=/`;
+  document.cookie = `${name}=; expires=${past}`;
+  if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    document.cookie = `${name}=; expires=${past}; domain=${hostname}; path=/`;
+    document.cookie = `${name}=; expires=${past}; domain=.${hostname}; path=/`;
+  }
 }

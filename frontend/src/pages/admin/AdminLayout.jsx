@@ -15,12 +15,9 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = async () => {
-    try { await authService.logout(); } catch {}
-    finally {
-      logout();
-      navigate('/admin/login');
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/admin/login');
   };
 
   const menuItems = [

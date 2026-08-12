@@ -602,58 +602,62 @@ export const SelectedOrderDetailModal = ({ order, onClose }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', overflow: 'hidden', background: '#ffffff', fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif" }}>
       {/* Modal Header Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.1rem 1.4rem', borderBottom: '1.5px solid #e2e8f0', background: 'linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', padding: '0.95rem 1.1rem', borderBottom: '1.5px solid #e2e8f0', background: 'linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%)', flexShrink: 0 }}>
+        {/* Top Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <button
             style={{
-              padding: '0.45rem 0.85rem', borderRadius: '0.55rem',
+              padding: '0.4rem 0.75rem', borderRadius: '0.55rem',
               border: '1.5px solid #cbd5e1', background: '#ffffff',
-              color: '#0f172a', fontWeight: 800, fontSize: '0.84rem',
+              color: '#0f172a', fontWeight: 800, fontSize: '0.8rem',
               cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem',
             }}
             onClick={onClose}
           >
             ← Back to Orders
           </button>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>
-                Order Details
-              </h3>
-              <motion.span
-                whileHover={{ scale: 1.04, background: '#e2e8f0' }}
-                whileTap={{ scale: 0.96 }}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                  padding: '0.28rem 0.75rem', borderRadius: '0.65rem',
-                  background: '#f8fafc', border: '1.5px solid #cbd5e1',
-                  fontSize: '0.88rem', fontWeight: 800, color: '#0f172a',
-                  letterSpacing: '0.02em', cursor: 'pointer',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)', transition: 'all 0.2s ease',
-                }}
-                onClick={handleCopyOrderId}
-                title="Click to copy Order ID"
-              >
-                <span>{rawOrderId}</span>
-                {copiedOrderId ? <Check style={{ width: 13, height: 13, color: '#059669' }} /> : <Copy style={{ width: 13, height: 13, color: '#64748b' }} />}
-              </motion.span>
-            </div>
-            <p style={{ margin: '0.15rem 0 0', fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
-              Ordered on {formattedDate} at {formattedTime}
-            </p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {!isFailed && (
+              <button style={{ ...detailStyles.invoiceBtn, padding: '0.45rem 0.85rem', fontSize: '0.8rem' }} onClick={handleOpenInvoiceTab}>
+                <Download style={{ width: 14, height: 14 }} />
+                <span>Invoice</span>
+              </button>
+            )}
+            <button style={s.closeBtn} onClick={onClose} title="Close order details">
+              <X style={{ width: 18, height: 18, color: '#64748b' }} />
+            </button>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          {!isFailed && (
-            <button style={detailStyles.invoiceBtn} onClick={handleOpenInvoiceTab}>
-              <Download style={{ width: 15, height: 15 }} />
-              Download Invoice
-            </button>
-          )}
-          <button style={s.closeBtn} onClick={onClose} title="Close order details">
-            <X style={{ width: 18, height: 18, color: '#64748b' }} />
-          </button>
+        {/* Order Details Subhead */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
+              Order Details
+            </h3>
+            <p style={{ margin: '0.15rem 0 0', fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+              Ordered on {formattedDate} at {formattedTime}
+            </p>
+          </div>
+
+          <motion.span
+            whileHover={{ scale: 1.04, background: '#e2e8f0' }}
+            whileTap={{ scale: 0.96 }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+              padding: '0.22rem 0.65rem', borderRadius: '0.65rem',
+              background: '#f8fafc', border: '1.5px solid #cbd5e1',
+              fontSize: '0.82rem', fontWeight: 800, color: '#0f172a',
+              letterSpacing: '0.02em', cursor: 'pointer',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.04)', transition: 'all 0.2s ease',
+            }}
+            onClick={handleCopyOrderId}
+            title="Click to copy Order ID"
+          >
+            <span>{rawOrderId}</span>
+            {copiedOrderId ? <Check style={{ width: 12, height: 12, color: '#059669' }} /> : <Copy style={{ width: 12, height: 12, color: '#64748b' }} />}
+          </motion.span>
         </div>
       </div>
 
@@ -733,7 +737,7 @@ export const SelectedOrderDetailModal = ({ order, onClose }) => {
 
         {/* 3. Payment Details */}
         <div style={detailStyles.amazonCard}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem', alignItems: 'start' }} className="responsive-order-grid">
+          <div style={{ display: 'grid', gap: '1.25rem', alignItems: 'start' }} className="responsive-order-payment-grid">
             {/* Left: Payment Info */}
             <div>
               <div style={detailStyles.amazonCardTitle}>
@@ -849,7 +853,7 @@ export const SelectedOrderDetailModal = ({ order, onClose }) => {
 
 const drawerStyles = {
   overlay: {
-    position: 'fixed', inset: 0, zIndex: 1100,
+    position: 'fixed', inset: 0, zIndex: 2000,
     background: 'rgba(15, 23, 42, 0.65)',
     backdropFilter: 'blur(8px)',
     display: 'flex', justifyContent: 'flex-end',
@@ -872,16 +876,16 @@ const drawerStyles = {
   },
   scrollArea: {
     flex: 1, overflowY: 'auto',
-    padding: '1.1rem 1.35rem',
+    padding: '0.9rem',
     display: 'flex', flexDirection: 'column', gap: '0.95rem',
     WebkitOverflowScrolling: 'touch',
   },
   detailOverlay: {
-    position: 'fixed', inset: 0, zIndex: 1400,
+    position: 'fixed', inset: 0, zIndex: 2200,
     background: 'rgba(15, 23, 42, 0.75)',
     backdropFilter: 'blur(10px)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    padding: '1rem',
+    padding: '0.4rem',
   },
 };
 
@@ -1184,9 +1188,9 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
               transition={{ type: 'spring', damping: 26, stiffness: 300 }}
               style={{
                 background: '#ffffff',
-                borderRadius: '1.5rem',
-                width: '94%', maxWidth: 840,
-                height: '90vh', maxHeight: '90vh',
+                borderRadius: '1.25rem',
+                width: '98%', maxWidth: 840,
+                height: '94vh', maxHeight: '94dvh',
                 display: 'flex', flexDirection: 'column',
                 boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.45)',
                 border: '1.5px solid #cbd5e1',
@@ -1205,8 +1209,12 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
       </AnimatePresence>
 
       <style>{`
+        .responsive-order-payment-grid {
+          grid-template-columns: 1fr 340px;
+        }
         @media (max-width: 768px) {
           .responsive-order-grid { grid-template-columns: 1fr !important; }
+          .responsive-order-payment-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </>

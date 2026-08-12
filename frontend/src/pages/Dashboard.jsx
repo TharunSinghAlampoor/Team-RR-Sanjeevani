@@ -85,20 +85,17 @@ export const Dashboard = () => {
     return map;
   }, [favorites]);
 
-  const handleLogout = async () => {
-    try { await authService.logout(); } catch {}
-    finally { logout(); navigate('/login'); }
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   // ─── Data Fetchers ───────────────────────────────────────────────
   const fetchCategories = useCallback(async () => {
     try {
       const res = await shopService.getCategories();
-      if (res && res.success && Array.isArray(res.data)) {
-        setCategories(res.data);
-      } else {
-        setCategories([]);
-      }
+      const rawCat = (res && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);
+      setCategories(rawCat);
     } catch (e) {
       console.error('Fetch categories:', e);
       setCategories([]);
@@ -109,9 +106,10 @@ export const Dashboard = () => {
     setLoadingProducts(true);
     try {
       const res = await shopService.getProducts({});
-      if (res && res.success && Array.isArray(res.data)) {
+      const rawProducts = (res && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);
+      if (rawProducts.length > 0) {
         // Fisher-Yates shuffle to randomize product order
-        const shuffled = [...res.data];
+        const shuffled = [...rawProducts];
         for (let i = shuffled.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];

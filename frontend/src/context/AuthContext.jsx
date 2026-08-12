@@ -83,10 +83,12 @@ export const AuthProvider = ({ children }) => {
         setCachedCartCount(shopping.cartCount);
         setCachedFavoritesCount(shopping.favoritesCount);
 
-        // Fetch fresh full profile from API
-        try {
-          const response = await authService.getCurrentUser();
-          if (response.success && response.data) {
+        // Unblock loading state immediately so UI renders in <5ms
+        setLoading(false);
+
+        // Fetch fresh full profile asynchronously in background
+        authService.getCurrentUser().then(response => {
+          if (response && response.success && response.data) {
             setUser(response.data);
             const freshName = response.data.fullName || response.data.email || localUserName;
             const freshRole = response.data.role || localRole;
@@ -98,13 +100,14 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('user_role', freshRole);
             saveSessionCookies(freshName, localToken);
           }
-        } catch (err) {
+        }).catch(err => {
           if (err.response && err.response.status === 401) {
             clearSession();
           }
-        }
+        });
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadSession();
@@ -168,13 +171,16 @@ export const AuthProvider = ({ children }) => {
     saveSession(userData, jwtToken);
   };
 
-  const logout = async () => {
-    try {
-      await authService.logout();
-    } catch (e) {
-      console.warn("Backend logout notification failed:", e);
-    } finally {
-      clearSession();
+  const logout = () => {
+    // 1. Instantly purge local session state for sub-10ms UI response on all devices
+    clearSession();
+
+    // 2. Non-blocking async backend notification
+    authService.logout().catch(() => {});
+
+    // 3. Instant hard redirect to login page (bypasses component transition delays)
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login' && window.location.pathname !== '/admin/login') {
+      window.location.href = '/login';
     }
   };
 

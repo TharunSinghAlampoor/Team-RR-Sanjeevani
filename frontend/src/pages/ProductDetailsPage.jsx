@@ -170,6 +170,21 @@ export const ProductDetailsPage = () => {
 
     const fetchData = async () => {
       try {
+        // 1. Fetch single product details first for immediate UI render
+        if (productId) {
+          try {
+            const singleRes = await shopService.getProductById(productId);
+            const targetProd = singleRes?.data || (singleRes?.success ? singleRes.data : singleRes);
+            if (targetProd && isMounted) {
+              setProduct(targetProd);
+              setLoading(false); // Unblock UI immediately!
+            }
+          } catch (e) {
+            console.warn("Fast getProductById notice:", e);
+          }
+        }
+
+        // 2. Load catalog & categories in parallel for related recommendations
         const [prodsRes, catsRes] = await Promise.all([
           shopService.getProducts({}),
           shopService.getCategories()
@@ -184,24 +199,16 @@ export const ProductDetailsPage = () => {
         setAllProducts(validProds);
         setCategories(Array.isArray(catsList) ? catsList : []);
 
-        let currentProd = validProds.find(p => p && (
+        const currentProd = validProds.find(p => p && (
           String(p.productId || '').toLowerCase() === String(productId || '').toLowerCase() ||
           String(p.id || '').toLowerCase() === String(productId || '').toLowerCase()
         ));
 
-        if (!currentProd && productId) {
-          try {
-            const singleRes = await shopService.getProductById(productId);
-            currentProd = singleRes?.data || singleRes || null;
-          } catch (e) {
-            console.error("getProductById fallback error:", e);
-          }
+        if (currentProd) {
+          setProduct(currentProd);
         }
-
-        setProduct(currentProd || null);
       } catch (err) {
         console.error("Error fetching product details:", err);
-        setProduct(null);
       } finally {
         if (isMounted) setLoading(false);
       }

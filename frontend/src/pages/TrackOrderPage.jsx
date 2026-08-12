@@ -147,9 +147,9 @@ export const TrackOrderPage = () => {
     fetchData();
   }, [orderId]);
 
-  const handleLogout = async () => {
-    try { await authService.logout(); } catch { }
-    finally { logout(); navigate('/login'); }
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   const handleStatusUpdate = async (newStatus) => {

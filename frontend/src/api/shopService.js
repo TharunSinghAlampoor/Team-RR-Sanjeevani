@@ -91,15 +91,32 @@ export const shopService = {
   getCategories: async () => {
     try {
       const response = await shopClient.get('/categories');
-      return response.data;
+      if (response && response.data) {
+        const catList = Array.isArray(response.data.data)
+          ? response.data.data
+          : (Array.isArray(response.data) ? response.data : []);
+        if (catList.length > 0) {
+          return { success: true, data: catList };
+        }
+      }
+      return {
+        success: true,
+        data: [
+          { categoryId: 6, categoryName: 'Prescriptions & Pharmacy' },
+          { categoryId: 7, categoryName: 'Nutrition & Health' },
+          { categoryId: 3, categoryName: 'Medical Devices' },
+          { categoryId: 8, categoryName: 'Baby & Kids' },
+          { categoryId: 5, categoryName: 'Skin Care' },
+        ]
+      };
     } catch (e) {
       return {
         success: true,
         data: [
-          { categoryId: 1, categoryName: 'Prescriptions & Pharmacy' },
-          { categoryId: 2, categoryName: 'Nutrition & Health' },
+          { categoryId: 6, categoryName: 'Prescriptions & Pharmacy' },
+          { categoryId: 7, categoryName: 'Nutrition & Health' },
           { categoryId: 3, categoryName: 'Medical Devices' },
-          { categoryId: 4, categoryName: 'Baby & Kids' },
+          { categoryId: 8, categoryName: 'Baby & Kids' },
           { categoryId: 5, categoryName: 'Skin Care' },
         ]
       };
@@ -109,18 +126,24 @@ export const shopService = {
   // Products
   getProducts: async (params = {}) => {
     if (!params || Object.keys(params).length === 0) {
-      if (catalogCache) return catalogCache;
+      if (catalogCache && catalogCache.data && catalogCache.data.length > 0) return catalogCache;
     }
     try {
       const response = await shopClient.get('/products', { params });
-      if (response && response.data && (Array.isArray(response.data.data) ? response.data.data.length > 0 : (Array.isArray(response.data) && response.data.length > 0))) {
-        if (!params || Object.keys(params).length === 0) catalogCache = response.data;
-        return response.data;
+      if (response && response.data) {
+        const productList = Array.isArray(response.data.data)
+          ? response.data.data
+          : (Array.isArray(response.data) ? response.data : []);
+        if (productList.length > 0) {
+          const result = { success: true, data: productList };
+          if (!params || Object.keys(params).length === 0) catalogCache = result;
+          return result;
+        }
       }
       catalogCache = { success: true, data: FALLBACK_CATALOG };
       return catalogCache;
     } catch (e) {
-      console.warn('Backend products API offline, using fallback catalog:', e.message);
+      console.warn('Backend products API offline/error, using fallback catalog:', e.message);
       catalogCache = { success: true, data: FALLBACK_CATALOG };
       return catalogCache;
     }

@@ -484,11 +484,11 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
       advice: 'For blood pressure management, Amlodipine, Telmisartan, or Losartan are commonly prescribed. Regular monitoring with a BP monitor is essential. Reduce salt intake, exercise, and manage stress. Never stop BP medication without consulting your doctor.',
     },
     {
-      symptomName: 'Skin Care & Infections',
+      symptomName: 'Skin Care & Sunscreen',
       emoji: '✨',
-      triggers: ['skin', 'acne', 'pimple', 'fungal', 'ringworm', 'eczema', 'psoriasis', 'dark spot', 'pigmentation', 'sunscreen', 'moistur', 'त्वचा', 'मुहासे', 'చర్మం', 'ಚರ್ಮ', 'face wash', 'skin infection', 'wound', 'burn', 'cut'],
-      medicineKeywords: ['clotrimazole', 'ketoconazole', 'fluconazole', 'benzoyl peroxide', 'salicylic', 'retinol', 'moisturizer', 'sunscreen', 'serum', 'cream', 'lotion', 'skin', 'face wash', 'aloe', 'neem', 'betadine', 'soframycin', 'mupirocin', 'derma', 'anti-fungal', 'antifungal'],
-      advice: 'For acne, Benzoyl Peroxide or Salicylic Acid face washes help. For fungal infections, Clotrimazole cream is effective. Always use sunscreen (SPF 30+) daily. For persistent skin issues, consult a dermatologist.',
+      triggers: ['skin', 'acne', 'pimple', 'fungal', 'ringworm', 'eczema', 'psoriasis', 'dark spot', 'pigmentation', 'sunscreen', 'sun screen', 'sunblock', 'sun block', 'moistur', 'face wash', 'facewash', 'skin infection', 'wound', 'burn', 'cut', 'tan', 'tanning', 'glow'],
+      medicineKeywords: ['clotrimazole', 'ketoconazole', 'fluconazole', 'benzoyl peroxide', 'salicylic', 'retinol', 'moisturizer', 'sunscreen', 'sun screen', 'sunblock', 'serum', 'cream', 'lotion', 'skin', 'face wash', 'facewash', 'aloe', 'neem', 'betadine', 'soframycin', 'mupirocin', 'derma', 'anti-fungal', 'antifungal'],
+      advice: 'For sunscreen & daily protection, use broad-spectrum Sunscreen (SPF 30+ / SPF 50+). For acne & pimples, Benzoyl Peroxide or Salicylic Acid face washes work best. Apply moisturizer daily for hydrated skin.',
     },
     {
       symptomName: 'Eye Care',
@@ -1034,14 +1034,31 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
       try {
         const res = await shopService.getProducts();
         const allProds = (res && res.success && Array.isArray(res.data)) ? res.data : [];
-        const cleanTerm = translatedQ.replace(/^(show|find|search|give|me|want|need|what is|tell me about)\s+/g, '').trim();
+        const stopWords = ['show', 'find', 'search', 'give', 'me', 'want', 'need', 'what', 'is', 'tell', 'about', 'the', 'a', 'an', 'some', 'for', 'please', 'i', 'can', 'you', 'get'];
+        const rawClean = translatedQ.toLowerCase();
+        const noSpaceQuery = rawClean.replace(/[^a-z0-9]/g, '');
+
+        const keywords = rawClean
+          .split(/\s+/)
+          .filter(w => !stopWords.includes(w) && w.length > 1);
 
         const matched = allProds.filter(p => {
+          if (!p) return false;
           const name = (p.name || '').toLowerCase();
           const desc = (p.description || '').toLowerCase();
           const cat = (p.categoryName || '').toLowerCase();
           const brand = (p.brand || '').toLowerCase();
-          return name.includes(rawQ) || name.includes(cleanTerm) || desc.includes(cleanTerm) || cat.includes(cleanTerm) || brand.includes(cleanTerm);
+          const fullText = `${name} ${desc} ${cat} ${brand}`;
+          const fullNoSpace = fullText.replace(/[^a-z0-9]/g, '');
+
+          // Direct substring or normalized no-space match (e.g. "sun screen" vs "sunscreen")
+          if (fullText.includes(rawQ) || fullNoSpace.includes(noSpaceQuery)) return true;
+
+          // Keyword match
+          if (keywords.length > 0) {
+            return keywords.some(kw => fullText.includes(kw) || fullNoSpace.includes(kw));
+          }
+          return false;
         });
 
         if (matched.length > 0) {

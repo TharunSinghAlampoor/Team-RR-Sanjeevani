@@ -287,3 +287,16 @@
   transform: translateY(-2px);
   box-shadow: 0 14px 28px rgba(5, 150, 105, 0.45);
 }
+
+@media (max-width: 640px) {
+  .admin-login-form-panel {
+    padding: 1.25rem 1rem;
+  }
+  .admin-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 1.25rem;
+  }
+  .admin-card-title {
+    font-size: 1.35rem;
+  }
+}

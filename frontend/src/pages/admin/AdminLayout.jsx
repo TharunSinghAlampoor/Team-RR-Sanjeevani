@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Pill, FolderTree, PackageCheck, ShoppingBag, Users,
   BarChart3, FileSpreadsheet, Settings, LogOut, ChevronLeft, ChevronRight,
-  ShieldCheck, Bell, Search, ExternalLink
+  ShieldCheck, ExternalLink, Menu, X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import authService from '../../api/authService';
 import './AdminLayout.css';
 
 export function AdminLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +19,11 @@ export function AdminLayout() {
     logout();
     navigate('/admin/login');
   };
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [location.pathname]);
 
   const menuItems = [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
@@ -32,29 +37,42 @@ export function AdminLayout() {
     { label: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 
-  // Get current active title
   const activeMenu = menuItems.find(m => location.pathname.startsWith(m.path));
   const pageTitle = activeMenu ? activeMenu.label : 'Admin Portal';
 
   return (
     <div className="admin-layout-root">
+      {/* Mobile Backdrop */}
+      {isMobileOpen && (
+        <div
+          className="admin-mobile-backdrop"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      <aside className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
         <div className="admin-sidebar-header">
           <div className="admin-sidebar-logo-group">
             <img src="/sanjeevani_symbol.png" alt="Logo" className="admin-sidebar-logo-img" />
-            {!isCollapsed && (
+            {(!isCollapsed || isMobileOpen) && (
               <span className="admin-sidebar-brand-name">
                 Sanjeevani <span style={{ color: '#38bdf8', fontSize: '0.75rem', textTransform: 'uppercase', display: 'block', fontWeight: 800 }}>Admin Portal</span>
               </span>
             )}
           </div>
           <button
-            className="admin-toggle-sidebar-btn"
+            className="admin-toggle-sidebar-btn desktop-only"
             onClick={() => setIsCollapsed(!isCollapsed)}
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+          <button
+            className="admin-toggle-sidebar-btn mobile-only"
+            onClick={() => setIsMobileOpen(false)}
+          >
+            <X size={18} />
           </button>
         </div>
 
@@ -66,10 +84,11 @@ export function AdminLayout() {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
-                title={isCollapsed ? item.label : undefined}
+                title={isCollapsed && !isMobileOpen ? item.label : undefined}
+                onClick={() => setIsMobileOpen(false)}
               >
                 <Icon />
-                {!isCollapsed && <span>{item.label}</span>}
+                {(!isCollapsed || isMobileOpen) && <span>{item.label}</span>}
               </NavLink>
             );
           })}
@@ -80,10 +99,10 @@ export function AdminLayout() {
             onClick={handleLogout}
             className="admin-nav-item"
             style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: '#fca5a5' }}
-            title={isCollapsed ? 'Sign Out' : undefined}
+            title={isCollapsed && !isMobileOpen ? 'Sign Out' : undefined}
           >
             <LogOut size={20} />
-            {!isCollapsed && <span>Logout</span>}
+            {(!isCollapsed || isMobileOpen) && <span>Logout</span>}
           </button>
         </div>
       </aside>
@@ -93,6 +112,13 @@ export function AdminLayout() {
         {/* Top Header */}
         <header className="admin-header">
           <div className="admin-header-left">
+            <button
+              className="admin-hamburger-btn"
+              onClick={() => setIsMobileOpen(true)}
+              aria-label="Open Navigation Menu"
+            >
+              <Menu size={22} />
+            </button>
             <h1 className="admin-page-title">{pageTitle}</h1>
           </div>
 
@@ -101,21 +127,9 @@ export function AdminLayout() {
               href="/dashboard"
               target="_blank"
               rel="noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                fontSize: '0.82rem',
-                fontWeight: 800,
-                color: '#059669',
-                background: '#ecfdf5',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '0.6rem',
-                border: '1px solid #a7f3d0',
-                textDecoration: 'none'
-              }}
+              className="admin-store-link"
             >
-              <span>View Customer Store</span>
+              <span className="store-link-text">Customer Store</span>
               <ExternalLink size={14} />
             </a>
 
@@ -123,11 +137,11 @@ export function AdminLayout() {
               <div className="admin-avatar">
                 {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'A'}
               </div>
-              <div>
-                <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
-                  {user?.fullName || 'Administrator'}
+              <div className="admin-user-info">
+                <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap' }}>
+                  {user?.fullName || 'Admin'}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#059669', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                <div style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                   <ShieldCheck size={11} />
                   <span>SYSTEM ADMIN</span>
                 </div>

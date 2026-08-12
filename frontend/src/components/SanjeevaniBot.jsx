@@ -341,28 +341,9 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
     }
   };
 
-  // Initial Welcome Message
+  // Initial State — Start with clean empty chat canvas
   useEffect(() => {
-    setMessages([
-      {
-        id: 1,
-        sender: 'bot',
-        text: '🙏 Welcome to Sanjeevani Healthcare! How can I assist you today?',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        quickReplies: [
-          { label: '📦 Track My Order', action: 'track_order' },
-          { label: '💊 Browse Medicines', action: 'show_categories' },
-          { label: '🤒 Medicine for Fever', action: 'symptom_fever' },
-          { label: '🤧 Medicine for Cold & Cough', action: 'symptom_cold' },
-          { label: '🛒 My Cart & Checkout', action: 'cart_info' },
-          { label: '❤️ My Wishlist', action: 'wishlist_info' },
-          { label: '💳 Payment Options', action: 'payment_info' },
-          { label: '🔄 Return & Refund Policy', action: 'return_policy' },
-          { label: '🏷️ Store Offers & Coupons', action: 'offers' },
-          { label: '📞 24/7 Support Agent', action: 'contact_support' }
-        ]
-      }
-    ]);
+    setMessages([]);
   }, []);
 
   const scrollToBottom = () => {
@@ -1330,6 +1311,18 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
               flexDirection: 'column',
               gap: '1rem'
             }}>
+              {messages.length === 0 && (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', textAlign: 'center', padding: '2rem 1rem' }}>
+                  <AnimatedDoctorRoboIcon size={54} />
+                  <h4 style={{ margin: '0.85rem 0 0.25rem 0', color: '#0f172a', fontSize: '1.05rem', fontWeight: 900, letterSpacing: '0.3px' }}>
+                    Sanjeevani RAG AI
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b', lineHeight: 1.5, maxWidth: '280px' }}>
+                    Ask about medicines, sunscreen, orders, shipping, refunds, or payment options...
+                  </p>
+                </div>
+              )}
+
               {messages.map((msg) => (
                 <div
                   key={msg.id}

@@ -677,8 +677,8 @@ export const ProductDetailsPage = () => {
                     padding: '0.9rem 1.25rem',
                     borderRadius: '0.85rem',
                     background: isInCart
-                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                      : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                      ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+                      : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                     border: 'none',
                     color: '#ffffff',
                     fontWeight: 800,
@@ -689,8 +689,8 @@ export const ProductDetailsPage = () => {
                     justifyContent: 'center',
                     gap: '0.5rem',
                     boxShadow: isInCart
-                      ? '0 4px 16px rgba(37, 99, 235, 0.38)'
-                      : '0 4px 16px rgba(5, 150, 105, 0.32)',
+                      ? '0 4px 16px rgba(124, 58, 237, 0.38)'
+                      : '0 4px 16px rgba(37, 99, 235, 0.35)',
                     opacity: inStock ? 1 : 0.6
                   }}
                   whileHover={inStock ? { scale: 1.02 } : {}}

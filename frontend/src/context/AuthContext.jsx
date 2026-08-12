@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import authService from '../api/authService';
+import { getApiBaseUrl } from '../api/apiConfig';
 import {
   saveSessionCookies,
   loadSessionCookies,
@@ -178,8 +179,7 @@ export const AuthProvider = ({ children }) => {
     // 2. Issue browser-guaranteed keepalive logout request so backend MySQL deletes token from jwt_tokens table
     if (activeToken) {
       try {
-        const rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
-        const logoutUrl = `${rawBase.replace(/\/$/, '')}/auth/logout`;
+        const logoutUrl = `${getApiBaseUrl()}/auth/logout`;
         const authHeader = activeToken.startsWith('Bearer ') ? activeToken : `Bearer ${activeToken}`;
         
         fetch(logoutUrl, {

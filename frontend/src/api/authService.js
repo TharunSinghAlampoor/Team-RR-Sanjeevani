@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { getCookie, clearSessionCookies } from '../utils/cookieUtils';
+import { getApiBaseUrl } from './apiConfig';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://sanjeevani-backend-txgo.onrender.com/api';
-const API_BASE_URL = `${BASE_URL.replace(/\/$/, '')}/auth`;
+const API_BASE_URL = `${getApiBaseUrl()}/auth`;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

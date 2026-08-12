@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Bot, X, Send, Sparkles, ShoppingBag, Truck, FileText, 
+  Bot, X, Send, Sparkles, ShoppingBag, ShoppingCart, Truck, FileText, 
   HelpCircle, RefreshCw, ChevronRight, MessageSquare, ShieldCheck, 
   ArrowRight, HeartPulse, Mic, MicOff, Volume2, VolumeX, LayoutGrid
 } from 'lucide-react';

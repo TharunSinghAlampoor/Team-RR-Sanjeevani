@@ -1563,34 +1563,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
                     )}
                   </div>
 
-                  {/* Quick Reply Chips */}
-                  {msg.quickReplies && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.35rem', maxWidth: '95%' }}>
-                      {msg.quickReplies.map((chip, i) => (
-                        <button
-                          key={i}
-                          onClick={() => handleQuickReply(chip.action, chip.label, chip)}
-                          style={{
-                            background: '#ffffff',
-                            border: chip.action.startsWith('cat_') ? '1.5px solid #10b981' : '1.5px solid #a4c3d2',
-                            color: chip.action.startsWith('cat_') ? '#047857' : '#0D5C75',
-                            padding: '0.35rem 0.75rem',
-                            borderRadius: '99px',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            transition: 'all 0.18s ease',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.3rem'
-                          }}
-                        >
-                          {translateData(chip.label)}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+
 
                   <span style={{ fontSize: '0.68rem', color: '#94a3b8', padding: '0 0.2rem' }}>
                     {msg.timestamp}

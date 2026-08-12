@@ -8,6 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import shopService from '../api/shopService';
+import { performRAGQuery } from '../api/ragService';
 import ProductImage from './ProductImage';
 
 const SPEECH_LANG_MAP = {
@@ -1073,15 +1074,24 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders }) => {
             };
           }
         } else {
-          botResponse.text = `I'm Sanjeevani AI Assistant — I can help you with:\n\n💊 Medicines — "medicine for fever", "cold tablet"\n📦 Orders — "my orders", "track order"\n🛒 Cart — "my cart", "checkout"\n❤️ Wishlist — "my wishlist"\n🔄 Returns — "refund", "replace"\n💳 Payment — "payment options"\n🏷️ Offers — "store offers"\n📞 Support — "contact support"\n\nTry asking one of these!`;
-          botResponse.quickReplies = [
-            { label: '💊 Browse Medicines', action: 'show_categories' },
-            { label: '🤒 Medicine for Fever', action: 'symptom_fever' },
-            { label: '📦 My Orders', action: 'track_order' },
-            { label: '🛒 My Cart', action: 'cart_info' },
-            { label: '🔄 Refund/Return', action: 'return_policy' },
-            { label: '📞 Support', action: 'contact_support' }
-          ];
+          // Perform RAG (Retrieval-Augmented Generation) query via Hugging Face LLM Model
+          const ragResult = await performRAGQuery(queryText);
+          if (ragResult && ragResult.isRAG && ragResult.text) {
+            botResponse.text = `🤖 ${ragResult.text}`;
+            if (ragResult.products && ragResult.products.length > 0) {
+              botResponse.products = ragResult.products;
+            }
+          } else {
+            botResponse.text = `I'm Sanjeevani AI Assistant — I can help you with:\n\n💊 Medicines — "medicine for fever", "cold tablet"\n📦 Orders — "my orders", "track order"\n🛒 Cart — "my cart", "checkout"\n❤️ Wishlist — "my wishlist"\n🔄 Returns — "refund", "replace"\n💳 Payment — "payment options"\n🏷️ Offers — "store offers"\n📞 Support — "contact support"\n\nTry asking one of these!`;
+            botResponse.quickReplies = [
+              { label: '💊 Browse Medicines', action: 'show_categories' },
+              { label: '🤒 Medicine for Fever', action: 'symptom_fever' },
+              { label: '📦 My Orders', action: 'track_order' },
+              { label: '🛒 My Cart', action: 'cart_info' },
+              { label: '🔄 Refund/Return', action: 'return_policy' },
+              { label: '📞 Support', action: 'contact_support' }
+            ];
+          }
         }
       } catch (e) {
         botResponse.text = 'Search for medicines and health products on Sanjeevani Store.';

@@ -143,7 +143,7 @@ export const performRAGQuery = async (queryText, userSession = {}) => {
 
     matchingProducts = filterAndRankProducts(allProds, queryText);
 
-    productContext = (matchingProducts.length > 0 ? matchingProducts : allProds.slice(0, 4)).map(p => 
+    productContext = matchingProducts.map(p => 
       `• ${p.name} | Price: ₹${p.price} | Rating: ★${p.rating || 4.8} | Category: ${p.categoryName} | Stock: ${p.stock > 0 ? 'In Stock' : 'Out of Stock'}`
     );
   } catch (e) {
@@ -240,7 +240,7 @@ export const performRAGQuery = async (queryText, userSession = {}) => {
 
   return {
     text: synthesizedText,
-    products: matchingProducts.slice(0, 4),
+    products: matchingProducts.length > 0 ? matchingProducts.slice(0, 4) : null,
     orderList: matchingOrders.length > 0 && (cleanQ.includes('order') || cleanQ.includes('track') || cleanQ.includes('status')) ? matchingOrders.slice(0, 3) : null,
     isRAG: true
   };

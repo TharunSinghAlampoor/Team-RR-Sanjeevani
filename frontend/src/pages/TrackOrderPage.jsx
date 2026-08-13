@@ -943,41 +943,51 @@ export const TrackOrderPage = () => {
           /* Mobile, iPhone & Tablet Responsive Media Queries */
           @media (max-width: 768px) {
             .track-order-container {
-              margin: 0.75rem auto 0 !important;
-              padding: 0 0.65rem !important;
+              margin: 0.5rem auto 0 !important;
+              padding: 0 0.5rem !important;
               gap: 0.85rem !important;
               max-width: 100% !important;
+            }
+            .track-card-padding {
+              padding: 1.1rem 0.85rem !important;
+              border-radius: 12px !important;
             }
             .track-bottom-grid {
               grid-template-columns: 1fr !important;
               gap: 0.85rem !important;
             }
             .track-stepper-grid {
-              display: flex !important;
-              overflow-x: auto !important;
-              justify-content: space-between !important;
-              padding-bottom: 0.35rem !important;
-              gap: 0.5rem !important;
-              -webkit-overflow-scrolling: touch;
-              max-width: 100% !important;
+              display: grid !important;
+              grid-template-columns: repeat(5, 1fr) !important;
+              gap: 0.25rem !important;
+              padding: 0.2rem 0 !important;
+              text-align: center !important;
             }
             .track-stepper-item {
-              min-width: 58px !important;
-              flex-shrink: 0 !important;
+              min-width: 0 !important;
+              flex-shrink: 1 !important;
+            }
+            .track-stepper-item span {
+              font-size: 0.72rem !important;
+              line-height: 1.2 !important;
+            }
+            .track-header-row {
+              flex-direction: column !important;
+              align-items: flex-start !important;
+              gap: 0.65rem !important;
+            }
+            .track-support-grid {
+              grid-template-columns: 1fr !important;
+              gap: 0.65rem !important;
             }
           }
 
           @media (max-width: 480px) {
             .track-card-padding {
-              padding: 0.95rem 0.75rem !important;
+              padding: 0.95rem 0.65rem !important;
             }
-            .track-header-row {
-              flex-direction: column !important;
-              align-items: flex-start !important;
-              gap: 0.5rem !important;
-            }
-            .track-support-grid {
-              grid-template-columns: 1fr !important;
+            .track-stepper-item span {
+              font-size: 0.68rem !important;
             }
           }
         ` }} />

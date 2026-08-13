@@ -202,18 +202,14 @@ export const ForgotPassword = () => {
     setIsSubmitting(true);
     try {
       const identifier = email.trim();
-      await authService.verifyOtp(identifier, otp);
-      setApiSuccess('OTP verified successfully!');
+      const response = await authService.verifyOtp(identifier, otp);
+      setApiSuccess(response?.message || 'OTP verified successfully! Please enter your new password.');
       setStep(3);
       setErrors({});
     } catch (err) {
-      if (otp.length === 6) {
-        setApiSuccess('OTP verified successfully!');
-        setStep(3);
-        setErrors({});
-      } else {
-        setApiError(err.response?.data?.message || 'Invalid OTP. Please check the 6-digit code sent to your email.');
-      }
+      console.error('OTP Verification Error:', err);
+      const errMsg = err.response?.data?.message || err.message || 'Invalid or expired OTP code. Please check your email inbox.';
+      setApiError(`❌ ${errMsg}`);
     } finally {
       setIsSubmitting(false);
     }

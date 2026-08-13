@@ -30,25 +30,28 @@ export const LanguageSelector = ({ isCompact = false }) => {
     <div ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        className="lang-selector-btn"
+        title="Change Language"
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.45rem',
+          gap: '0.4rem',
           background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
           border: '1.5px solid #a7f3d0',
-          padding: isCompact ? '0.35rem 0.65rem' : '0.45rem 0.85rem',
+          padding: isCompact ? '0.35rem 0.6rem' : '0.4rem 0.75rem',
           borderRadius: '9999px',
           cursor: 'pointer',
           color: '#047857',
           fontWeight: 800,
-          fontSize: '0.85rem',
+          fontSize: '0.82rem',
           boxShadow: '0 2px 8px rgba(5, 150, 105, 0.12)',
-          transition: 'all 0.2s ease'
+          transition: 'all 0.2s ease',
+          whiteSpace: 'nowrap',
         }}
       >
-        <Globe style={{ width: 16, height: 16, color: '#059669' }} />
-        <span>{currentLang.flag} {currentLang.native}</span>
-        <ChevronDown style={{ width: 14, height: 14, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        <Globe style={{ width: 17, height: 17, color: '#059669', flexShrink: 0 }} />
+        <span className="lang-text" style={{ fontSize: '0.8rem', fontWeight: 800 }}>{currentLang.flag} {currentLang.native}</span>
+        <ChevronDown style={{ width: 13, height: 13, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', color: '#059669' }} />
       </button>
 
       {isOpen && (

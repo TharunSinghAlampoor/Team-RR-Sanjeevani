@@ -5371,53 +5371,73 @@ body:has(.dashboard-page) {
   }
 
   .medical-navbar {
-    padding: 0.55rem 0.75rem !important;
+    padding: 0.5rem 0.65rem !important;
     min-height: auto !important;
   }
 
   .navbar-container {
-    flex-wrap: wrap !important;
-    gap: 0.45rem 0.35rem !important;
-    justify-content: space-between !important;
-  }
-
-  /* Search bar stacks cleanly on second row on mobile */
-  .navbar-search-wrapper {
-    order: 3 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0.15rem 0 0 0 !important;
-  }
-
-  .search-input {
-    height: 38px !important;
-    font-size: 0.82rem !important;
-    padding-left: 2.5rem !important;
-  }
-
-  .navbar-actions {
-    gap: 0.35rem !important;
     display: flex !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
-  }
-
-  /* Hide redundant desktop action buttons from top navbar on mobile, keeping Language & Profile top right */
-  .navbar-actions .action-btn {
-    display: none !important;
+    justify-content: space-between !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
   }
 
   /* Compact Brand on mobile */
   .navbar-brand {
-    padding: 0.2rem 0.6rem 0.2rem 0.3rem !important;
+    order: 1 !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
   }
 
   .brand-logo-wrap {
-    width: 34px !important;
-    height: 34px !important;
+    width: 32px !important;
+    height: 32px !important;
   }
 
   .brand-text-img {
-    height: 32px !important;
+    height: 28px !important;
+  }
+
+  /* Search bar centered in the middle on mobile */
+  .navbar-search-wrapper {
+    order: 2 !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 0.3rem !important;
+  }
+
+  .search-input-group {
+    height: 36px !important;
+  }
+
+  .search-input {
+    height: 36px !important;
+    font-size: 0.78rem !important;
+    padding-left: 2.2rem !important;
+    padding-right: 1.8rem !important;
+    border-radius: 9999px !important;
+  }
+
+  .search-icon {
+    width: 14px !important;
+    height: 14px !important;
+    left: 0.6rem !important;
+  }
+
+  .navbar-actions {
+    order: 3 !important;
+    flex-shrink: 0 !important;
+    gap: 0.3rem !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Hide redundant desktop action buttons from top navbar on mobile, keeping Globe Language & Profile top right */
+  .navbar-actions .action-btn {
+    display: none !important;
   }
 
   /* Neat Category icon button on mobile screens */

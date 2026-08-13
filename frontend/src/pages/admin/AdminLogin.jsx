@@ -41,8 +41,9 @@ export function AdminLogin() {
       if (response && response.success && response.data) {
         const { token, user: userProfile } = response.data;
 
-        if (userProfile.role !== 'ADMIN') {
-          setErrorMsg('Access Denied. Administrator privileges are required.');
+        const role = String(userProfile?.role || '').toUpperCase();
+        if (role !== 'ADMIN') {
+          setErrorMsg('🚫 Customer accounts cannot log in through the Admin portal. Please use the Customer Login page.');
           setIsSubmitting(false);
           return;
         }

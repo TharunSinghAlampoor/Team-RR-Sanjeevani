@@ -106,6 +106,13 @@ export const Login = () => {
 
       if (response && response.success && response.data) {
         const { token, user } = response.data;
+        const userRole = String(user?.role || '').toUpperCase();
+
+        if (userRole === 'ADMIN') {
+          setApiError('🚫 Admin accounts cannot log in through the Customer portal. Please use the Admin Login page.');
+          return;
+        }
+
         login(user, token);
         try {
           if (shopService && typeof shopService.prefetchCatalog === 'function') {

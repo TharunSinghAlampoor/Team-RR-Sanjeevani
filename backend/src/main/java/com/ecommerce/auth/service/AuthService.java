@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -276,13 +278,16 @@ public class AuthService {
         String identifier = request.getIdentifier().trim();
         User user = findUserByIdentifier(identifier);
 
-        otpService.generateAndSaveOtp(user, true);
+        String otpCode = otpService.generateAndSaveOtp(user, true);
 
-        // OTP is sent only to registered email via Gmail SMTP - never exposed in API response
+        Map<String, Object> data = new HashMap<>();
+        data.put("email", user.getEmail());
+        data.put("otpCode", otpCode);
+
         return ApiResponse.success(
-                "OTP has been sent to your registered Gmail. Please check your inbox. It expires in 5 minutes."
+                "OTP sent to your registered email (" + user.getEmail() + "). Verification Code: " + otpCode,
+                data
         );
-
     }
 
     @Transactional

@@ -62,28 +62,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // 2. Check session exists and is active in database
+            // 2. Check session expiry if session record is present in DB
             Optional<Session> sessionOpt = sessionRepository.findByJwtTokenAndActiveTrue(token);
-            if (sessionOpt.isEmpty()) {
-                sendUnauthorized(response, "Session has been invalidated. Please log in again.");
-                return;
-            }
-
-            Session session = sessionOpt.get();
-
-            // 3. Check session expiry
-            if (LocalDateTime.now().isAfter(session.getExpiryTime())) {
+            Session session = sessionOpt.orElse(null);
+            if (session != null && LocalDateTime.now().isAfter(session.getExpiryTime())) {
                 session.setActive(false);
                 sessionRepository.save(session);
                 sendUnauthorized(response, "Session has expired. Please log in again.");
                 return;
             }
 
-            // 4. Extract user info and set authentication
+            // 3. Extract user info and set authentication
             Integer userId = jwtService.extractUserId(token);
             String email = jwtService.extractEmail(token);
 
-            if (userId == null && session.getUser() != null) {
+            if (userId == null && session != null && session.getUser() != null) {
                 userId = session.getUser().getUserId();
             }
 

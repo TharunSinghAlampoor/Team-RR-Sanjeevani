@@ -25,22 +25,24 @@ public class EmailService {
             logger.info("═══════════════════════════════════════════");
             return;
         }
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("no-reply@sanjeevani.com");
-            message.setTo(toEmail);
-            message.setSubject("Sanjeevani Portal - Password Reset OTP");
-            message.setText("Dear User,\n\nYour OTP for password reset is: " + otpCode + 
-                "\nThis OTP is valid for 5 minutes. Please do not share this OTP with anyone.\n\nBest regards,\nSanjeevani Team");
-            
-            mailSender.send(message);
-            logger.info("OTP Email sent successfully to {}", toEmail);
-        } catch (Exception e) {
-            logger.error("Failed to send OTP Email to {}: {}", toEmail, e.getMessage());
-            logger.info("═══════════════════════════════════════════");
-            logger.info("  [Error Fallback] OTP Email for {} : {}", toEmail, otpCode);
-            logger.info("═══════════════════════════════════════════");
-        }
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom("no-reply@sanjeevani.com");
+                message.setTo(toEmail);
+                message.setSubject("Sanjeevani Portal - Password Reset OTP");
+                message.setText("Dear User,\n\nYour OTP for password reset is: " + otpCode + 
+                    "\nThis OTP is valid for 5 minutes. Please do not share this OTP with anyone.\n\nBest regards,\nSanjeevani Team");
+                
+                mailSender.send(message);
+                logger.info("OTP Email sent successfully to {}", toEmail);
+            } catch (Exception e) {
+                logger.error("Failed to send OTP Email to {}: {}", toEmail, e.getMessage());
+                logger.info("═══════════════════════════════════════════");
+                logger.info("  [Error Fallback] OTP Email for {} : {}", toEmail, otpCode);
+                logger.info("═══════════════════════════════════════════");
+            }
+        });
     }
 
     public void sendOrderInvoiceEmail(String toEmail, String orderId, Double totalAmount, String paymentId, String referenceNumber) {

@@ -47,10 +47,21 @@ public class OrderService {
     }
 
     public List<OrderDto> getUserOrders(Integer userId) {
-        if (userId == null) {
-            return List.of();
+        List<Order> orders;
+        if (userId != null) {
+            orders = orderRepository.findByUserUserIdOrderByCreatedAtDesc(userId);
+            if (orders.isEmpty()) {
+                orders = orderRepository.findAll().stream()
+                        .filter(o -> o.getStatus() != OrderStatus.FAILED)
+                        .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                        .collect(Collectors.toList());
+            }
+        } else {
+            orders = orderRepository.findAll().stream()
+                    .filter(o -> o.getStatus() != OrderStatus.FAILED)
+                    .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                    .collect(Collectors.toList());
         }
-        List<Order> orders = orderRepository.findByUserUserIdOrderByCreatedAtDesc(userId);
         return orders.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 

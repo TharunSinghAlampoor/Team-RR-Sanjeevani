@@ -439,8 +439,8 @@ export const Navbar = ({
           }}
           className="mobile-nav-item"
         >
-          <Home style={{ width: 20, height: 20 }} />
-          <span>{translateData('Home')}</span>
+          <Home style={{ width: 20, height: 20, color: '#0d5c75' }} />
+          <span style={{ color: '#0d5c75' }}>{translateData('Home')}</span>
         </button>
 
         <button
@@ -448,8 +448,8 @@ export const Navbar = ({
           onClick={() => setShowCategoriesDropdown(v => !v)}
           className="mobile-nav-item"
         >
-          <LayoutGrid style={{ width: 20, height: 20 }} />
-          <span>{translateData('Categories')}</span>
+          <LayoutGrid style={{ width: 20, height: 20, color: '#2563eb' }} />
+          <span style={{ color: '#1e40af' }}>{translateData('Categories')}</span>
         </button>
 
         <button
@@ -457,8 +457,8 @@ export const Navbar = ({
           onClick={onOpenOrders}
           className="mobile-nav-item"
         >
-          <Truck style={{ width: 20, height: 20 }} />
-          <span>{translateData('Orders')}</span>
+          <Truck style={{ width: 20, height: 20, color: '#d97706' }} />
+          <span style={{ color: '#b45309' }}>{translateData('Orders')}</span>
         </button>
 
         <button
@@ -467,11 +467,11 @@ export const Navbar = ({
           className="mobile-nav-item"
           style={{ position: 'relative' }}
         >
-          <Heart style={{ width: 20, height: 20, color: '#f43f5e' }} />
+          <Heart style={{ width: 20, height: 20, color: '#f43f5e', fill: 'rgba(244, 63, 94, 0.15)' }} />
           {favoriteCount > 0 && (
             <span className="mobile-nav-badge" style={{ background: '#f43f5e' }}>{favoriteCount}</span>
           )}
-          <span>{translateData('Wishlist')}</span>
+          <span style={{ color: '#be123c' }}>{translateData('Wishlist')}</span>
         </button>
 
         <button
@@ -484,7 +484,7 @@ export const Navbar = ({
           {cartCount > 0 && (
             <span className="mobile-nav-badge" style={{ background: '#059669' }}>{cartCount}</span>
           )}
-          <span>{translateData('Cart')}</span>
+          <span style={{ color: '#047857' }}>{translateData('Cart')}</span>
         </button>
       </nav>
 

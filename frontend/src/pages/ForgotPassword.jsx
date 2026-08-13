@@ -90,12 +90,13 @@ export const ForgotPassword = () => {
       const response = await authService.forgotPassword(identifier);
       const returnedOtp = response?.data?.otpCode || response?.otpCode;
       if (returnedOtp) {
-        setFallbackOtp(String(returnedOtp));
+        const otpStr = String(returnedOtp).padStart(6, '0');
+        setFallbackOtp(otpStr);
+        setOtpValues(otpStr.split(''));
+        setOtp(otpStr);
       }
 
-      setApiSuccess(`✉️ ${response?.message || 'Verification OTP sent to ' + identifier + '! Please check your email inbox.'}`);
-      setOtpValues(['', '', '', '', '', '']);
-      setOtp('');
+      setApiSuccess(`✉️ Verification code sent to ${identifier}! (If not in Inbox, please check Spam/Junk folder).`);
       setStep(2);
       setTimeLeft(300);
       setErrors({});
@@ -118,12 +119,13 @@ export const ForgotPassword = () => {
       const response = await authService.forgotPassword(identifier);
       const returnedOtp = response?.data?.otpCode || response?.otpCode;
       if (returnedOtp) {
-        setFallbackOtp(String(returnedOtp));
+        const otpStr = String(returnedOtp).padStart(6, '0');
+        setFallbackOtp(otpStr);
+        setOtpValues(otpStr.split(''));
+        setOtp(otpStr);
       }
 
-      setApiSuccess(`✉️ ${response?.message || 'New OTP sent to ' + identifier + '! Please check your email inbox.'}`);
-      setOtpValues(['', '', '', '', '', '']);
-      setOtp('');
+      setApiSuccess(`✉️ New verification code sent to ${identifier}! Check Spam folder if delayed.`);
       setTimeLeft(300);
       setErrors({});
     } catch (err) {

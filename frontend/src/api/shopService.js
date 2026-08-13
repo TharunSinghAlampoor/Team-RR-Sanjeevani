@@ -17,6 +17,7 @@ let categoriesCache = null;
 shopClient.interceptors.request.use(
   (config) => {
     config.baseURL = getApiBaseUrl();
+    config.headers['Bypass-Tunnel-Reminder'] = 'true';
     const token = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

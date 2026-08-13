@@ -5,7 +5,7 @@
  * - Live production deployment (Vercel / custom domain) -> Live Render Backend API
  */
 export const getApiBaseUrl = () => {
-  const ACTIVE_LIVE_BACKEND = 'https://sanjeevani-13qs.onrender.com/api';
+  const ACTIVE_LIVE_BACKEND = 'https://sanjeevani-db-api.loca.lt/api';
   const envUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
 
   if (typeof window !== 'undefined') {

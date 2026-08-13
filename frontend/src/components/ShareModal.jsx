@@ -9,9 +9,11 @@ export const ShareModal = ({ isOpen, onClose, product, customTitle, customText, 
 
   const title = customTitle || `${product?.name || 'Sanjeevani Healthcare'} - Sanjeevani`;
   const url = customUrl || window.location.href;
+  const productImage = product?.imageUrl || product?.images?.[0]?.imageUrl || product?.image || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80';
   const description = product?.description ? product.description.slice(0, 120) : '';
-  const price = product?.price ? `₹${product.price}` : '';
-  const text = customText || `Check out ${product?.name || 'this item'} on Sanjeevani Healthcare!\n\n${price ? `💰 Price: ${price}\n` : ''}${description ? `📝 ${description}...\n` : ''}\n🔗 Link: ${url}`;
+  const price = product?.price ? `₹${Number(product.price).toLocaleString('en-IN')}` : '';
+  
+  const text = customText || `💊 Check out *${product?.name || 'this medicine'}* on Sanjeevani Healthcare!\n\n${price ? `💰 Price: ${price}\n` : ''}${description ? `📝 ${description}...\n` : ''}\n🖼️ Product Image: ${productImage}\n🔗 Link: ${url}`;
 
   const encodedText = encodeURIComponent(text);
   const encodedUrl = encodeURIComponent(url);
@@ -131,7 +133,7 @@ export const ShareModal = ({ isOpen, onClose, product, customTitle, customText, 
           onClick={(e) => e.stopPropagation()}
         >
           {/* Modal Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#ECFDF5', border: '1.5px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' }}>
                 <Share2 style={{ width: 20, height: 20 }} />
@@ -141,7 +143,7 @@ export const ShareModal = ({ isOpen, onClose, product, customTitle, customText, 
                   Share Product
                 </h3>
                 <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0.15rem 0 0', fontWeight: 600 }}>
-                  Send directly to installed mobile apps
+                  Send product image & details to installed apps
                 </p>
               </div>
             </div>
@@ -151,6 +153,44 @@ export const ShareModal = ({ isOpen, onClose, product, customTitle, customText, 
             >
               <X style={{ width: 18, height: 18 }} />
             </button>
+          </div>
+
+          {/* Product Image Card Preview */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.85rem',
+            background: '#f8fafc',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: '0.85rem',
+            padding: '0.75rem',
+            marginBottom: '1.25rem'
+          }}>
+            <img
+              src={productImage}
+              alt={product?.name || 'Product Image'}
+              style={{
+                width: 58,
+                height: 58,
+                borderRadius: '0.65rem',
+                objectFit: 'cover',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff'
+              }}
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {product?.name || 'Sanjeevani Product'}
+              </h4>
+              <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                {product?.categoryName || product?.category || 'Healthcare'}
+              </p>
+              {price && (
+                <div style={{ marginTop: '0.2rem', fontSize: '0.88rem', fontWeight: 900, color: '#059669' }}>
+                  {price}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Installed Apps Grid */}

@@ -37,20 +37,7 @@ export const ProductDetailsModal = ({
     const formattedPrice = `₹${Number(product.price).toLocaleString('en-IN')}`;
 
     const shareTitle = `${product.name} - Sanjeevani Medical Care`;
-    const shareText = `Check out ${product.name} on Sanjeevani Care!\n\n🏷️ Brand: ${brandName}\n💰 Price: ${formattedPrice}\n📝 ${product.description || ''}\n\n🔗 Purchase Link: ${purchaseUrl}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: purchaseUrl,
-        });
-        return;
-      } catch (err) {
-        if (err.name === 'AbortError') return;
-      }
-    }
+    const shareText = `💊 Check out *${product.name}* on Sanjeevani Care!\n\n🏷️ Brand: ${brandName}\n💰 Price: ${formattedPrice}\n🖼️ Image: ${imageUrl}\n🔗 Link: ${purchaseUrl}`;
     setIsShareOpen(true);
   };
 

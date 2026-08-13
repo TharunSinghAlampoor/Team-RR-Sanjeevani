@@ -331,23 +331,6 @@ export const ProductDetailsPage = () => {
   };
 
   const handleShare = async () => {
-    const shareTitle = `${product?.name || 'Sanjeevani Healthcare'} - Sanjeevani`;
-    const shareUrl = window.location.href;
-    const shareText = `Check out ${product?.name || 'this item'} on Sanjeevani Care!\n\n💰 Price: ₹${product?.price || ''}\n🔗 Link: ${shareUrl}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl
-        });
-        return;
-      } catch (err) {
-        if (err.name === 'AbortError') return;
-      }
-    }
-
     setIsShareModalOpen(true);
   };
 

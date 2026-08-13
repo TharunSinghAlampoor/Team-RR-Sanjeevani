@@ -893,14 +893,7 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
   if (isOpen === false) return null;
   const navigate = useNavigate();
   const [creatingDemo, setCreatingDemo] = useState(false);
-  const [modalOrders, setModalOrders] = useState(() => {
-    let localList = [];
-    try {
-      const stored = localStorage.getItem('sanjeevani_local_orders');
-      if (stored) localList = JSON.parse(stored);
-    } catch (e) {}
-    return (Array.isArray(orders) && orders.length > 0) ? orders : localList;
-  });
+  const [modalOrders, setModalOrders] = useState(() => Array.isArray(orders) ? orders : []);
 
   React.useEffect(() => {
     let isMounted = true;

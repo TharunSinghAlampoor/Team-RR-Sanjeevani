@@ -149,6 +149,11 @@ export const Dashboard = () => {
   }, []);
 
   const fetchOrders = useCallback(async () => {
+    const activeToken = sessionStorage.getItem('token') || localStorage.getItem('token') || getCookie('auth_token');
+    if (!activeToken) {
+      setOrders([]);
+      return;
+    }
     try {
       const res = await shopService.getOrders();
       const rawList = (res && res.success && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);
@@ -176,6 +181,7 @@ export const Dashboard = () => {
       setOrders(cleanOrders);
     } catch (e) {
       console.error('Fetch orders error:', e);
+      setOrders([]);
     }
   }, []);
 

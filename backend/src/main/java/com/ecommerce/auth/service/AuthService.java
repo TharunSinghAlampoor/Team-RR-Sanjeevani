@@ -292,10 +292,11 @@ public class AuthService {
         String identifier = request.getIdentifier().trim();
         User user = findUserByIdentifier(identifier);
 
-        otpService.generateAndSaveOtp(user, true);
+        String otpCode = otpService.generateAndSaveOtp(user, true);
 
         java.util.Map<String, Object> data = new java.util.HashMap<>();
         data.put("email", user.getEmail());
+        data.put("otpCode", otpCode);
 
         return ApiResponse.success(
                 "OTP sent to " + user.getEmail() + ". Please check your email inbox.",

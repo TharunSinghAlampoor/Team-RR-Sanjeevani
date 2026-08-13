@@ -24,6 +24,8 @@ export const ForgotPassword = () => {
 
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [timeLeft, setTimeLeft] = useState(300);
+  const [fallbackOtp, setFallbackOtp] = useState('');
+  const [showFallbackOtp, setShowFallbackOtp] = useState(false);
   const navigate = useNavigate();
 
   // Manage countdown timer for OTP
@@ -71,6 +73,7 @@ export const ForgotPassword = () => {
     e.preventDefault();
     setApiError('');
     setApiSuccess('');
+    setShowFallbackOtp(false);
 
     if (!email) {
       setErrors({ email: 'Email address is required' });
@@ -85,6 +88,10 @@ export const ForgotPassword = () => {
     try {
       const identifier = email.trim();
       const response = await authService.forgotPassword(identifier);
+      const returnedOtp = response?.data?.otpCode || response?.otpCode;
+      if (returnedOtp) {
+        setFallbackOtp(String(returnedOtp));
+      }
 
       setApiSuccess(`✉️ ${response?.message || 'Verification OTP sent to ' + identifier + '! Please check your email inbox.'}`);
       setOtpValues(['', '', '', '', '', '']);
@@ -104,10 +111,15 @@ export const ForgotPassword = () => {
   const handleResendOtp = async () => {
     setApiError('');
     setApiSuccess('');
+    setShowFallbackOtp(false);
     setIsSubmitting(true);
     try {
       const identifier = email.trim();
       const response = await authService.forgotPassword(identifier);
+      const returnedOtp = response?.data?.otpCode || response?.otpCode;
+      if (returnedOtp) {
+        setFallbackOtp(String(returnedOtp));
+      }
 
       setApiSuccess(`✉️ ${response?.message || 'New OTP sent to ' + identifier + '! Please check your email inbox.'}`);
       setOtpValues(['', '', '', '', '', '']);
@@ -458,6 +470,26 @@ export const ForgotPassword = () => {
                 ))}
               </div>
               {errors.otp && <span style={{ fontSize: '0.76rem', color: '#ef4444', fontWeight: 700, marginTop: '0.4rem', textAlign: 'center', display: 'block' }}>{errors.otp}</span>}
+
+              {fallbackOtp && (
+                <div style={{ textAlign: 'center', marginTop: '0.65rem' }}>
+                  {!showFallbackOtp ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowFallbackOtp(true)}
+                      style={{ background: 'none', border: 'none', color: '#0D5C75', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Didn't receive email? View Fallback OTP Code
+                    </button>
+                  ) : (
+                    <div style={{ display: 'inline-block', background: '#f0fdf4', border: '1px solid #a7f3d0', padding: '0.35rem 0.75rem', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#047857' }}>
+                        Fallback OTP Code: <strong style={{ letterSpacing: '1px', fontSize: '0.9rem' }}>{fallbackOtp}</strong>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {timeLeft === 0 && (

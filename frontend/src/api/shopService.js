@@ -30,7 +30,15 @@ shopClient.interceptors.request.use(
 // prevents guest-session 401s (cart, favorites, orders) from clearing a logged-in session
 shopClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const config = error.config;
+    // Auto-retry once on Network Error to handle Render cold-start wakeups smoothly
+    if (config && (!error.response || (error.message && error.message.includes('Network Error'))) && !config._retry) {
+      config._retry = true;
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return shopClient(config);
+    }
+
     if (error.response && error.response.status === 401) {
       const hadToken = sessionStorage.getItem('token') || localStorage.getItem('token');
       if (hadToken) {

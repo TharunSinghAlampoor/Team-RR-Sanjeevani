@@ -25,13 +25,21 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    const isPublicAuthEndpoint = error.config && error.config.url && (
-      error.config.url.includes('/login') ||
-      error.config.url.includes('/register') ||
-      error.config.url.includes('/forgot-password') ||
-      error.config.url.includes('/verify-otp') ||
-      error.config.url.includes('/reset-password')
+  async (error) => {
+    const config = error.config;
+    // Auto-retry once on Network Error to handle Render cold-start wakeups smoothly
+    if (config && (!error.response || (error.message && error.message.includes('Network Error'))) && !config._retry) {
+      config._retry = true;
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return apiClient(config);
+    }
+
+    const isPublicAuthEndpoint = config && config.url && (
+      config.url.includes('/login') ||
+      config.url.includes('/register') ||
+      config.url.includes('/forgot-password') ||
+      config.url.includes('/verify-otp') ||
+      config.url.includes('/reset-password')
     );
     if (!isPublicAuthEndpoint && error.response && error.response.status === 401) {
       clearSessionCookies();

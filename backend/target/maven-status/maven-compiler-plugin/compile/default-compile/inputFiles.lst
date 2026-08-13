@@ -3,6 +3,7 @@ D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\CacheConfig.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\CorsConfig.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\DataInitializer.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\DataSourceConfig.java
+D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\OrderSeeder.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\ProductSeeder.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\RateLimitConfig.java
 D:\E-Commerce\backend\src\main\java\com\ecommerce\auth\config\SecurityConfig.java

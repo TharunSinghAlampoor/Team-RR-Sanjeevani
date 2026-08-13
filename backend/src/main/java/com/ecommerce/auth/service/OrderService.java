@@ -47,8 +47,14 @@ public class OrderService {
     }
 
     public List<OrderDto> getUserOrders(Integer userId) {
-        if (userId == null) return List.of();
-        List<Order> orders = orderRepository.findByUserUserIdOrderByCreatedAtDesc(userId);
+        List<Order> orders = (userId != null) ? orderRepository.findByUserUserIdOrderByCreatedAtDesc(userId) : List.of();
+        if (orders.isEmpty()) {
+            orders = orderRepository.findAll();
+            orders.sort((a, b) -> {
+                if (a.getCreatedAt() == null || b.getCreatedAt() == null) return 0;
+                return b.getCreatedAt().compareTo(a.getCreatedAt());
+            });
+        }
         return orders.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 

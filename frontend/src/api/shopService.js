@@ -95,6 +95,80 @@ const FALLBACK_CATALOG = [
   { productId: 10, name: 'SPF 50+ PA++++ Sunscreen Gel', categoryName: 'Skin Care', categoryId: 5, price: 425.00, rating: 4.9, brand: 'Neutrogena', stock: 130, description: 'Non-greasy, invisible broad spectrum UV protection with zero white cast.', imageUrl: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=400&q=80' },
 ];
 
+const FALLBACK_ORDERS = Array.from({ length: 31 }, (_, idx) => {
+  const i = idx + 1;
+  const numId = 849200 + i;
+  const orderId = `ORD-${numId}`;
+  const statuses = ['DELIVERED', 'SHIPPED', 'CONFIRMED', 'PACKED', 'PROCESSING'];
+  const status = statuses[(i - 1) % statuses.length];
+  const addresses = [
+    'Flat 402, Block A, Jubilee Hills, Hyderabad - 500033',
+    'H.No 12-4-88, Banjara Hills Road No 10, Hyderabad - 500034',
+    'Plot 45, Tech Zone, Hitech City, Hyderabad - 500081',
+    'Flat 201, Sunrise Apartments, Gachibowli, Hyderabad - 500032',
+    'House #78, Greenfield Colony, Madhapur, Hyderabad - 500081'
+  ];
+  const paymentMethods = ['Razorpay Online', 'UPI / Razorpay', 'Cash on Delivery', 'Credit Card / Razorpay', 'NetBanking'];
+
+  const sampleProducts = [
+    { productId: 1, name: 'Paracetamol 650mg Extra Strength', price: 45.00, img: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80' },
+    { productId: 2, name: 'Amoxicillin 500mg Antibiotics', price: 120.00, img: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=400&q=80' },
+    { productId: 3, name: 'Organic Multivitamin Daily Boost', price: 499.00, img: 'https://images.unsplash.com/photo-1577401239170-897942555fb3?auto=format&fit=crop&w=400&q=80' },
+    { productId: 4, name: 'Whey Protein Isolate 1kg Chocolate', price: 1899.00, img: 'https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?auto=format&fit=crop&w=400&q=80' },
+    { productId: 5, name: 'Automatic Digital BP Monitor', price: 1450.00, img: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=400&q=80' },
+    { productId: 6, name: 'Fingertip Pulse Oximeter OLED', price: 799.00, img: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=400&q=80' },
+    { productId: 7, name: 'Gentle Baby Moisturizing Lotion 400ml', price: 349.00, img: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=400&q=80' },
+    { productId: 8, name: 'Pediatric Nutritive Milk Powder 400g', price: 620.00, img: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80' },
+    { productId: 9, name: 'Hyaluronic Acid Hydrating Face Serum', price: 649.00, img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80' },
+    { productId: 10, name: 'SPF 50+ PA++++ Sunscreen Gel', price: 425.00, img: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=400&q=80' }
+  ];
+
+  const prod1 = sampleProducts[(i - 1) % sampleProducts.length];
+  const prod2 = sampleProducts[(i + 3) % sampleProducts.length];
+  const qty1 = (i % 3) + 1;
+  const qty2 = (i % 2) + 1;
+
+  const item1 = {
+    productId: prod1.productId,
+    productName: prod1.name,
+    quantity: qty1,
+    pricePerUnit: prod1.price,
+    totalPrice: prod1.price * qty1,
+    imageUrl: prod1.img
+  };
+
+  const items = [item1];
+  let totalAmount = item1.totalPrice;
+
+  if (i % 2 === 0) {
+    const item2 = {
+      productId: prod2.productId,
+      productName: prod2.name,
+      quantity: qty2,
+      pricePerUnit: prod2.price,
+      totalPrice: prod2.price * qty2,
+      imageUrl: prod2.img
+    };
+    items.push(item2);
+    totalAmount += item2.totalPrice;
+  }
+
+  return {
+    orderId,
+    status,
+    totalAmount,
+    createdAt: new Date(Date.now() - (i * 5 * 3600000 + i * 12 * 60000)).toISOString(),
+    shippingAddress: addresses[(i - 1) % addresses.length],
+    paymentMethod: paymentMethods[(i - 1) % paymentMethods.length],
+    customerName: i % 7 === 0 ? 'System Administrator' : 'Sanjeevani User',
+    customerEmail: i % 7 === 0 ? 'admin@sanjeevani.com' : 'customer@sanjeevani.com',
+    customerPhone: i % 7 === 0 ? '+91 99999 88888' : '+91 98765 43210',
+    paymentId: `pay_${numId}`,
+    referenceNumber: `order_REF_${numId}`,
+    items
+  };
+});
+
 export const shopService = {
   // Categories with sub-1ms in-memory cache
   getCategories: async () => {
@@ -291,45 +365,32 @@ export const shopService = {
     return response.data;
   },
 
-  // Orders
+  // Orders - Returns real database orders directly
   getOrders: async () => {
-    let apiOrders = [];
     try {
       const response = await shopClient.get('/orders');
       const data = response.data;
-      apiOrders = (data && data.success && Array.isArray(data.data)) ? data.data : (Array.isArray(data) ? data : []);
+      const apiOrders = (data && data.success && Array.isArray(data.data))
+        ? data.data
+        : (Array.isArray(data) ? data : []);
+      if (apiOrders.length > 0) {
+        return { success: true, data: apiOrders };
+      }
     } catch (e) {
       console.warn('Backend orders API notice:', e.message);
     }
 
+    // Fallback to locally saved user purchases if offline
     let localOrders = [];
     try {
-      const stored1 = localStorage.getItem('sanjeevani_local_orders');
-      const stored2 = localStorage.getItem('sanjeevani_orders');
-      let arr1 = stored1 ? JSON.parse(stored1) : [];
-      let arr2 = stored2 ? JSON.parse(stored2) : [];
-      if (!Array.isArray(arr1)) arr1 = [];
-      if (!Array.isArray(arr2)) arr2 = [];
-      localOrders = [...arr1, ...arr2];
-    } catch (e) {}
-
-    const combinedMap = new Map();
-    [...apiOrders, ...localOrders].forEach(o => {
-      if (!o) return;
-      if (String(o.status || '').toUpperCase() === 'FAILED') return;
-      const key = String(o.orderId || o.id || Math.random()).trim().toLowerCase();
-      if (!combinedMap.has(key)) {
-        combinedMap.set(key, o);
+      const stored = localStorage.getItem('sanjeevani_local_orders');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) localOrders = parsed;
       }
-    });
-
-    const finalOrders = Array.from(combinedMap.values());
-    try {
-      localStorage.setItem('sanjeevani_local_orders', JSON.stringify(finalOrders));
-      localStorage.setItem('sanjeevani_orders', JSON.stringify(finalOrders));
     } catch (e) {}
 
-    return { success: true, data: finalOrders };
+    return { success: true, data: localOrders };
   },
 
   checkoutCart: async (payload = {}) => {

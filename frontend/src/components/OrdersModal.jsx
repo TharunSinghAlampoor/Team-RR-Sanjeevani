@@ -982,19 +982,22 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
 
   // Deduplicate and sort orders from Latest / Newest first (top) to Oldest last (bottom)
   const sortedOrders = React.useMemo(() => {
-    let localSaved = [];
-    try {
-      const rawLocal1 = localStorage.getItem('sanjeevani_orders');
-      const rawLocal2 = localStorage.getItem('sanjeevani_local_orders');
-      let arr1 = rawLocal1 ? JSON.parse(rawLocal1) : [];
-      let arr2 = rawLocal2 ? JSON.parse(rawLocal2) : [];
-      if (!Array.isArray(arr1)) arr1 = [];
-      if (!Array.isArray(arr2)) arr2 = [];
-      localSaved = [...arr1, ...arr2];
-    } catch (e) {}
-
     const apiList = Array.isArray(modalOrders) && modalOrders.length > 0 ? modalOrders : (Array.isArray(orders) ? orders : []);
-    const combined = [...apiList, ...localSaved];
+    
+    let combined = apiList;
+    if (combined.length === 0) {
+      let localSaved = [];
+      try {
+        const rawLocal1 = localStorage.getItem('sanjeevani_orders');
+        const rawLocal2 = localStorage.getItem('sanjeevani_local_orders');
+        let arr1 = rawLocal1 ? JSON.parse(rawLocal1) : [];
+        let arr2 = rawLocal2 ? JSON.parse(rawLocal2) : [];
+        if (!Array.isArray(arr1)) arr1 = [];
+        if (!Array.isArray(arr2)) arr2 = [];
+        localSaved = [...arr1, ...arr2];
+      } catch (e) {}
+      combined = localSaved;
+    }
     if (!combined.length) return [];
 
     const uniqueMap = new Map();

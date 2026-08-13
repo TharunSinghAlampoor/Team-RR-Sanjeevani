@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DriverManager;
 
 @Configuration
 public class DataSourceConfig {
@@ -33,42 +31,13 @@ public class DataSourceConfig {
     @Bean
     @Primary
     public DataSource dataSource() {
-        String effectiveUrl = dbUrl;
-        if (effectiveUrl != null && effectiveUrl.contains(":PORT")) {
-            logger.warn("Detected unreplaced literal ':PORT' in dbUrl. Auto-correcting to Aiven port ':21552'.");
-            effectiveUrl = effectiveUrl.replace(":PORT", ":21552");
-        }
-
-        logger.info("Testing primary database connection at URL: {}", effectiveUrl);
-
-        boolean canConnectToPrimary = false;
-        try {
-            Class.forName(dbDriver);
-            DriverManager.setLoginTimeout(3);
-            try (Connection conn = DriverManager.getConnection(effectiveUrl, dbUser, dbPassword)) {
-                if (conn != null && !conn.isClosed()) {
-                    canConnectToPrimary = true;
-                    logger.info("Successfully connected to primary MySQL database at {}", effectiveUrl);
-                }
-            }
-        } catch (Throwable t) {
-            logger.warn("Primary database check failed ({}). Falling back to embedded H2 MySQL mode.", t.getMessage());
-        }
+        logger.info("Connecting directly to local MySQL database at URL: {}", dbUrl);
 
         HikariConfig config = new HikariConfig();
-
-        if (canConnectToPrimary) {
-            config.setJdbcUrl(effectiveUrl);
-            config.setUsername(dbUser);
-            config.setPassword(dbPassword);
-            config.setDriverClassName(dbDriver);
-        } else {
-            logger.warn("Activating embedded H2 database layer (jdbc:h2:mem:sanjeevani_db;MODE=MySQL) for Render service stability.");
-            config.setJdbcUrl("jdbc:h2:mem:sanjeevani_db;MODE=MySQL;DB_CLOSE_DELAY=-1;DEFAULT_NULL_ORDERING=HIGH");
-            config.setUsername("sa");
-            config.setPassword("");
-            config.setDriverClassName("org.h2.Driver");
-        }
+        config.setJdbcUrl(dbUrl);
+        config.setUsername(dbUser);
+        config.setPassword(dbPassword);
+        config.setDriverClassName(dbDriver);
 
         config.setMaximumPoolSize(20);
         config.setMinimumIdle(5);
@@ -79,3 +48,4 @@ public class DataSourceConfig {
         return new HikariDataSource(config);
     }
 }
+

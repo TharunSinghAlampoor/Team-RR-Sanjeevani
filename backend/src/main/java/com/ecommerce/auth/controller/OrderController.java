@@ -24,8 +24,10 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<OrderDto>>> getUserOrders(@AuthenticationPrincipal Integer userId) {
-        Integer effectiveUserId = (userId != null) ? userId : 1;
-        List<OrderDto> orders = orderService.getUserOrders(effectiveUserId);
+        if (userId == null) {
+            return ResponseEntity.ok(ApiResponse.success("User order history retrieved", List.of()));
+        }
+        List<OrderDto> orders = orderService.getUserOrders(userId);
         return ResponseEntity.ok(ApiResponse.success("User order history retrieved", orders));
     }
 
@@ -33,8 +35,10 @@ public class OrderController {
     public ResponseEntity<ApiResponse<OrderDto>> checkoutCart(
             @AuthenticationPrincipal Integer userId,
             @RequestBody(required = false) CheckoutRequest checkoutRequest) {
-        Integer effectiveUserId = (userId != null) ? userId : 1;
-        OrderDto order = orderService.checkoutCart(effectiveUserId, checkoutRequest);
+        if (userId == null) {
+            throw new com.ecommerce.auth.exception.AuthException("Authentication required to checkout");
+        }
+        OrderDto order = orderService.checkoutCart(userId, checkoutRequest);
         return ResponseEntity.ok(ApiResponse.success("Order placed successfully from cart", order));
     }
 
@@ -42,13 +46,15 @@ public class OrderController {
     public ResponseEntity<ApiResponse<OrderDto>> buyNow(
             @AuthenticationPrincipal Integer userId,
             @RequestBody(required = false) BuyNowRequest request) {
-        Integer effectiveUserId = (userId != null) ? userId : 1;
+        if (userId == null) {
+            throw new com.ecommerce.auth.exception.AuthException("Authentication required to place buy-now order");
+        }
         if (request == null) {
             request = new BuyNowRequest();
             request.setProductId(1);
             request.setQuantity(1);
         }
-        OrderDto order = orderService.buyNow(effectiveUserId, request);
+        OrderDto order = orderService.buyNow(userId, request);
         return ResponseEntity.ok(ApiResponse.success("Buy now order processed successfully", order));
     }
 

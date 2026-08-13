@@ -53,19 +53,37 @@ shopClient.interceptors.response.use(
   }
 );
 
-// Local Orders Persistence Helper
+// User-Scoped Local Orders Storage Helper
+const getUserOrderStorageKey = () => {
+  try {
+    const rawUser = sessionStorage.getItem('user') || localStorage.getItem('user');
+    if (!rawUser) return null;
+    let nameStr = rawUser;
+    if (typeof rawUser === 'string' && (rawUser.startsWith('{') || rawUser.startsWith('['))) {
+      try {
+        const parsed = JSON.parse(rawUser);
+        nameStr = parsed.email || parsed.fullName || parsed.name || rawUser;
+      } catch (e) {}
+    }
+    const cleanUser = String(nameStr).trim().toLowerCase().replace(/[^a-z0-9_@.-]/g, '_');
+    return `sanjeevani_orders_${cleanUser}`;
+  } catch (e) {
+    return null;
+  }
+};
+
 export const saveLocalOrder = (order) => {
   if (!order) return;
   try {
-    const stored1 = localStorage.getItem('sanjeevani_local_orders');
-    const stored2 = localStorage.getItem('sanjeevani_orders');
-    let localOrders1 = stored1 ? JSON.parse(stored1) : [];
-    let localOrders2 = stored2 ? JSON.parse(stored2) : [];
-    if (!Array.isArray(localOrders1)) localOrders1 = [];
-    if (!Array.isArray(localOrders2)) localOrders2 = [];
+    const userKey = getUserOrderStorageKey();
+    if (!userKey) return;
+
+    const stored = localStorage.getItem(userKey);
+    let localOrders = stored ? JSON.parse(stored) : [];
+    if (!Array.isArray(localOrders)) localOrders = [];
 
     const combinedMap = new Map();
-    [...localOrders1, ...localOrders2].forEach(o => {
+    localOrders.forEach(o => {
       if (o && (o.orderId || o.id)) combinedMap.set(String(o.orderId || o.id).trim().toLowerCase(), o);
     });
 
@@ -87,8 +105,7 @@ export const saveLocalOrder = (order) => {
     combinedMap.set(String(newObj.orderId).trim().toLowerCase(), newObj);
     const finalArr = Array.from(combinedMap.values());
 
-    localStorage.setItem('sanjeevani_local_orders', JSON.stringify(finalArr));
-    localStorage.setItem('sanjeevani_orders', JSON.stringify(finalArr));
+    localStorage.setItem(userKey, JSON.stringify(finalArr));
   } catch (e) {
     console.warn('Failed to save order to localStorage:', e);
   }
@@ -377,28 +394,31 @@ export const shopService = {
     return response.data;
   },
 
-  // Orders - Returns real database orders directly
+  // Orders - Returns real database orders directly for the authenticated user
   getOrders: async () => {
     try {
       const response = await shopClient.get('/orders');
       const data = response.data;
-      const apiOrders = (data && data.success && Array.isArray(data.data))
-        ? data.data
-        : (Array.isArray(data) ? data : []);
-      if (apiOrders.length > 0) {
-        return { success: true, data: apiOrders };
+      if (data && data.success && Array.isArray(data.data)) {
+        return { success: true, data: data.data };
+      }
+      if (Array.isArray(data)) {
+        return { success: true, data: data };
       }
     } catch (e) {
       console.warn('Backend orders API notice:', e.message);
     }
 
-    // Fallback to locally saved user purchases if offline
+    // Fallback to locally saved purchases ONLY for the active user if offline
     let localOrders = [];
     try {
-      const stored = localStorage.getItem('sanjeevani_local_orders');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) localOrders = parsed;
+      const userKey = getUserOrderStorageKey();
+      if (userKey) {
+        const stored = localStorage.getItem(userKey);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) localOrders = parsed;
+        }
       }
     } catch (e) {}
 

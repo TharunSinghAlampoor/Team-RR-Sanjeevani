@@ -153,6 +153,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('user_role');
+    localStorage.removeItem('sanjeevani_orders');
+    localStorage.removeItem('sanjeevani_local_orders');
     setToken(null);
     setUser(null);
     setCachedCartCount(0);

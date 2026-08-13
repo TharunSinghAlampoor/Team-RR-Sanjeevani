@@ -5571,78 +5571,72 @@ body:has(.dashboard-page) {
 
   .cat-section__grid {
     display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 0.6rem !important;
-    padding: 0.2rem 0 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.65rem !important;
+    padding: 0.25rem 0 !important;
   }
 
   .pcard {
     display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 0.75rem !important;
-    padding: 0.6rem 0.75rem !important;
-    min-height: 96px !important;
-    max-height: 110px !important;
-    border-radius: 0.85rem !important;
+    flex-direction: column !important;
+    min-height: 255px !important;
+    height: auto !important;
+    max-height: none !important;
+    border-radius: 0.95rem !important;
+    padding: 0.65rem !important;
     position: relative !important;
     box-sizing: border-box !important;
     width: 100% !important;
     background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+    border: 1.5px solid #e2e8f0 !important;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
+    overflow: visible !important;
   }
 
   .pcard__image-wrap {
-    width: 85px !important;
-    min-width: 85px !important;
-    max-width: 85px !important;
-    height: 90px !important;
-    min-height: 90px !important;
-    max-height: 90px !important;
-    padding: 4px !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 115px !important;
+    min-height: 115px !important;
+    max-height: 115px !important;
+    padding: 6px !important;
     background: #f8fafc !important;
     border: 1px solid #f1f5f9 !important;
-    border-radius: 0.65rem !important;
-    flex-shrink: 0 !important;
-    margin: 0 !important;
+    border-radius: 0.75rem !important;
+    margin: 0 0 0.4rem 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
   }
 
-  .pcard__content-right {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 0% !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    gap: 0.12rem !important;
-    padding-right: 0 !important;
-  }
-
   .pcard__info {
-    padding: 0 !important;
+    padding: 0.25rem 0.1rem 0.15rem !important;
     width: 100% !important;
+    margin-top: 0 !important;
   }
 
   .pcard__brand {
-    font-size: 0.65rem !important;
-    padding-right: 28px !important;
+    font-size: 0.68rem !important;
+    color: #0369a1 !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding-right: 0 !important;
   }
 
   .pcard__name {
-    font-size: 0.84rem !important;
-    line-height: 1.2 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.25 !important;
     font-weight: 800 !important;
     color: #0f172a !important;
     display: -webkit-box !important;
-    -webkit-line-clamp: 1 !important;
-    line-clamp: 1 !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
-    margin: 0.05rem 0 0.1rem 0 !important;
-    padding-right: 24px !important;
+    margin: 0.15rem 0 !important;
+    padding-right: 0 !important;
   }
 
   .pcard__desc {
@@ -5650,12 +5644,12 @@ body:has(.dashboard-page) {
   }
 
   .pcard__price-row {
-    margin-top: 0.08rem !important;
-    margin-bottom: 0.2rem !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.35rem !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 0.35rem !important;
+    gap: 0.3rem !important;
     width: 100% !important;
   }
 
@@ -5666,31 +5660,32 @@ body:has(.dashboard-page) {
   }
 
   .pcard__stock {
-    font-size: 0.64rem !important;
-    padding: 1px 6px !important;
+    font-size: 0.62rem !important;
+    padding: 1.5px 6px !important;
+    border-radius: 0.4rem !important;
   }
 
   .pcard__actions {
-    padding-top: 0 !important;
-    margin-top: 0.08rem !important;
+    margin-top: auto !important;
+    padding-top: 0.25rem !important;
     width: 100% !important;
   }
 
   .pcard__btn {
     font-size: 0.78rem !important;
     font-weight: 800 !important;
-    height: 32px !important;
+    height: 34px !important;
     width: 100% !important;
-    padding: 0 0.65rem !important;
-    border-radius: 0.55rem !important;
+    padding: 0 0.5rem !important;
+    border-radius: 0.6rem !important;
     background: linear-gradient(135deg, #0d5c75 0%, #059669 100%) !important;
     color: #ffffff !important;
     border: none !important;
-    box-shadow: 0 2px 8px rgba(13, 92, 117, 0.2) !important;
+    box-shadow: 0 3px 10px rgba(13, 92, 117, 0.22) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0.4rem !important;
+    gap: 0.35rem !important;
   }
 }
 

@@ -107,8 +107,8 @@ export function AdminInventory() {
       </div>
 
       {/* Stock Table */}
-      <div style={{ background: '#ffffff', borderRadius: '1.25rem', border: '1.5px solid #e2e8f0', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
+      <div style={{ background: '#ffffff', borderRadius: '1.25rem', border: '1.5px solid #e2e8f0', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ width: '100%', minWidth: 700, borderCollapse: 'collapse', fontSize: '0.88rem' }}>
           <thead>
             <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', textAlign: 'left', color: '#475569', fontSize: '0.78rem', textTransform: 'uppercase' }}>
               <th style={{ padding: '1rem' }}>Medicine</th>

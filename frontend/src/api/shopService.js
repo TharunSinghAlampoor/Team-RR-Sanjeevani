@@ -563,6 +563,37 @@ export const shopService = {
     const response = await shopClient.get(`/order-support/order/${orderId}`);
     return response.data;
   },
+
+  // Admin Order Support Management
+  getAdminRefunds: async () => {
+    const response = await shopClient.get('/order-support/admin/refunds');
+    return response.data;
+  },
+
+  updateAdminRefundStatus: async (id, status) => {
+    const response = await shopClient.put(`/order-support/admin/refunds/${id}/status`, { status });
+    return response.data;
+  },
+
+  getAdminReplacements: async () => {
+    const response = await shopClient.get('/order-support/admin/replacements');
+    return response.data;
+  },
+
+  updateAdminReplacementStatus: async (id, status) => {
+    const response = await shopClient.put(`/order-support/admin/replacements/${id}/status`, { status });
+    return response.data;
+  },
+
+  getAdminCancellations: async () => {
+    const response = await shopClient.get('/order-support/admin/cancellations');
+    return response.data;
+  },
+
+  getAdminRatings: async () => {
+    const response = await shopClient.get('/order-support/admin/ratings');
+    return response.data;
+  },
 };
 
 export default shopService;

@@ -149,4 +149,80 @@ public class OrderSupportController {
         response.put("cancellation", cancellationRepository.findByOrderId(orderId).orElse(null));
         return ResponseEntity.ok(response);
     }
+
+    // ─── ADMIN MANAGEMENT ENDPOINTS ───
+
+    // 6. Admin: Get all refund requests
+    @GetMapping("/admin/refunds")
+    public ResponseEntity<?> getAllRefunds() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", refundRepository.findAll());
+        return ResponseEntity.ok(response);
+    }
+
+    // 7. Admin: Update refund request status
+    @PutMapping("/admin/refunds/{id}/status")
+    public ResponseEntity<?> updateRefundStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        Optional<OrderRefundRequest> opt = refundRepository.findById(id);
+        if (opt.isPresent()) {
+            OrderRefundRequest refund = opt.get();
+            if (payload.containsKey("status") && payload.get("status") != null) {
+                refund.setStatus(payload.get("status").toUpperCase());
+                refundRepository.save(refund);
+            }
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Refund status updated successfully");
+            response.put("data", refund);
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(404).body(Map.of("success", false, "message", "Refund request not found"));
+    }
+
+    // 8. Admin: Get all replacement requests
+    @GetMapping("/admin/replacements")
+    public ResponseEntity<?> getAllReplacements() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", replacementRepository.findAll());
+        return ResponseEntity.ok(response);
+    }
+
+    // 9. Admin: Update replacement request status
+    @PutMapping("/admin/replacements/{id}/status")
+    public ResponseEntity<?> updateReplacementStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        Optional<OrderReplacementRequest> opt = replacementRepository.findById(id);
+        if (opt.isPresent()) {
+            OrderReplacementRequest replacement = opt.get();
+            if (payload.containsKey("status") && payload.get("status") != null) {
+                replacement.setStatus(payload.get("status").toUpperCase());
+                replacementRepository.save(replacement);
+            }
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Replacement status updated successfully");
+            response.put("data", replacement);
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(404).body(Map.of("success", false, "message", "Replacement request not found"));
+    }
+
+    // 10. Admin: Get all cancellations
+    @GetMapping("/admin/cancellations")
+    public ResponseEntity<?> getAllCancellations() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", cancellationRepository.findAll());
+        return ResponseEntity.ok(response);
+    }
+
+    // 11. Admin: Get all order ratings & feedback
+    @GetMapping("/admin/ratings")
+    public ResponseEntity<?> getAllRatings() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", feedbackRepository.findAll());
+        return ResponseEntity.ok(response);
+    }
 }

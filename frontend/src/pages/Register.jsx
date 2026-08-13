@@ -150,7 +150,19 @@ export const Register = () => {
         formData.role
       );
 
-      setApiSuccess(response.message || 'Registration successful! Redirecting to login...');
+      if (response && response.data && response.data.token && response.data.user) {
+        const { token, user } = response.data;
+        login(user, token);
+        setApiSuccess(response.message || 'Registration successful! Auto-logging you in...');
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1200);
+      } else {
+        setApiSuccess(response.message || 'Registration successful! Redirecting to login...');
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
+      }
       setFormData({
         fullName: '',
         email: '',
@@ -160,9 +172,6 @@ export const Register = () => {
         confirmPassword: '',
         agree: false,
       });
-      setTimeout(() => {
-        navigate('/login');
-      }, 1800);
     } catch (err) {
       if (err.response && err.response.data) {
         const errorData = err.response.data;
@@ -172,8 +181,10 @@ export const Register = () => {
         } else {
           setApiError(errorData.message || 'Registration failed');
         }
+      } else if (err.message) {
+        setApiError(err.message);
       } else {
-        setApiError('Network error. Please check your internet connection.');
+        setApiError('Registration failed. Please try again.');
       }
     } finally {
       setIsSubmitting(false);

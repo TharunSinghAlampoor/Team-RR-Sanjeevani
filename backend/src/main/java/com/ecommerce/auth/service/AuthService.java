@@ -96,9 +96,25 @@ public class AuthService {
         );
 
         userRepository.save(user);
-        logger.info("User registered successfully: {}", user.getEmail());
 
-        return ApiResponse.success("Registration successful! You can now log in.");
+        // Auto-generate token & session so user is logged in upon registration
+        String token = jwtService.generateToken(user.getUserId(), user.getEmail());
+        LocalDateTime loginTime = LocalDateTime.now();
+        LocalDateTime expiryTime = loginTime.plusMinutes(sessionExpiryMinutes);
+        sessionRepository.save(new Session(user, token, loginTime, expiryTime));
+        jwtTokenRepository.save(new JwtToken(user, token, expiryTime));
+
+        LoginResponse.UserProfile profile = new LoginResponse.UserProfile(
+                user.getUserId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                user.getRole()
+        );
+        LoginResponse response = new LoginResponse(token, jwtService.getExpirationMs(), profile);
+
+        logger.info("User registered successfully and auto-logged in: {}", user.getEmail());
+        return ApiResponse.success("Registration successful! Logging you in...", response);
     }
 
     @Transactional

@@ -20,7 +20,7 @@ public final class ValidationUtil {
     }
 
     public static boolean isValidPassword(String password) {
-        return password != null && PASSWORD_PATTERN.matcher(password).matches();
+        return password != null && password.trim().length() >= 6;
     }
 
     public static boolean isValidFullName(String name) {

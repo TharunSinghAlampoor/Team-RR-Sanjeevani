@@ -166,32 +166,34 @@ const ProductCard = React.memo(({
         />
       </div>
 
-      {/* Info */}
-      <div className="pcard__info">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
-          <p className="pcard__brand" style={{ color: '#0369a1', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: '0.7rem' }}>{brandName}</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginLeft: 'auto', background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', padding: '2px 7px', borderRadius: 99, border: '1px solid #fde68a', boxShadow: '0 1px 3px rgba(245, 158, 11, 0.12)' }}>
-            <Star style={{ width: 11, height: 11, color: '#f59e0b', fill: '#f59e0b' }} />
-            <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#b45309' }}>
-              {Number(product.rating || 4.5).toFixed(1)}
-            </span>
+      {/* Details & Actions Container (Right side on mobile) */}
+      <div className="pcard__content-right">
+        {/* Info */}
+        <div className="pcard__info">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
+            <p className="pcard__brand" style={{ color: '#0369a1', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: '0.7rem' }}>{brandName}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginLeft: 'auto', background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', padding: '2px 7px', borderRadius: 99, border: '1px solid #fde68a', boxShadow: '0 1px 3px rgba(245, 158, 11, 0.12)' }}>
+              <Star style={{ width: 11, height: 11, color: '#f59e0b', fill: '#f59e0b' }} />
+              <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#b45309' }}>
+                {Number(product.rating || 4.5).toFixed(1)}
+              </span>
+            </div>
           </div>
+          <h3 className="pcard__name" style={{ color: '#0f172a', fontWeight: 800 }}>{translateData(product.name)}</h3>
+          <p className="pcard__desc" style={{ color: '#64748b' }}>{translateData(product.description)}</p>
         </div>
-        <h3 className="pcard__name" style={{ color: '#0f172a', fontWeight: 800 }}>{translateData(product.name)}</h3>
-        <p className="pcard__desc" style={{ color: '#64748b' }}>{translateData(product.description)}</p>
-      </div>
 
-      {/* Price + Stock */}
-      <div className="pcard__price-row" style={{ marginTop: '0.4rem' }}>
-        <span className="pcard__price" style={{ color: '#0f766e', fontSize: '1.12rem', fontWeight: 900, letterSpacing: '-0.02em' }}>₹{Number(product.price).toLocaleString('en-IN')}</span>
-        {inStock
-          ? <span className="pcard__stock pcard__stock--in" style={{ background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', color: '#047857', border: '1px solid #6ee7b7', fontWeight: 800, padding: '2px 8px', borderRadius: '0.4rem', fontSize: '0.7rem' }}><CheckCircle2 className="w-3 h-3" /> {t('inStock')}</span>
-          : <span className="pcard__stock pcard__stock--out" style={{ background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 800, padding: '2px 8px', borderRadius: '0.4rem', fontSize: '0.7rem' }}><AlertCircle className="w-3 h-3" /> {t('outOfStock')}</span>
-        }
-      </div>
+        {/* Price + Stock */}
+        <div className="pcard__price-row" style={{ marginTop: '0.4rem' }}>
+          <span className="pcard__price" style={{ color: '#0f766e', fontSize: '1.12rem', fontWeight: 900, letterSpacing: '-0.02em' }}>₹{Number(product.price).toLocaleString('en-IN')}</span>
+          {inStock
+            ? <span className="pcard__stock pcard__stock--in" style={{ background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', color: '#047857', border: '1px solid #6ee7b7', fontWeight: 800, padding: '2px 8px', borderRadius: '0.4rem', fontSize: '0.7rem' }}><CheckCircle2 className="w-3 h-3" /> {t('inStock')}</span>
+            : <span className="pcard__stock pcard__stock--out" style={{ background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 800, padding: '2px 8px', borderRadius: '0.4rem', fontSize: '0.7rem' }}><AlertCircle className="w-3 h-3" /> {t('outOfStock')}</span>
+          }
+        </div>
 
-      {/* Actions */}
-      <div className="pcard__actions" style={{ marginTop: 'auto', paddingTop: '0.5rem' }}>
+        {/* Actions */}
+        <div className="pcard__actions" style={{ marginTop: 'auto', paddingTop: '0.5rem' }}>
         {inCartActive && qty > 0 ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', width: '100%' }}>
             {/* Stepper Pill (- Count +) */}
@@ -317,7 +319,8 @@ const ProductCard = React.memo(({
         )}
       </div>
     </div>
-  );
+  </div>
+);
 });
 
 ProductCard.displayName = 'ProductCard';

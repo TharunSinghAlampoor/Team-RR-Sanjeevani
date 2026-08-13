@@ -88,7 +88,7 @@ export const ForgotPassword = () => {
       const returnedOtp = response?.data?.otpCode || response?.otpCode;
 
       if (returnedOtp) {
-        setApiSuccess(`✉️ Verification OTP sent to ${identifier}! Check your email inbox.`);
+        setApiSuccess(`✉️ Verification OTP generated for ${identifier}! (OTP Code: ${returnedOtp})`);
         const digits = String(returnedOtp).split('').slice(0, 6);
         while (digits.length < 6) digits.push('');
         setOtpValues(digits);
@@ -102,13 +102,9 @@ export const ForgotPassword = () => {
       setTimeLeft(300);
       setErrors({});
     } catch (err) {
-      console.warn("Backend forgotPassword API notice:", err);
-      setApiSuccess(`✉️ Verification OTP sent to ${email}! Check your email inbox.`);
-      setStep(2);
-      setOtpValues(['', '', '', '', '', '']);
-      setOtp('');
-      setTimeLeft(300);
-      setErrors({});
+      console.error("Backend forgotPassword API error:", err);
+      const errMsg = err.response?.data?.message || err.message || 'Failed to send OTP. Please check that your email address is registered.';
+      setApiError(`❌ ${errMsg}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -121,17 +117,25 @@ export const ForgotPassword = () => {
     try {
       const identifier = email.trim();
       const response = await authService.forgotPassword(identifier);
-      setApiSuccess(`✉️ ${response?.message || 'New OTP sent to ' + identifier + '! Check your email inbox.'}`);
-      setOtpValues(['', '', '', '', '', '']);
-      setOtp('');
+      const returnedOtp = response?.data?.otpCode || response?.otpCode;
+
+      if (returnedOtp) {
+        setApiSuccess(`✉️ New OTP generated for ${identifier}! (OTP Code: ${returnedOtp})`);
+        const digits = String(returnedOtp).split('').slice(0, 6);
+        while (digits.length < 6) digits.push('');
+        setOtpValues(digits);
+        setOtp(String(returnedOtp));
+      } else {
+        setApiSuccess(`✉️ ${response?.message || 'New OTP sent to ' + identifier + '! Check your email inbox.'}`);
+        setOtpValues(['', '', '', '', '', '']);
+        setOtp('');
+      }
       setTimeLeft(300);
       setErrors({});
     } catch (err) {
-      setApiSuccess(`✉️ New OTP sent to ${email}! Check your email inbox.`);
-      setOtpValues(['', '', '', '', '', '']);
-      setOtp('');
-      setTimeLeft(300);
-      setErrors({});
+      console.error("Backend resend OTP error:", err);
+      const errMsg = err.response?.data?.message || err.message || 'Failed to resend OTP. Please try again.';
+      setApiError(`❌ ${errMsg}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -251,19 +255,20 @@ export const ForgotPassword = () => {
     setIsSubmitting(true);
     try {
       const identifier = email.trim();
-      await authService.resetPassword(identifier, otp, newPassword, confirmPassword);
-      setApiSuccess('Password reset successfully! Redirecting to login...');
-    } catch (err) {
-      console.warn("Backend resetPassword warning:", err);
-      setApiSuccess('Password reset successfully! Redirecting to login...');
-    } finally {
+      const response = await authService.resetPassword(identifier, otp, newPassword, confirmPassword);
+      setApiSuccess(response?.message || 'Password reset successfully! Redirecting to login...');
       try {
         localStorage.setItem(`sanjeevani_user_pwd_${email.trim().toLowerCase()}`, newPassword);
       } catch (e) {}
-      setIsSubmitting(false);
       setTimeout(() => {
         navigate('/login');
       }, 1200);
+    } catch (err) {
+      console.error("Backend resetPassword error:", err);
+      const errMsg = err.response?.data?.message || err.message || 'Failed to reset password. Please verify your OTP.';
+      setApiError(`❌ ${errMsg}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

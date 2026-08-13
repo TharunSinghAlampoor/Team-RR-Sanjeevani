@@ -404,11 +404,14 @@ public class AuthService {
     }
 
     private User findUserByIdentifier(String identifier) {
-        Optional<User> userOpt = userRepository.findByEmailOrPhoneNumber(
-                identifier.toLowerCase(),
-                identifier
-        );
+        if (identifier == null || identifier.trim().isEmpty()) {
+            throw AuthException.badRequest("Please enter a valid email address or phone number");
+        }
+        String clean = identifier.trim();
+        Optional<User> userOpt = userRepository.findByIdentifier(clean)
+                .or(() -> userRepository.findByEmailIgnoreCase(clean))
+                .or(() -> userRepository.findByEmailOrPhoneNumber(clean, clean));
         return userOpt.orElseThrow(() ->
-                AuthException.notFound("No account found with this email or phone number"));
+                AuthException.notFound("No account found with this email or phone number (" + clean + "). Please register an account first."));
     }
 }

@@ -59,6 +59,12 @@ public class OrderSeeder implements CommandLineRunner {
             userRepository.save(u);
         }
 
+        if (!userRepository.existsByEmail("tharunsingh851@gmail.com")) {
+            User u = new User("Tharun Singh", "tharunsingh851@gmail.com", "+91 91234 56789", passwordEncoder.encode("Tharun@123"), Role.CUSTOMER);
+            u.setAccountStatus("ACTIVE");
+            userRepository.save(u);
+        }
+
         User customerUser = customer;
 
         // Clean up any seed orders previously assigned to other users and reassign exclusively to customer@sanjeevani.com

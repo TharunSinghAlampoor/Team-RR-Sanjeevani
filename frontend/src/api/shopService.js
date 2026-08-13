@@ -32,11 +32,15 @@ shopClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const config = error.config;
-    // Auto-retry once on Network Error to handle Render cold-start wakeups smoothly
-    if (config && (!error.response || (error.message && error.message.includes('Network Error'))) && !config._retry) {
-      config._retry = true;
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      return shopClient(config);
+    // Auto-retry up to 2 times on Network Error to handle Render cold-starts and socket reconnects smoothly
+    if (config && (!error.response || (error.message && error.message.includes('Network Error')))) {
+      config._retryCount = config._retryCount || 0;
+      if (config._retryCount < 2) {
+        config._retryCount += 1;
+        const delay = config._retryCount * 2000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return shopClient(config);
+      }
     }
 
     if (error.response && error.response.status === 401) {

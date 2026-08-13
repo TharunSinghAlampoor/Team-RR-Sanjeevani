@@ -1,7 +1,8 @@
 /**
  * Dynamic API Base URL Config
  * Automatically detects environment:
- * - Localhost dev server -> http://localhost:8080/api
+ * - Prioritizes VITE_API_BASE_URL / VITE_API_URL environment variables
+ * - Localhost / local dev server -> http://localhost:8080/api (or dynamic host IP)
  * - Live production deployment (Vercel / custom domain) -> Live Render Backend API
  */
 export const getApiBaseUrl = () => {
@@ -12,15 +13,26 @@ export const getApiBaseUrl = () => {
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 
-    if (!isLocalhost) {
-      if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
-        return envUrl.replace(/\/$/, '');
+    // If explicit env URL is provided, handle dynamic local IP substitution if needed
+    if (envUrl) {
+      const cleanEnvUrl = envUrl.replace(/\/$/, '');
+      if (isLocalhost) {
+        return cleanEnvUrl;
       }
+      // If client is accessing via local network IP (e.g. 192.168.x.x) and envUrl points to localhost, substitute IP
+      if (cleanEnvUrl.includes('localhost') || cleanEnvUrl.includes('127.0.0.1')) {
+        return cleanEnvUrl.replace(/localhost|127\.0\.0\.1/, hostname);
+      }
+      return cleanEnvUrl;
+    }
+
+    // Default fallback when no env variable is set
+    if (!isLocalhost && !hostname.startsWith('192.168.') && !hostname.startsWith('10.') && !hostname.startsWith('172.')) {
       return ACTIVE_LIVE_BACKEND;
     }
   }
 
-  if (envUrl && !envUrl.includes('localhost')) {
+  if (envUrl) {
     return envUrl.replace(/\/$/, '');
   }
 
@@ -28,3 +40,4 @@ export const getApiBaseUrl = () => {
 };
 
 export default getApiBaseUrl;
+

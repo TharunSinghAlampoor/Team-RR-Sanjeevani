@@ -3,6 +3,7 @@ package com.ecommerce.auth.config;
 import com.ecommerce.auth.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -44,8 +45,13 @@ public class SecurityConfig {
 
                 // Endpoint authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // Permit preflight OPTIONS requests globally
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Public endpoints, health checks, and error handling dispatches
                         .requestMatchers(
+                                "/error",
+                                "/health",
+                                "/actuator/**",
                                 "/auth/register",
                                 "/auth/login",
                                 "/auth/forgot-password",

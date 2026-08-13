@@ -150,19 +150,8 @@ export const Register = () => {
         formData.role
       );
 
-      if (response && response.data && response.data.token && response.data.user) {
-        const { token, user } = response.data;
-        login(user, token);
-        setApiSuccess(response.message || 'Registration successful! Auto-logging you in...');
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 1200);
-      } else {
-        setApiSuccess(response.message || 'Registration successful! Redirecting to login...');
-        setTimeout(() => {
-          navigate('/login');
-        }, 1500);
-      }
+      setApiSuccess('🎉 Registration successful! Redirecting to login page...');
+      const registeredEmail = formData.email.trim();
       setFormData({
         fullName: '',
         email: '',
@@ -172,6 +161,9 @@ export const Register = () => {
         confirmPassword: '',
         agree: false,
       });
+      setTimeout(() => {
+        navigate('/login', { state: { email: registeredEmail, registered: true } });
+      }, 1000);
     } catch (err) {
       if (err.response && err.response.data) {
         const errorData = err.response.data;

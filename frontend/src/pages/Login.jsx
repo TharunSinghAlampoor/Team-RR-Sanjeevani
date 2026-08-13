@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Mail, Phone, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, 
@@ -21,11 +21,23 @@ export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
+  const [apiSuccess, setApiSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Populate registered email and notice if redirected from Register
+  useEffect(() => {
+    if (location.state?.email) {
+      setFormData((prev) => ({ ...prev, email: location.state.email }));
+      if (location.state?.registered) {
+        setApiSuccess('🎉 Account registered successfully! Please log in below.');
+      }
+    }
+  }, [location]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -197,6 +209,22 @@ export const Login = () => {
             Access verified medicines, healthcare items & live tracking
           </p>
         </div>
+
+        {/* Success Alert */}
+        {apiSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              background: '#ecfdf5', border: '1.5px solid #a7f3d0', color: '#047857',
+              padding: '0.75rem 0.95rem', borderRadius: '12px', fontSize: '0.84rem', fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: '0.55rem', marginBottom: '1.1rem'
+            }}
+          >
+            <CheckCircle2 style={{ width: 18, height: 18, flexShrink: 0 }} />
+            <span>{apiSuccess}</span>
+          </motion.div>
+        )}
 
         {/* Error Alert */}
         {apiError && (

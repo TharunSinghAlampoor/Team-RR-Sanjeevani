@@ -14,6 +14,10 @@ import java.util.Properties;
 public class EmailService {
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
+    static {
+        System.setProperty("java.net.preferIPv4Stack", "true");
+    }
+
     @Value("${spring.mail.username:tharunsingh851@gmail.com}")
     private String mailUsername;
 
@@ -32,6 +36,7 @@ public class EmailService {
         props.put("mail.smtps.auth", "true");
         props.put("mail.smtps.ssl.enable", "true");
         props.put("mail.smtps.ssl.trust", "*");
+        props.put("mail.smtps.ssl.protocols", "TLSv1.2 TLSv1.3");
         props.put("mail.smtps.socketFactory.port", "465");
         props.put("mail.smtps.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtps.connectiontimeout", "8000");
@@ -53,6 +58,7 @@ public class EmailService {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.ssl.trust", "*");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2 TLSv1.3");
         props.put("mail.smtp.connectiontimeout", "8000");
         props.put("mail.smtp.timeout", "8000");
 

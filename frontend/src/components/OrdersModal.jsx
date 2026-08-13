@@ -994,31 +994,36 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
 
   // Deduplicate and sort orders from Latest / Newest first (top) to Oldest last (bottom)
   const sortedOrders = React.useMemo(() => {
-    const apiList = (Array.isArray(modalOrders) && modalOrders.length > 0)
-      ? modalOrders
-      : ((Array.isArray(orders) && orders.length > 0) ? orders : internalFetchedOrders);
-    
-    let combined = apiList;
-    if (combined.length === 0) {
-      let localSaved = [];
-      try {
-        const rawLocal1 = localStorage.getItem('sanjeevani_orders');
-        const rawLocal2 = localStorage.getItem('sanjeevani_local_orders');
-        let arr1 = rawLocal1 ? JSON.parse(rawLocal1) : [];
-        let arr2 = rawLocal2 ? JSON.parse(rawLocal2) : [];
-        if (!Array.isArray(arr1)) arr1 = [];
-        if (!Array.isArray(arr2)) arr2 = [];
-        localSaved = [...arr1, ...arr2];
-      } catch (e) {}
-      combined = localSaved;
+    let combined = [];
+
+    if (Array.isArray(modalOrders) && modalOrders.length > 0) {
+      combined.push(...modalOrders);
     }
+    if (Array.isArray(orders) && orders.length > 0) {
+      combined.push(...orders);
+    }
+    if (Array.isArray(internalFetchedOrders) && internalFetchedOrders.length > 0) {
+      combined.push(...internalFetchedOrders);
+    }
+
+    try {
+      const rawLocal1 = localStorage.getItem('sanjeevani_orders');
+      const rawLocal2 = localStorage.getItem('sanjeevani_local_orders');
+      let arr1 = rawLocal1 ? JSON.parse(rawLocal1) : [];
+      let arr2 = rawLocal2 ? JSON.parse(rawLocal2) : [];
+      if (Array.isArray(arr1) && arr1.length > 0) combined.push(...arr1);
+      if (Array.isArray(arr2) && arr2.length > 0) combined.push(...arr2);
+    } catch (e) {
+      console.error('Error reading local orders:', e);
+    }
+
     if (!combined.length) return [];
 
     const uniqueMap = new Map();
     combined.forEach(o => {
       if (!o) return;
       if (String(o.status || '').toUpperCase() === 'FAILED') return;
-      const key = String(o.orderId || o.id || Math.random()).trim().toLowerCase();
+      const key = String(o.orderId || o.id || o.referenceNumber || Math.random()).trim().toLowerCase();
       if (!uniqueMap.has(key)) {
         uniqueMap.set(key, o);
       }
@@ -1033,7 +1038,7 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
       const idB = Number(String(b.orderId || b.id || '').replace(/[^0-9]/g, '')) || 0;
       return idB - idA; // Higher order number first
     });
-  }, [modalOrders, orders]);
+  }, [modalOrders, orders, internalFetchedOrders]);
 
   const [selectedOrderForDetail, setSelectedOrderForDetail] = useState(() => {
     if (initialOrderId) {

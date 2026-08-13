@@ -35,23 +35,21 @@ export const LanguageSelector = ({ isCompact = false }) => {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.4rem',
+          justifyContent: 'center',
+          width: 38,
+          height: 38,
+          borderRadius: '50%',
           background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
           border: '1.5px solid #a7f3d0',
-          padding: isCompact ? '0.35rem 0.6rem' : '0.4rem 0.75rem',
-          borderRadius: '9999px',
           cursor: 'pointer',
           color: '#047857',
-          fontWeight: 800,
-          fontSize: '0.82rem',
-          boxShadow: '0 2px 8px rgba(5, 150, 105, 0.12)',
+          boxShadow: '0 2px 8px rgba(5, 150, 105, 0.15)',
           transition: 'all 0.2s ease',
-          whiteSpace: 'nowrap',
+          padding: 0,
+          flexShrink: 0,
         }}
       >
-        <Globe style={{ width: 17, height: 17, color: '#059669', flexShrink: 0 }} />
-        <span className="lang-text" style={{ fontSize: '0.8rem', fontWeight: 800 }}>{currentLang.flag} {currentLang.native}</span>
-        <ChevronDown style={{ width: 13, height: 13, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', color: '#059669' }} />
+        <Globe style={{ width: 20, height: 20, color: '#059669', flexShrink: 0 }} />
       </button>
 
       {isOpen && (

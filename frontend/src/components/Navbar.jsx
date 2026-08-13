@@ -81,10 +81,11 @@ export const Navbar = ({
     >
       <div className="navbar-container">
 
-        {/* ── Brand Logo ─────────────────────────────────── */}
+        {/* ── Brand Logo (Symbol on top, Name stacked underneath) ── */}
         <div
           className="navbar-brand"
           onClick={() => { navigate('/dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', cursor: 'pointer' }}
         >
           <div className="brand-logo-wrap">
             <img src="/sanjeevani_symbol.png" alt="Sanjeevani" className="brand-logo-img" />
@@ -92,7 +93,7 @@ export const Navbar = ({
           <img
             src="/sanjeevani_text_transparent.png"
             alt="Sanjeevani"
-            style={{ height: 46, width: 'auto', objectFit: 'contain', display: 'block' }}
+            style={{ height: 22, width: 'auto', objectFit: 'contain', display: 'block' }}
             className="brand-text-img"
           />
         </div>

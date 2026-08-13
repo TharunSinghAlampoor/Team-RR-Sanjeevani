@@ -89,7 +89,10 @@ export const ForgotPassword = () => {
       const identifier = email.trim();
       const response = await authService.forgotPassword(identifier);
 
-      setApiSuccess(`✉️ ${response?.message || 'Verification code sent to ' + identifier + '! Please check your email inbox.'}`);
+      const rawMsg = response?.message || `Verification code sent to ${identifier}! Please check your email inbox.`;
+      const cleanMsg = rawMsg.replace(/\.?\s*Verification Code:\s*\d+/gi, '');
+
+      setApiSuccess(`✉️ ${cleanMsg}`);
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
       setStep(2);
@@ -112,7 +115,10 @@ export const ForgotPassword = () => {
       const identifier = email.trim();
       const response = await authService.forgotPassword(identifier);
 
-      setApiSuccess(`✉️ ${response?.message || 'New verification code sent to ' + identifier + '! Please check your email inbox.'}`);
+      const rawMsg = response?.message || `New verification code sent to ${identifier}! Please check your email inbox.`;
+      const cleanMsg = rawMsg.replace(/\.?\s*Verification Code:\s*\d+/gi, '');
+
+      setApiSuccess(`✉️ ${cleanMsg}`);
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
       setTimeLeft(300);

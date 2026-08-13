@@ -53,14 +53,27 @@ public class OrderSeeder implements CommandLineRunner {
             return userRepository.save(u);
         });
 
-        User admin = userRepository.findByEmail("admin@sanjeevani.com").orElseGet(() -> {
+        if (!userRepository.existsByEmail("admin@sanjeevani.com")) {
             User u = new User("System Administrator", "admin@sanjeevani.com", "+91 99999 88888", passwordEncoder.encode("Admin@123"), Role.ADMIN);
             u.setAccountStatus("ACTIVE");
-            return userRepository.save(u);
-        });
+            userRepository.save(u);
+        }
+
+        User customerUser = customer;
+
+        // Clean up any seed orders previously assigned to other users and reassign exclusively to customer@sanjeevani.com
+        List<Order> existingOrders = orderRepository.findAll();
+        for (Order o : existingOrders) {
+            if (o.getOrderId() != null && (o.getOrderId().startsWith("ORD-849") || o.getOrderId().startsWith("ORD-000"))) {
+                if (o.getUser() != null && !customerUser.getEmail().equalsIgnoreCase(o.getUser().getEmail())) {
+                    o.setUser(customerUser);
+                    orderRepository.save(o);
+                }
+            }
+        }
 
         if (orderRepository.count() >= 31) {
-            logger.info("Database already contains {} orders. OrderSeeder check complete.", orderRepository.count());
+            logger.info("Database contains {} orders assigned cleanly. OrderSeeder check complete.", orderRepository.count());
             return;
         }
 
@@ -93,11 +106,6 @@ public class OrderSeeder implements CommandLineRunner {
             "Razorpay Online", "UPI / Razorpay", "Cash on Delivery", "Credit Card / Razorpay", "NetBanking"
         };
 
-        List<User> allUsers = userRepository.findAll();
-        if (allUsers.isEmpty()) {
-            allUsers = List.of(customer, admin);
-        }
-
         int seededCount = 0;
         for (int i = 1; i <= 31; i++) {
             String orderId = String.format("ORD-%06d", 849200 + i);
@@ -109,7 +117,7 @@ public class OrderSeeder implements CommandLineRunner {
             String address = addresses[(i - 1) % addresses.length];
             String payMethod = paymentMethods[(i - 1) % paymentMethods.length];
             LocalDateTime orderTime = LocalDateTime.now().minusHours(i * 5).minusMinutes(i * 12);
-            User assignedUser = allUsers.get((i - 1) % allUsers.size());
+            User assignedUser = customerUser;
 
             int p1Idx = (i - 1) % products.size();
             int p2Idx = (i + 3) % products.size();

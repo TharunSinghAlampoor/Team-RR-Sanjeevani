@@ -5560,6 +5560,7 @@ body:has(.dashboard-page) {
     font-weight: 800 !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     margin-bottom: 0.15rem !important;
@@ -5568,6 +5569,7 @@ body:has(.dashboard-page) {
   .pcard__desc {
     display: -webkit-box !important;
     -webkit-line-clamp: 1 !important;
+    line-clamp: 1 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     font-size: 0.74rem !important;

@@ -88,7 +88,7 @@ export const ForgotPassword = () => {
       const returnedOtp = response?.data?.otpCode || response?.otpCode;
 
       if (returnedOtp) {
-        setApiSuccess(`✉️ Verification OTP sent to ${identifier}! Code: ${returnedOtp}`);
+        setApiSuccess(`✉️ Verification OTP sent to ${identifier}! Check your email inbox.`);
         const digits = String(returnedOtp).split('').slice(0, 6);
         while (digits.length < 6) digits.push('');
         setOtpValues(digits);
@@ -98,6 +98,7 @@ export const ForgotPassword = () => {
         setOtpValues(['', '', '', '', '', '']);
         setOtp('');
       }
+      setStep(2);
       setTimeLeft(300);
       setErrors({});
     } catch (err) {

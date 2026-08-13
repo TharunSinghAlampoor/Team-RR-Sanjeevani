@@ -973,9 +973,30 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
     }
   };
 
+  const [internalFetchedOrders, setInternalFetchedOrders] = React.useState([]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    const fetchApiOrders = async () => {
+      try {
+        const res = await shopService.getOrders();
+        const rawList = (res && res.success && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);
+        if (isMounted && rawList.length > 0) {
+          setInternalFetchedOrders(rawList);
+        }
+      } catch (e) {
+        console.error('OrdersModal auto-fetch error:', e);
+      }
+    };
+    fetchApiOrders();
+    return () => { isMounted = false; };
+  }, []);
+
   // Deduplicate and sort orders from Latest / Newest first (top) to Oldest last (bottom)
   const sortedOrders = React.useMemo(() => {
-    const apiList = Array.isArray(modalOrders) && modalOrders.length > 0 ? modalOrders : (Array.isArray(orders) ? orders : []);
+    const apiList = (Array.isArray(modalOrders) && modalOrders.length > 0)
+      ? modalOrders
+      : ((Array.isArray(orders) && orders.length > 0) ? orders : internalFetchedOrders);
     
     let combined = apiList;
     if (combined.length === 0) {

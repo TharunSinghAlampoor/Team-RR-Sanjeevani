@@ -428,6 +428,65 @@ export const Navbar = ({
         </div>
       </div>
 
+      {/* ── Mobile Bottom Navigation Bar (Fixed at bottom of mobile screen) ── */}
+      <nav className="mobile-bottom-nav">
+        <button
+          type="button"
+          onClick={() => {
+            navigate('/dashboard');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="mobile-nav-item"
+        >
+          <Home style={{ width: 20, height: 20 }} />
+          <span>{translateData('Home')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setShowCategoriesDropdown(v => !v)}
+          className="mobile-nav-item"
+        >
+          <LayoutGrid style={{ width: 20, height: 20 }} />
+          <span>{translateData('Categories')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenOrders}
+          className="mobile-nav-item"
+        >
+          <Truck style={{ width: 20, height: 20 }} />
+          <span>{translateData('Orders')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenFavorites}
+          className="mobile-nav-item"
+          style={{ position: 'relative' }}
+        >
+          <Heart style={{ width: 20, height: 20, color: '#f43f5e' }} />
+          {favoriteCount > 0 && (
+            <span className="mobile-nav-badge" style={{ background: '#f43f5e' }}>{favoriteCount}</span>
+          )}
+          <span>{translateData('Wishlist')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenCart}
+          className="mobile-nav-item"
+          style={{ position: 'relative' }}
+        >
+          <ShoppingCart style={{ width: 20, height: 20, color: '#059669' }} />
+          {cartCount > 0 && (
+            <span className="mobile-nav-badge" style={{ background: '#059669' }}>{cartCount}</span>
+          )}
+          <span>{translateData('Cart')}</span>
+        </button>
+      </nav>
+
       {isInternalProfileOpen && (
         <Suspense fallback={null}>
           <ProfileSidebar

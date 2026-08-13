@@ -23,6 +23,9 @@ adminClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+let adminProductsCache = null;
+let adminOrdersCache = null;
+
 export const adminService = {
   // Stats
   getStats: async () => {
@@ -30,9 +33,16 @@ export const adminService = {
     return response.data;
   },
 
-  // Product CRUD
+  // Product CRUD with instant cache & background revalidation
   getProducts: async () => {
+    if (adminProductsCache && adminProductsCache.data) {
+      adminClient.get('/admin/products').then(res => {
+        if (res?.data) adminProductsCache = res.data;
+      }).catch(() => {});
+      return adminProductsCache;
+    }
     const response = await adminClient.get('/admin/products');
+    if (response?.data) adminProductsCache = response.data;
     return response.data;
   },
 
@@ -98,9 +108,16 @@ export const adminService = {
     return response.data;
   },
 
-  // Orders
+  // Orders with instant cache & background revalidation
   getOrders: async () => {
+    if (adminOrdersCache && adminOrdersCache.data) {
+      adminClient.get('/admin/orders').then(res => {
+        if (res?.data) adminOrdersCache = res.data;
+      }).catch(() => {});
+      return adminOrdersCache;
+    }
     const response = await adminClient.get('/admin/orders');
+    if (response?.data) adminOrdersCache = response.data;
     return response.data;
   },
 

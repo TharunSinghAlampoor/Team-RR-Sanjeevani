@@ -252,8 +252,42 @@ export const shopService = {
     }
   },
 
-  // Products
+  // Products - Fast 0ms cache with silent background revalidation
   getProducts: async (params = {}) => {
+    const isDefaultFetch = !params || Object.keys(params).length === 0;
+
+    if (isDefaultFetch) {
+      if (catalogCache && catalogCache.data && catalogCache.data.length > 0) {
+        // Trigger silent background revalidation
+        shopClient.get('/products').then(res => {
+          if (res?.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+            catalogCache = { success: true, data: res.data.data };
+            try { localStorage.setItem('sanjeevani_cached_catalog', JSON.stringify(res.data.data)); } catch (e) {}
+          }
+        }).catch(() => {});
+
+        return catalogCache;
+      }
+
+      try {
+        const stored = localStorage.getItem('sanjeevani_cached_catalog');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            catalogCache = { success: true, data: parsed };
+            shopClient.get('/products').then(res => {
+              if (res?.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+                catalogCache = { success: true, data: res.data.data };
+                try { localStorage.setItem('sanjeevani_cached_catalog', JSON.stringify(res.data.data)); } catch (e) {}
+              }
+            }).catch(() => {});
+
+            return catalogCache;
+          }
+        }
+      } catch (e) {}
+    }
+
     try {
       const response = await shopClient.get('/products', { params });
       if (response && response.data) {
@@ -262,11 +296,14 @@ export const shopService = {
           : (Array.isArray(response.data) ? response.data : []);
         if (productList.length > 0) {
           const result = { success: true, data: productList };
-          catalogCache = result;
+          if (isDefaultFetch) {
+            catalogCache = result;
+            try { localStorage.setItem('sanjeevani_cached_catalog', JSON.stringify(productList)); } catch (e) {}
+          }
           return result;
         }
       }
-      return { success: true, data: FALLBACK_CATALOG };
+      return { success: true, data: catalogCache?.data || FALLBACK_CATALOG };
     } catch (e) {
       console.warn('Backend products API notice:', e.message);
       if (catalogCache && catalogCache.data && catalogCache.data.length > 0) {

@@ -502,10 +502,10 @@ export const TrackOrderPage = () => {
                 <button
                   onClick={(e) => downloadOrderInvoice(selectedOrder, e)}
                   style={{
-                    padding: '0.5rem 1.15rem', borderRadius: '8px',
-                    background: '#0D5C75', color: '#ffffff', fontWeight: 600,
+                    padding: '0.55rem 1.25rem', borderRadius: '0.65rem',
+                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', fontWeight: 800,
                     fontSize: '0.84rem', border: 'none', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 3px 8px rgba(13,92,117,0.2)'
+                    display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(5,150,105,0.3)'
                   }}
                 >
                   <Download style={{ width: 15, height: 15 }} />
@@ -566,7 +566,7 @@ export const TrackOrderPage = () => {
 
                           <button
                             onClick={() => showToast(`Added "${it.productName || 'Item'}" to cart!`)}
-                            style={{ padding: '0.45rem 1rem', borderRadius: '6px', background: '#FFD814', border: '1px solid #FCD200', color: '#0F1111', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', flexShrink: 0 }}
+                            style={{ padding: '0.5rem 1.15rem', borderRadius: '0.65rem', background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', border: 'none', color: '#ffffff', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer', flexShrink: 0, boxShadow: '0 4px 12px rgba(5,150,105,0.3)' }}
                           >
                             {translateData('Buy Again')}
                           </button>
@@ -901,7 +901,7 @@ export const TrackOrderPage = () => {
                 </span>
                 <button
                   onClick={() => setShowCancelModal(true)}
-                  style={{ padding: '0.55rem 1.15rem', borderRadius: '0.65rem', background: '#fef2f2', border: '1.5px solid #fca5a5', color: '#dc2626', fontWeight: 900, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(220, 38, 38, 0.15)' }}
+                  style={{ padding: '0.55rem 1.25rem', borderRadius: '0.65rem', background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', border: 'none', color: '#ffffff', fontWeight: 900, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 14px rgba(220, 38, 38, 0.3)' }}
                 >
                   <XCircle style={{ width: 16, height: 16 }} />
                   <span>Cancel Order</span>

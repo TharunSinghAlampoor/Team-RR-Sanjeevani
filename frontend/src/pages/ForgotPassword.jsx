@@ -85,20 +85,10 @@ export const ForgotPassword = () => {
     try {
       const identifier = email.trim();
       const response = await authService.forgotPassword(identifier);
-      const returnedOtp = response?.data?.otpCode || response?.otpCode;
-
-      if (returnedOtp) {
-        setApiSuccess(`✉️ ${response?.message || 'Verification OTP generated! Code: ' + returnedOtp}`);
-        const digits = String(returnedOtp).split('').slice(0, 6);
-        while (digits.length < 6) digits.push('');
-        setOtpValues(digits);
-        setOtp(String(returnedOtp));
-      } else {
-        setApiSuccess(`✉️ ${response?.message || 'Verification OTP sent to ' + identifier + '! Check your email inbox.'}`);
-        setOtpValues(['', '', '', '', '', '']);
-        setOtp('');
-      }
+      setApiSuccess(`✉️ ${response?.message || 'Verification OTP sent to ' + identifier + '! Check your email inbox.'}`);
       setStep(2);
+      setOtpValues(['', '', '', '', '', '']);
+      setOtp('');
       setTimeLeft(300);
       setErrors({});
     } catch (err) {

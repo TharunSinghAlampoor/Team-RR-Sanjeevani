@@ -294,15 +294,10 @@ public class AuthService {
         String identifier = request.getIdentifier().trim();
         User user = findUserByIdentifier(identifier);
 
-        String otpCode = otpService.generateAndSaveOtp(user, true);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("email", user.getEmail());
-        data.put("otpCode", otpCode);
+        otpService.generateAndSaveOtp(user, true);
 
         return ApiResponse.success(
-                "OTP sent to your registered email (" + user.getEmail() + "). Verification Code: " + otpCode,
-                data
+                "OTP has been sent to your registered email (" + user.getEmail() + "). Please check your inbox. It expires in 5 minutes."
         );
     }
 

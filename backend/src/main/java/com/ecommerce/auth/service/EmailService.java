@@ -17,6 +17,9 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.username:tharunsingh851@gmail.com}")
+    private String fromEmail;
+
     public void sendOtpEmail(String toEmail, String otpCode) {
         if (mailSender == null) {
             logger.warn("JavaMailSender is not configured. Falling back to console logging.");
@@ -28,16 +31,15 @@ public class EmailService {
         java.util.concurrent.CompletableFuture.runAsync(() -> {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom("no-reply@sanjeevani.com");
+                message.setFrom(fromEmail != null && !fromEmail.isBlank() ? fromEmail : "tharunsingh851@gmail.com");
                 message.setTo(toEmail);
-                message.setSubject("Sanjeevani Portal - Password Reset OTP");
-                message.setText("Dear User,\n\nYour OTP for password reset is: " + otpCode + 
-                    "\nThis OTP is valid for 5 minutes. Please do not share this OTP with anyone.\n\nBest regards,\nSanjeevani Team");
+                message.setSubject("Sanjeevani Healthcare - Password Reset Verification Code (" + otpCode + ")");
+                message.setText("Dear User,\n\nYour 6-digit verification code for password reset on Sanjeevani Healthcare Portal is:\n\n   👉 " + otpCode + " 👈\n\nThis code is valid for 5 minutes. If you did not request a password reset, please ignore this email.\n\nBest regards,\nSanjeevani Healthcare Team");
                 
                 mailSender.send(message);
-                logger.info("OTP Email sent successfully to {}", toEmail);
+                logger.info("OTP Email sent successfully to {} via Gmail SMTP", toEmail);
             } catch (Exception e) {
-                logger.error("Failed to send OTP Email to {}: {}", toEmail, e.getMessage());
+                logger.error("Failed to send OTP Email to {}: {}", toEmail, e.getMessage(), e);
                 logger.info("═══════════════════════════════════════════");
                 logger.info("  [Error Fallback] OTP Email for {} : {}", toEmail, otpCode);
                 logger.info("═══════════════════════════════════════════");
@@ -75,7 +77,7 @@ public class EmailService {
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("invoices@sanjeevani.com");
+            message.setFrom(fromEmail != null && !fromEmail.isBlank() ? fromEmail : "tharunsingh851@gmail.com");
             message.setTo(recipient);
             message.setSubject(subject);
             message.setText(body);

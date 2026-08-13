@@ -267,9 +267,11 @@ const ProductCard = React.memo(({
                 }
               }}
               title="Remove from Cart"
+              className="pcard__remove-btn"
               style={{
-                padding: '0.55rem 0.65rem',
-                borderRadius: '0.75rem',
+                height: 34,
+                padding: '0 0.55rem',
+                borderRadius: '0.65rem',
                 background: '#fef2f2',
                 color: '#dc2626',
                 border: '1.5px solid #fca5a5',
@@ -280,12 +282,13 @@ const ProductCard = React.memo(({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.25rem',
+                flexShrink: 0,
                 boxShadow: '0 2px 6px rgba(220, 38, 38, 0.12)',
                 transition: 'all 0.2s ease'
               }}
             >
-              <Trash2 style={{ width: 14, height: 14 }} />
-              <span>Remove</span>
+              <Trash2 style={{ width: 14, height: 14, flexShrink: 0 }} />
+              <span className="pcard__remove-text">Remove</span>
             </button>
           </div>
         ) : (

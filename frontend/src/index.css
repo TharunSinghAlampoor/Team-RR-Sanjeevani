@@ -5707,6 +5707,17 @@ body:has(.dashboard-page) {
     justify-content: center !important;
     gap: 0.35rem !important;
   }
+
+  /* Compact icon pill for remove button on mobile to prevent text truncation */
+  .pcard__remove-text {
+    display: none !important;
+  }
+
+  .pcard__remove-btn {
+    width: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+  }
 }
 
 /* 2. Large Mobile Phablets & Small Tablets (481px - 640px) */

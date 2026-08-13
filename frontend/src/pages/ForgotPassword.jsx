@@ -89,12 +89,15 @@ export const ForgotPassword = () => {
 
       if (returnedOtp) {
         setApiSuccess(`✉️ Verification OTP sent to ${identifier}! Code: ${returnedOtp}`);
+        const digits = String(returnedOtp).split('').slice(0, 6);
+        while (digits.length < 6) digits.push('');
+        setOtpValues(digits);
+        setOtp(String(returnedOtp));
       } else {
         setApiSuccess(`✉️ ${response?.message || 'Verification OTP sent to ' + identifier + '! Check your email inbox.'}`);
+        setOtpValues(['', '', '', '', '', '']);
+        setOtp('');
       }
-      setStep(2);
-      setOtpValues(['', '', '', '', '', '']);
-      setOtp('');
       setTimeLeft(300);
       setErrors({});
     } catch (err) {

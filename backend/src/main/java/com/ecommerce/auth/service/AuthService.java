@@ -292,14 +292,14 @@ public class AuthService {
         String identifier = request.getIdentifier().trim();
         User user = findUserByIdentifier(identifier);
 
-        String otpCode = otpService.generateAndSaveOtp(user, true);
+        // generateAndSaveOtp automatically triggers EmailService.sendOtpEmail
+        otpService.generateAndSaveOtp(user, true);
 
         java.util.Map<String, Object> data = new java.util.HashMap<>();
         data.put("email", user.getEmail());
-        data.put("otpCode", otpCode);
 
         return ApiResponse.success(
-                "OTP sent to " + user.getEmail() + ". Please check your email inbox.",
+                "Verification code sent to " + user.getEmail() + "! Please check your email inbox.",
                 data
         );
     }

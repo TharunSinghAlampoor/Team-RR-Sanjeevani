@@ -35,6 +35,13 @@ public class AdminController {
     private final OrderItemRepository orderItemRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogRepository auditLogRepository;
+    private final JwtTokenRepository jwtTokenRepository;
+    private final SessionRepository sessionRepository;
+    private final OtpRepository otpRepository;
+    private final CartItemRepository cartItemRepository;
+    private final WishlistItemRepository wishlistItemRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final PaymentRepository paymentRepository;
 
     public AdminController(
             UserRepository userRepository,
@@ -44,7 +51,14 @@ public class AdminController {
             OrderRepository orderRepository,
             OrderItemRepository orderItemRepository,
             PasswordEncoder passwordEncoder,
-            AuditLogRepository auditLogRepository) {
+            AuditLogRepository auditLogRepository,
+            JwtTokenRepository jwtTokenRepository,
+            SessionRepository sessionRepository,
+            OtpRepository otpRepository,
+            CartItemRepository cartItemRepository,
+            WishlistItemRepository wishlistItemRepository,
+            FavoriteRepository favoriteRepository,
+            PaymentRepository paymentRepository) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
@@ -53,6 +67,13 @@ public class AdminController {
         this.orderItemRepository = orderItemRepository;
         this.passwordEncoder = passwordEncoder;
         this.auditLogRepository = auditLogRepository;
+        this.jwtTokenRepository = jwtTokenRepository;
+        this.sessionRepository = sessionRepository;
+        this.otpRepository = otpRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.wishlistItemRepository = wishlistItemRepository;
+        this.favoriteRepository = favoriteRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     private User verifyAdmin(Integer userId) {
@@ -552,6 +573,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{id}")
+    @Transactional
     public ResponseEntity<ApiResponse<String>> deleteUser(
             @AuthenticationPrincipal Integer userId,
             @PathVariable Integer id) {
@@ -567,6 +589,50 @@ public class AdminController {
             }
         }
 
+        // 1. Clean up child security & session records
+        try {
+            jwtTokenRepository.deleteByUserUserId(id);
+        } catch (Exception ignored) {}
+
+        try {
+            sessionRepository.deleteByUserId(id);
+        } catch (Exception ignored) {}
+
+        try {
+            otpRepository.deleteByUserUserId(id);
+        } catch (Exception ignored) {}
+
+        // 2. Clean up shopping cart, wishlist, and favorites
+        try {
+            cartItemRepository.deleteByUserUserId(id);
+        } catch (Exception ignored) {}
+
+        try {
+            wishlistItemRepository.deleteByUserUserId(id);
+        } catch (Exception ignored) {}
+
+        try {
+            favoriteRepository.deleteByUserUserId(id);
+        } catch (Exception ignored) {}
+
+        // 3. Clean up user orders and order items
+        try {
+            List<Order> userOrders = orderRepository.findByUserUserId(id);
+            for (Order o : userOrders) {
+                try {
+                    orderItemRepository.deleteByOrderOrderId(o.getOrderId());
+                } catch (Exception ignored) {}
+                try {
+                    paymentRepository.findFirstByOrderOrderId(o.getOrderId())
+                            .ifPresent(paymentRepository::delete);
+                } catch (Exception ignored) {}
+                try {
+                    orderRepository.delete(o);
+                } catch (Exception ignored) {}
+            }
+        } catch (Exception ignored) {}
+
+        // 4. Delete user record
         userRepository.deleteById(id);
         logAdminAction(admin, "DELETE_USER", "USER", "Deleted user: " + targetUser.getEmail());
 

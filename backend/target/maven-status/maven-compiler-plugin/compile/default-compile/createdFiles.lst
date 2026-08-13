@@ -91,6 +91,7 @@ com\ecommerce\auth\entity\OrderCancellation.class
 com\ecommerce\auth\controller\WishlistController.class
 com\ecommerce\auth\config\RateLimitConfig.class
 com\ecommerce\auth\controller\AuthController.class
+com\ecommerce\auth\config\OrderSeeder.class
 com\ecommerce\auth\controller\AdminController.class
 com\ecommerce\auth\entity\OrderRatingFeedback.class
 com\ecommerce\auth\service\SmsService.class

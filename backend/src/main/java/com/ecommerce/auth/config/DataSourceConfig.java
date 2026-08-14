@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
+import java.util.Base64;
 
 @Configuration
 public class DataSourceConfig {
@@ -24,6 +25,12 @@ public class DataSourceConfig {
 
     @Value("${spring.datasource.password:Tharun@123}")
     private String dbPassword;
+
+    @Value("${aiven.datasource.url:jdbc:mysql://sanjeevani-sanjeevani-sql.a.aivencloud.com:22954/defaultdb?useSSL=false&allowPublicKeyRetrieval=true&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=Asia/Kolkata}")
+    private String aivenUrl;
+
+    @Value("${aiven.datasource.username:avnadmin}")
+    private String aivenUser;
 
     @Bean
     @Primary
@@ -52,9 +59,43 @@ public class DataSourceConfig {
             logger.info("Primary MySQL database connected successfully!");
             return ds;
         } catch (Exception e) {
-            logger.warn("Primary database connection failed ({}: {}). Falling back to H2 in-memory database for resilient cloud execution.",
+            logger.warn("Primary local database connection failed ({}: {}). Trying Aiven Cloud MySQL Database...",
                     e.getClass().getSimpleName(), e.getMessage());
-            return createH2DataSource();
+            
+            // Try connecting to Aiven Cloud MySQL Database
+            try {
+                logger.info("Attempting connection to Aiven Cloud Database URL: {}", aivenUrl);
+                HikariConfig aivenConfig = new HikariConfig();
+                aivenConfig.setJdbcUrl(aivenUrl);
+                aivenConfig.setUsername(aivenUser);
+                aivenConfig.setPassword(resolveAivenPassword());
+                aivenConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
+                aivenConfig.setMaximumPoolSize(15);
+                aivenConfig.setMinimumIdle(2);
+                aivenConfig.setIdleTimeout(30000);
+                aivenConfig.setMaxLifetime(1800000);
+                aivenConfig.setConnectionTimeout(5000);
+
+                HikariDataSource aivenDs = new HikariDataSource(aivenConfig);
+                logger.info("Aiven Cloud MySQL Database connected successfully!");
+                return aivenDs;
+            } catch (Exception aivenEx) {
+                logger.warn("Aiven Cloud database connection failed ({}: {}). Falling back to H2 in-memory database.",
+                        aivenEx.getClass().getSimpleName(), aivenEx.getMessage());
+                return createH2DataSource();
+            }
+        }
+    }
+
+    private String resolveAivenPassword() {
+        String envPass = System.getenv("SPRING_DATASOURCE_PASSWORD");
+        if (envPass != null && !envPass.trim().isEmpty()) {
+            return envPass.trim();
+        }
+        try {
+            return new String(Base64.getDecoder().decode("QVZOU19qNmZ1djhZOTF6RlJPUC1SeVc="));
+        } catch (Exception e) {
+            return "";
         }
     }
 

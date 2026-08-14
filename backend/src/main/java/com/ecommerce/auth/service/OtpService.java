@@ -42,7 +42,14 @@ public class OtpService {
         Otp otp = new Otp(user, otpCode, now, expiry);
         otpRepository.save(otp);
 
-        emailService.sendOtpEmail(user.getEmail(), otpCode);
+        try {
+            emailService.sendOtpEmail(user.getEmail(), otpCode);
+        } catch (Exception e) {
+            logger.error("Failed to send OTP email to {}: {}", user.getEmail(), e.getMessage());
+            // Delete the OTP since the email was never delivered
+            otpRepository.delete(otp);
+            throw new RuntimeException("Unable to send verification email. Please try again in a moment.", e);
+        }
 
         logger.info("═══════════════════════════════════════════");
         logger.info("  OTP for {} ({}) : {}", user.getFullName(), user.getEmail(), otpCode);
@@ -51,6 +58,7 @@ public class OtpService {
 
         return otpCode;
     }
+
 
     public boolean verifyOtp(User user, String otpCode) {
         Optional<Otp> otpOpt = otpRepository

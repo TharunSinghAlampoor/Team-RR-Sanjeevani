@@ -40,4 +40,8 @@ public class AuthException extends RuntimeException {
     public static AuthException tooManyRequests(String message) {
         return new AuthException(message, HttpStatus.TOO_MANY_REQUESTS);
     }
+
+    public static AuthException serviceUnavailable(String message) {
+        return new AuthException(message, HttpStatus.SERVICE_UNAVAILABLE);
+    }
 }

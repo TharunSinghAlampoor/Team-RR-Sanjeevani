@@ -293,7 +293,14 @@ public class AuthService {
         User user = findUserByIdentifier(identifier);
 
         // generateAndSaveOtp automatically triggers EmailService.sendOtpEmail
-        otpService.generateAndSaveOtp(user, true);
+        // If email delivery fails after all retries, it throws RuntimeException
+        try {
+            otpService.generateAndSaveOtp(user, true);
+        } catch (RuntimeException e) {
+            logger.error("OTP email delivery failed for {}: {}", user.getEmail(), e.getMessage());
+            throw AuthException.serviceUnavailable(
+                    "Unable to send verification email right now. The server is warming up — please wait 30 seconds and try again.");
+        }
 
         java.util.Map<String, Object> data = new java.util.HashMap<>();
         data.put("email", user.getEmail());
@@ -303,6 +310,7 @@ public class AuthService {
                 data
         );
     }
+
 
     @Transactional
     public ApiResponse<Object> verifyOtp(VerifyOtpRequest request) {

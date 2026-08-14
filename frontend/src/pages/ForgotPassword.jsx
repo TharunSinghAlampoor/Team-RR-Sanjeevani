@@ -100,7 +100,13 @@ export const ForgotPassword = () => {
       setErrors({});
     } catch (err) {
       console.error("Backend forgotPassword API error:", err);
-      const errMsg = err.response?.data?.message || err.message || 'Failed to send OTP. Please check that your email address is registered.';
+      const status = err.response?.status;
+      let errMsg;
+      if (status === 503) {
+        errMsg = 'Server is warming up — please wait 30 seconds and try again.';
+      } else {
+        errMsg = err.response?.data?.message || err.message || 'Failed to send OTP. Please check that your email address is registered.';
+      }
       setApiError(`❌ ${errMsg}`);
     } finally {
       setIsSubmitting(false);
@@ -125,7 +131,13 @@ export const ForgotPassword = () => {
       setErrors({});
     } catch (err) {
       console.error("Backend resend OTP error:", err);
-      const errMsg = err.response?.data?.message || err.message || 'Failed to resend OTP. Please try again.';
+      const status = err.response?.status;
+      let errMsg;
+      if (status === 503) {
+        errMsg = 'Server is warming up — please wait 30 seconds and try again.';
+      } else {
+        errMsg = err.response?.data?.message || err.message || 'Failed to resend OTP. Please try again.';
+      }
       setApiError(`❌ ${errMsg}`);
     } finally {
       setIsSubmitting(false);

@@ -91,7 +91,7 @@ public class EmailService {
             "Dear User,\n\n" +
             "Your 6-digit verification code for password reset on Sanjeevani Healthcare Portal is:\n\n" +
             "    \uD83D\uDC49 " + otpCode + " \uD83D\uDC48\n\n" +
-            "This code is valid for 5 minutes.\n" +
+            "This code is valid for 10 minutes.\n" +
             "If you did not request this, please ignore this email.\n\n" +
             "Best regards,\n" +
             "Sanjeevani Healthcare Team"

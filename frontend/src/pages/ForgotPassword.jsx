@@ -23,7 +23,7 @@ export const ForgotPassword = () => {
   const [passwordStrength, setPasswordStrength] = useState(0);
 
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
-  const [timeLeft, setTimeLeft] = useState(300);
+  const [timeLeft, setTimeLeft] = useState(600);
   const [fallbackOtp, setFallbackOtp] = useState('');
   const [showFallbackOtp, setShowFallbackOtp] = useState(false);
   const navigate = useNavigate();
@@ -96,7 +96,7 @@ export const ForgotPassword = () => {
       setOtpValues(['', '', '', '', '', '']);
       setOtp('');
       setStep(2);
-      setTimeLeft(300);
+      setTimeLeft(600);
       setErrors({});
     } catch (err) {
       console.error("Backend forgotPassword API error:", err);
@@ -150,13 +150,22 @@ export const ForgotPassword = () => {
     const newOtpValues = [...otpValues];
     newOtpValues[index] = val;
     setOtpValues(newOtpValues);
-    setOtp(newOtpValues.join(''));
+    const fullOtp = newOtpValues.join('');
+    setOtp(fullOtp);
 
     if (val !== '' && index < 5) {
       const nextInput = document.getElementById(`otp-input-${index + 1}`);
       if (nextInput) {
         nextInput.focus();
       }
+    }
+
+    // Auto-submit when all 6 digits are filled
+    if (fullOtp.length === 6 && /^\d{6}$/.test(fullOtp)) {
+      setTimeout(() => {
+        const form = document.getElementById('otp-verify-form');
+        if (form) form.requestSubmit();
+      }, 150);
     }
   };
 
@@ -225,7 +234,13 @@ export const ForgotPassword = () => {
       setErrors({});
     } catch (err) {
       console.error('OTP Verification Error:', err);
-      const errMsg = err.response?.data?.message || err.message || 'Invalid or expired OTP code. Please check your email inbox.';
+      const status = err.response?.status;
+      let errMsg;
+      if (status === 503) {
+        errMsg = 'Server is warming up — please wait 30 seconds and try again.';
+      } else {
+        errMsg = err.response?.data?.message || err.message || 'Invalid or expired OTP code. Please check your email inbox.';
+      }
       setApiError(`❌ ${errMsg}`);
     } finally {
       setIsSubmitting(false);
@@ -437,7 +452,7 @@ export const ForgotPassword = () => {
 
         {/* ── STEP 2: VERIFY 6-DIGIT OTP ── */}
         {step === 2 && (
-          <form onSubmit={handleOtpSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <form id="otp-verify-form" onSubmit={handleOtpSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '0.9rem', textAlign: 'center' }}>
               <p style={{ margin: '0 0 0.35rem', fontSize: '0.84rem', color: '#475569', fontWeight: 600 }}>
                 OTP sent to registered Email:
@@ -497,13 +512,13 @@ export const ForgotPassword = () => {
 
             <motion.button
               type="submit"
-              disabled={isSubmitting || timeLeft === 0}
+              disabled={isSubmitting}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               style={{
                 width: '100%', padding: '0.85rem 1rem', borderRadius: '12px', border: 'none',
                 background: 'linear-gradient(135deg, #059669 0%, #0D5C75 100%)',
-                color: '#ffffff', fontWeight: 900, fontSize: '0.95rem', cursor: isSubmitting || timeLeft === 0 ? 'not-allowed' : 'pointer',
+                color: '#ffffff', fontWeight: 900, fontSize: '0.95rem', cursor: isSubmitting ? 'not-allowed' : 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                 boxShadow: '0 4px 16px rgba(5, 150, 105, 0.3)'
               }}

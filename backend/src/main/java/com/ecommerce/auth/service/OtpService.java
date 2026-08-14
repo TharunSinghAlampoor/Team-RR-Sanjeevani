@@ -61,22 +61,30 @@ public class OtpService {
 
 
     public boolean verifyOtp(User user, String otpCode) {
+        logger.info("Verifying OTP for user: {} with code: {}", user.getEmail(), otpCode);
+
         Optional<Otp> otpOpt = otpRepository
                 .findTopByUserAndOtpCodeAndVerifiedFalseOrderByGeneratedTimeDesc(user, otpCode);
 
         if (otpOpt.isEmpty()) {
+            logger.warn("No matching unverified OTP found for user: {} with code: {}", user.getEmail(), otpCode);
             return false;
         }
 
         Otp otp = otpOpt.get();
+        LocalDateTime now = LocalDateTime.now();
 
-        if (LocalDateTime.now().isAfter(otp.getExpiryTime())) {
-            logger.warn("OTP expired for user: {}", user.getEmail());
+        logger.info("Found OTP - code: {}, expiryTime: {}, currentTime: {}, verified: {}",
+                otp.getOtpCode(), otp.getExpiryTime(), now, otp.isVerified());
+
+        if (now.isAfter(otp.getExpiryTime())) {
+            logger.warn("OTP expired for user: {}. Expiry: {}, Current: {}", user.getEmail(), otp.getExpiryTime(), now);
             return false;
         }
 
         otp.setVerified(true);
         otpRepository.save(otp);
+        logger.info("OTP verified successfully for user: {}", user.getEmail());
         return true;
     }
 

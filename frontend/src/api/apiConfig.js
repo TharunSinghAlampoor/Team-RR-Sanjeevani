@@ -15,7 +15,7 @@ const ensureApiSuffix = (urlStr) => {
 };
 
 export const getApiBaseUrl = () => {
-  const ACTIVE_LIVE_BACKEND = 'http://54.82.202.70:8080/api';
+  const ACTIVE_LIVE_BACKEND = 'https://sanjeevani-13qs.onrender.com/api';
   const envUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
 
   if (typeof window !== 'undefined') {

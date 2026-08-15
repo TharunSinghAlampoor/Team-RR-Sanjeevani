@@ -15,7 +15,7 @@ const ensureApiSuffix = (urlStr) => {
 };
 
 export const getApiBaseUrl = () => {
-  const ACTIVE_LIVE_BACKEND = 'https://sanjeevani-13qs.onrender.com/api';
+  const ACTIVE_LIVE_BACKEND = 'https://54.82.202.70.nip.io/api';
   const envUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
 
   if (typeof window !== 'undefined') {
@@ -27,6 +27,10 @@ export const getApiBaseUrl = () => {
       let cleanEnvUrl = envUrl.trim().replace(/\/$/, '');
       if (isLocalhost) {
         return ensureApiSuffix(cleanEnvUrl);
+      }
+      // Substitute raw HTTP IP with HTTPS nip.io domain automatically if needed
+      if (cleanEnvUrl.includes('54.82.202.70') && !cleanEnvUrl.includes('nip.io')) {
+        cleanEnvUrl = cleanEnvUrl.replace(/http:\/\/54\.82\.202\.70(:8080)?/, 'https://54.82.202.70.nip.io');
       }
       // If client is accessing via local network IP (e.g. 192.168.x.x) and envUrl points to localhost, substitute IP
       if (cleanEnvUrl.includes('localhost') || cleanEnvUrl.includes('127.0.0.1')) {

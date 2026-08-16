@@ -326,6 +326,17 @@ public class OrderService {
                 String formatted = newStatusStr.trim().toUpperCase().replace(" ", "_");
                 OrderStatus newStatus = OrderStatus.valueOf(formatted);
                 order.setStatus(newStatus);
+
+                LocalDateTime created = order.getCreatedAt() != null ? order.getCreatedAt() : LocalDateTime.now();
+                long offsetMins = switch (newStatus) {
+                    case PACKED -> 25L;
+                    case SHIPPED -> 65L;
+                    case OUT_FOR_DELIVERY -> 115L;
+                    case DELIVERED -> 155L;
+                    case CANCELLED, FAILED -> 1L;
+                    default -> 5L;
+                };
+                order.setUpdatedAt(created.plusMinutes(offsetMins));
                 orderRepository.save(order);
             } catch (IllegalArgumentException e) {
                 throw new AuthException("Invalid order status: " + newStatusStr);

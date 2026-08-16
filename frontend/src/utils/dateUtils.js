@@ -27,7 +27,7 @@ export const parseExactDate = (dateInput) => {
 };
 
 /**
- * Format Date to exact 12-hour Indian Standard Time format (e.g. "10 Aug 2026, 07:59 PM").
+ * Format Date to exact 12-hour Indian Standard Time format (e.g. "10 Aug 2026 at 9:30 PM").
  */
 export const formatExactDateTime = (dateInput) => {
   const d = parseExactDate(dateInput);
@@ -37,12 +37,11 @@ export const formatExactDateTime = (dateInput) => {
     year: 'numeric'
   });
   const timeStr = d.toLocaleTimeString('en-IN', {
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
-    second: '2-digit',
     hour12: true
-  });
-  return `${dateStr}, ${timeStr}`;
+  }).toUpperCase();
+  return `${dateStr} at ${timeStr}`;
 };
 
 /**
@@ -58,16 +57,15 @@ export const formatExactDateStr = (dateInput) => {
 };
 
 /**
- * Format Date to exact 12-hour Time string with seconds (e.g. "07:59:45 PM").
+ * Format Date to exact 12-hour Time string (e.g. "9:30 PM").
  */
 export const formatExactTimeStr = (dateInput) => {
   const d = parseExactDate(dateInput);
   return d.toLocaleTimeString('en-IN', {
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
-    second: '2-digit',
     hour12: true
-  });
+  }).toUpperCase();
 };
 
 /**

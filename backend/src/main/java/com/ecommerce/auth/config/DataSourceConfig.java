@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
-import java.util.Base64;
 
 @Configuration
 public class DataSourceConfig {
@@ -26,11 +25,14 @@ public class DataSourceConfig {
     @Value("${spring.datasource.password:Tharun@123}")
     private String dbPassword;
 
-    @Value("${aiven.datasource.url:jdbc:mysql://sanjeevani-sanjeevani-sql.a.aivencloud.com:22954/defaultdb?useSSL=false&allowPublicKeyRetrieval=true&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=Asia/Kolkata}")
+    @Value("${aiven.datasource.url:#{null}}")
     private String aivenUrl;
 
-    @Value("${aiven.datasource.username:avnadmin}")
+    @Value("${aiven.datasource.username:#{null}}")
     private String aivenUser;
+
+    @Value("${aiven.datasource.password:#{null}}")
+    private String aivenPassword;
 
     @Bean
     @Primary
@@ -41,7 +43,7 @@ public class DataSourceConfig {
             return createH2DataSource();
         }
 
-        // 2. Try initializing Primary MySQL Database with fast failover timeout
+        // 2. Try initializing Primary MySQL Database
         try {
             logger.info("Attempting connection to primary database URL: {}", dbUrl);
             HikariConfig config = new HikariConfig();
@@ -59,43 +61,34 @@ public class DataSourceConfig {
             logger.info("Primary MySQL database connected successfully!");
             return ds;
         } catch (Exception e) {
-            logger.warn("Primary local database connection failed ({}: {}). Trying Aiven Cloud MySQL Database...",
-                    e.getClass().getSimpleName(), e.getMessage());
-            
-            // Try connecting to Aiven Cloud MySQL Database
-            try {
-                logger.info("Attempting connection to Aiven Cloud Database URL: {}", aivenUrl);
-                HikariConfig aivenConfig = new HikariConfig();
-                aivenConfig.setJdbcUrl(aivenUrl);
-                aivenConfig.setUsername(aivenUser);
-                aivenConfig.setPassword(resolveAivenPassword());
-                aivenConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
-                aivenConfig.setMaximumPoolSize(15);
-                aivenConfig.setMinimumIdle(2);
-                aivenConfig.setIdleTimeout(30000);
-                aivenConfig.setMaxLifetime(1800000);
-                aivenConfig.setConnectionTimeout(5000);
+            logger.warn("Primary database connection failed ({}: {}).", e.getClass().getSimpleName(), e.getMessage());
 
-                HikariDataSource aivenDs = new HikariDataSource(aivenConfig);
-                logger.info("Aiven Cloud MySQL Database connected successfully!");
-                return aivenDs;
-            } catch (Exception aivenEx) {
-                logger.warn("Aiven Cloud database connection failed ({}: {}). Falling back to H2 in-memory database.",
-                        aivenEx.getClass().getSimpleName(), aivenEx.getMessage());
-                return createH2DataSource();
+            // 3. Try secondary database connection if configured via environment variables
+            if (aivenUrl != null && !aivenUrl.trim().isEmpty()) {
+                try {
+                    logger.info("Attempting connection to secondary Cloud Database URL...");
+                    HikariConfig cloudConfig = new HikariConfig();
+                    cloudConfig.setJdbcUrl(aivenUrl);
+                    cloudConfig.setUsername(aivenUser != null ? aivenUser : dbUser);
+                    cloudConfig.setPassword(aivenPassword != null ? aivenPassword : dbPassword);
+                    cloudConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
+                    cloudConfig.setMaximumPoolSize(15);
+                    cloudConfig.setMinimumIdle(2);
+                    cloudConfig.setIdleTimeout(30000);
+                    cloudConfig.setMaxLifetime(1800000);
+                    cloudConfig.setConnectionTimeout(5000);
+
+                    HikariDataSource cloudDs = new HikariDataSource(cloudConfig);
+                    logger.info("Secondary Cloud MySQL Database connected successfully!");
+                    return cloudDs;
+                } catch (Exception cloudEx) {
+                    logger.warn("Secondary Cloud database connection failed ({}: {}). Falling back to H2 in-memory database.",
+                            cloudEx.getClass().getSimpleName(), cloudEx.getMessage());
+                }
             }
-        }
-    }
 
-    private String resolveAivenPassword() {
-        String envPass = System.getenv("SPRING_DATASOURCE_PASSWORD");
-        if (envPass != null && !envPass.trim().isEmpty()) {
-            return envPass.trim();
-        }
-        try {
-            return new String(Base64.getDecoder().decode("QVZOU19qNmZ1djhZOTF6RlJPUC1SeVc="));
-        } catch (Exception e) {
-            return "";
+            logger.info("Falling back to resilient H2 in-memory database.");
+            return createH2DataSource();
         }
     }
 

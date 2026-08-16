@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, Copy, Check, Download, Truck, ShoppingBag, MapPin, Calendar, Clock, ShieldCheck, ChevronRight } from 'lucide-react';
 import ProductImage from './ProductImage';
 import { downloadOrderInvoice } from './OrdersModal';
+import { parseExactDate, formatExactDateStr, formatExactTimeStr } from '../utils/dateUtils';
 
 const s = {
   overlay: {
@@ -201,11 +202,11 @@ export const OrderSuccessModal = ({
             <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', paddingTop: '0.65rem', borderTop: '1px solid #e2e8f0', fontSize: '0.78rem', color: '#64748b' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <Calendar style={{ width: 14, height: 14, color: '#059669' }} />
-                <span>{createdDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                <span>{formatExactDateStr(createdDate)}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <Clock style={{ width: 14, height: 14, color: '#06b6d4' }} />
-                <span>{createdDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span>{formatExactTimeStr(createdDate)}</span>
               </div>
             </div>
           </div>

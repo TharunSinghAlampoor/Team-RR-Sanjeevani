@@ -549,9 +549,9 @@ export const SelectedOrderDetailModal = ({ order, onClose }) => {
   if (!order) return null;
 
   const rawOrderId = String(order.orderId || 'ORD-0000');
-  const createdDate = order.createdAt ? new Date(order.createdAt) : new Date();
-  const formattedDate = createdDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-  const formattedTime = createdDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  const createdDate = parseExactDate(order.createdAt);
+  const formattedDate = formatExactDateStr(createdDate);
+  const formattedTime = formatExactTimeStr(createdDate);
 
   const isFailed = order.status === 'FAILED';
   const customerName = order.customerName || 'Valued Customer';

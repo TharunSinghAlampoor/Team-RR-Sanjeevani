@@ -128,6 +128,8 @@ public class OrderSupportController {
         if (orderOpt.isPresent()) {
             Order order = orderOpt.get();
             order.setStatus(OrderStatus.CANCELLED);
+            LocalDateTime created = order.getCreatedAt() != null ? order.getCreatedAt() : LocalDateTime.now();
+            order.setUpdatedAt(created.plusMinutes(1L));
             orderRepository.save(order);
         }
 

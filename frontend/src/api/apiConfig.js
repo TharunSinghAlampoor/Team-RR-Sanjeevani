@@ -15,14 +15,13 @@ const ensureApiSuffix = (urlStr) => {
 };
 
 export const getApiBaseUrl = () => {
-  const ACTIVE_LIVE_BACKEND = 'https://54.82.202.70.nip.io/api';
+  const ACTIVE_LIVE_BACKEND = 'https://sanjeevani-backend.onrender.com/api';
   const envUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
 
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
     const isLocalNetwork = hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.');
-    const isVercel = hostname.includes('vercel.app');
 
     if (isLocalhost) {
       return ensureApiSuffix(envUrl || 'http://localhost:8080/api');
@@ -32,22 +31,13 @@ export const getApiBaseUrl = () => {
       return ensureApiSuffix(envUrl.replace(/localhost|127\.0\.0\.1/, hostname));
     }
 
-    // On Vercel deployments, use relative /api path so Vercel vercel.json rewrite proxies directly to live AWS EC2
-    if (isVercel && (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
-      return '/api';
-    }
-
     // If explicit live env URL is provided (not pointing to localhost), use it
     if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
-      let cleanEnvUrl = envUrl.trim().replace(/\/$/, '');
-      if (cleanEnvUrl.includes('54.82.202.70') && !cleanEnvUrl.includes('nip.io')) {
-        cleanEnvUrl = cleanEnvUrl.replace(/http:\/\/54\.82\.202\.70(:8080)?/, 'https://54.82.202.70.nip.io');
-      }
-      return ensureApiSuffix(cleanEnvUrl);
+      return ensureApiSuffix(envUrl);
     }
 
-    // Default fallback when deployed on cloud
-    return isVercel ? '/api' : ACTIVE_LIVE_BACKEND;
+    // Default fallback when deployed on cloud (e.g. Vercel)
+    return ACTIVE_LIVE_BACKEND;
   }
 
   return ensureApiSuffix(envUrl || 'http://localhost:8080/api');

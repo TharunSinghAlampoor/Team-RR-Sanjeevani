@@ -61,12 +61,14 @@ com\ecommerce\auth\service\OrderService.class
 com\ecommerce\auth\dto\ResetPasswordRequest.class
 com\ecommerce\auth\controller\ProductController.class
 com\ecommerce\auth\service\AuthService.class
+com\ecommerce\auth\service\OrderService$1.class
 com\ecommerce\auth\service\JwtService.class
 com\ecommerce\auth\repository\WishlistItemRepository.class
 com\ecommerce\auth\service\EmailService.class
 com\ecommerce\auth\controller\CartController.class
 com\ecommerce\auth\service\WishlistService.class
 com\ecommerce\auth\service\ProductService.class
+com\ecommerce\auth\controller\AdminController$1.class
 com\ecommerce\auth\entity\OrderReplacementRequest.class
 com\ecommerce\auth\entity\Order.class
 com\ecommerce\auth\entity\CartItem.class

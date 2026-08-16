@@ -21,35 +21,36 @@ export const getApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+    const isLocalNetwork = hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.');
+    const isVercel = hostname.includes('vercel.app');
 
-    // If explicit env URL is provided, handle dynamic local IP substitution if needed
-    if (envUrl) {
+    if (isLocalhost) {
+      return ensureApiSuffix(envUrl || 'http://localhost:8080/api');
+    }
+
+    if (isLocalNetwork && envUrl && (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+      return ensureApiSuffix(envUrl.replace(/localhost|127\.0\.0\.1/, hostname));
+    }
+
+    // On Vercel deployments, use relative /api path so Vercel vercel.json rewrite proxies directly to live AWS EC2
+    if (isVercel && (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+      return '/api';
+    }
+
+    // If explicit live env URL is provided (not pointing to localhost), use it
+    if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
       let cleanEnvUrl = envUrl.trim().replace(/\/$/, '');
-      if (isLocalhost) {
-        return ensureApiSuffix(cleanEnvUrl);
-      }
-      // Substitute raw HTTP IP with HTTPS nip.io domain automatically if needed
       if (cleanEnvUrl.includes('54.82.202.70') && !cleanEnvUrl.includes('nip.io')) {
         cleanEnvUrl = cleanEnvUrl.replace(/http:\/\/54\.82\.202\.70(:8080)?/, 'https://54.82.202.70.nip.io');
-      }
-      // If client is accessing via local network IP (e.g. 192.168.x.x) and envUrl points to localhost, substitute IP
-      if (cleanEnvUrl.includes('localhost') || cleanEnvUrl.includes('127.0.0.1')) {
-        return ensureApiSuffix(cleanEnvUrl.replace(/localhost|127\.0\.0\.1/, hostname));
       }
       return ensureApiSuffix(cleanEnvUrl);
     }
 
-    // Default fallback when no env variable is set
-    if (!isLocalhost && !hostname.startsWith('192.168.') && !hostname.startsWith('10.') && !hostname.startsWith('172.')) {
-      return ACTIVE_LIVE_BACKEND;
-    }
+    // Default fallback when deployed on cloud
+    return isVercel ? '/api' : ACTIVE_LIVE_BACKEND;
   }
 
-  if (envUrl) {
-    return ensureApiSuffix(envUrl);
-  }
-
-  return 'http://localhost:8080/api';
+  return ensureApiSuffix(envUrl || 'http://localhost:8080/api');
 };
 
 export default getApiBaseUrl;

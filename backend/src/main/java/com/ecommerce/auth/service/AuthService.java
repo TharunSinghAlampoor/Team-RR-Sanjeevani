@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@SuppressWarnings("null")
 public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);

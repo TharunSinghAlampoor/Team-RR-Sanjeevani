@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/order-support")
+@SuppressWarnings("null")
 public class OrderSupportController {
 
     @Autowired

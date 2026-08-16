@@ -15,6 +15,7 @@ import java.util.List;
 
 @Component
 @org.springframework.core.annotation.Order(2)
+@SuppressWarnings("null")
 public class OrderSeeder implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderSeeder.class);

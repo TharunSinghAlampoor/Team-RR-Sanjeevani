@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@SuppressWarnings("null")
 public class RazorpayService {
 
     @Value("${razorpay.key_id}")

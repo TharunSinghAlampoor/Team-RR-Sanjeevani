@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
+@SuppressWarnings("null")
 public class ProductService {
 
     private final ProductRepository productRepository;

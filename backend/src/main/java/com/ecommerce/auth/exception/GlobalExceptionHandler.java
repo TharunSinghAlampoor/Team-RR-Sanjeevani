@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleAuthException(AuthException ex) {
         logger.warn("Auth error: {}", ex.getMessage());
         return ResponseEntity
-                .status(ex.getStatus())
+                .status(ex.getStatus() != null ? ex.getStatus() : org.springframework.http.HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ex.getMessage()));
     }
 

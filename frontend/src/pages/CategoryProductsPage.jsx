@@ -420,6 +420,24 @@ export function CategoryProductsPage() {
     }
   };
 
+  const handleRemoveFromCartByProductId = async (productId) => {
+    const item = (cartItems || []).find(i => String(i.productId || i.product?.productId || i.id) === String(productId));
+    if (item && (item.id || item.cartItemId)) {
+      await handleRemoveFromCart(item.id || item.cartItemId);
+    }
+  };
+
+  const handleUpdateQuantityByProductId = async (productId, newQty) => {
+    const item = (cartItems || []).find(i => String(i.productId || i.product?.productId || i.id) === String(productId));
+    if (!item) return;
+    const cartItemId = item.id || item.cartItemId;
+    if (newQty <= 0) {
+      await handleRemoveFromCart(cartItemId);
+    } else {
+      await handleUpdateQuantity(cartItemId, newQty);
+    }
+  };
+
   const handleStartBuyNow = (prod) => {
     setBuyNowProduct(prod);
     setIsBuyNowOpen(true);
@@ -476,17 +494,22 @@ export function CategoryProductsPage() {
         onChangePassword={() => navigate('/change-password')}
       />
 
-      <main className="dashboard-main" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
+      <main className="dashboard-main" style={{ paddingTop: '1.25rem', paddingBottom: '3rem' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 0.75rem' }}>
+          
+          {/* Category Header */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 900, margin: 0, color: '#0f172a', letterSpacing: '-0.02em' }}>
+              {translateData(currentCatMeta.name)}
+            </h1>
+            <p style={{ fontSize: '0.8rem', margin: '0.1rem 0 0', color: '#64748b', fontWeight: 600 }}>
+              {categoryProducts.length} {translateData('Items Available')}
+            </p>
+          </div>
 
-
-
-        {/* Product Grid Catalog */}
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 1.5rem' }}>
+          {/* Product Grid Catalog */}
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#059669' }}>
-              <div style={{ width: '40px', height: '40px', border: '3px solid rgba(5, 150, 105, 0.2)', borderTopColor: '#059669', borderRadius: '50%', margin: '0 auto 1rem auto', animation: 'spin 0.8s linear infinite' }} />
-              <p style={{ fontWeight: 600 }}>Loading {currentCatMeta.name} catalog...</p>
-            </div>
+            <BrandLoader fullScreen={false} message={`Loading ${currentCatMeta?.name || 'Category'} catalog...`} />
           ) : categoryProducts.length === 0 ? (
             <div style={{ background: '#ffffff', borderRadius: '16px', padding: '3.5rem 2rem', textAlign: 'center', boxShadow: '0 4px 16px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0' }}>
               <Package size={48} style={{ color: '#94a3b8', margin: '0 auto 1rem auto' }} />
@@ -510,8 +533,11 @@ export function CategoryProductsPage() {
                     index={i}
                     isFavorite={!!favoritesMap[prod.productId]}
                     isInCart={!!cartItemsMap[prod.productId]}
+                    cartQuantity={cartItemsMap[prod.productId] || 0}
                     onToggleFavorite={handleToggleFavorite}
                     onAddToCart={handleAddToCart}
+                    onUpdateQuantity={handleUpdateQuantityByProductId}
+                    onRemoveFromCart={handleRemoveFromCartByProductId}
                     onBuyNow={handleStartBuyNow}
                     onOpenDetails={(p) => navigate(`/product/${p.productId}`)}
                   />

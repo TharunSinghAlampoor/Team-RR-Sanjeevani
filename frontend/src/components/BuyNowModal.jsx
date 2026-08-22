@@ -1,10 +1,36 @@
 import React, { useState } from 'react';
-import { X, Zap, CreditCard, MapPin, CheckCircle2, Shield, AlertTriangle, Loader2, QrCode, Smartphone, XCircle, Copy, Check } from 'lucide-react';
+import { X, Zap, CreditCard, MapPin, CheckCircle2, Shield, AlertTriangle, Loader2, QrCode, Smartphone, XCircle, Copy, Check, DollarSign } from 'lucide-react';
 import shopService from '../api/shopService';
 import ProductImage from './ProductImage';
 import { loadRazorpayScript } from '../utils/razorpayUtils';
 import LocationAddressInput from './LocationAddressInput';
 import { useLanguage } from '../context/LanguageContext';
+
+// Real Brand Payment SVG Icons
+const PhonePeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="12" fill="#5f259f"/>
+    <path d="M16.42 8.44h-3.41v-1.6c0-.49-.39-.88-.88-.88s-.88.39-.88.88v1.6H9.72c-.49 0-.88.39-.88.88v1.23c0 .49.39.88.88.88h1.53v3.79c0 1.54 1.1 2.82 2.64 3.01.21.03.43.04.64.04 1.76 0 3.2-1.44 3.2-3.2v-5.85c0-.49-.39-.88-.88-.88zm-2.65 6.78c0 .72-.58 1.3-1.3 1.3-.72 0-1.3-.58-1.3-1.3v-3.79h2.6v3.79z" fill="#ffffff"/>
+  </svg>
+);
+
+const GPayIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+  </svg>
+);
+
+const PaytmIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <rect width="24" height="24" rx="5" fill="#002970"/>
+    <path d="M4.5 7.5h3.2c1.4 0 2.3.8 2.3 2.1 0 1.4-.9 2.2-2.3 2.2H6.2v2.7H4.5V7.5zm1.7 3H7c.6 0 1-.3 1-.9 0-.5-.4-.8-1-.8h-.8v1.7z" fill="#00BAF2"/>
+    <path d="M11.2 11.7l-2.1-4.2h1.9l1.2 2.6 1.2-2.6h1.9l-2.1 4.2v2.8h-1.8v-2.8z" fill="#ffffff"/>
+    <path d="M16.2 7.5h4.8v1.5h-1.5v5.5h-1.8V9H16.2V7.5z" fill="#00BAF2"/>
+  </svg>
+);
 
 const s = {
   overlay: {
@@ -176,6 +202,7 @@ export const BuyNowModal = ({
   const [quantity, setQuantity] = useState(1);
   const [shippingAddress, setShippingAddress] = useState('');
   const [paymentMode, setPaymentMode] = useState('razorpay'); // 'razorpay' | 'qr'
+  const [subPaymentApp, setSubPaymentApp] = useState('all'); // 'all' | 'phonepe' | 'gpay' | 'paytm' | 'amazonpay'
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [successOrderId, setSuccessOrderId] = useState('');
@@ -243,6 +270,36 @@ export const BuyNowModal = ({
     setTimeout(() => setCopiedVpa(false), 2000);
   };
 
+  const handleOpenMobileUpiApp = (appName) => {
+    const isMobileOrTablet = typeof window !== 'undefined' && (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      (window.matchMedia && window.matchMedia('(max-width: 1024px)').matches) ||
+      ('ontouchstart' in window)
+    );
+
+    setSubPaymentApp(subPaymentApp === appName ? 'all' : appName);
+
+    if (isMobileOrTablet) {
+      const upiUrl = `upi://pay?pa=${upiVpa}&pn=Sanjeevani%20Healthcare&am=${grandTotal.toFixed(2)}&cu=INR`;
+      let appUrl = upiUrl;
+      if (appName === 'phonepe') {
+        appUrl = `phonepe://pay?pa=${upiVpa}&pn=Sanjeevani%20Healthcare&am=${grandTotal.toFixed(2)}&cu=INR`;
+      } else if (appName === 'gpay') {
+        appUrl = `gpay://upi/pay?pa=${upiVpa}&pn=Sanjeevani%20Healthcare&am=${grandTotal.toFixed(2)}&cu=INR`;
+      } else if (appName === 'paytm') {
+        appUrl = `paytmmp://pay?pa=${upiVpa}&pn=Sanjeevani%20Healthcare&am=${grandTotal.toFixed(2)}&cu=INR`;
+      } else if (appName === 'amazonpay') {
+        appUrl = `amazonpay://pay?pa=${upiVpa}&pn=Sanjeevani%20Healthcare&am=${grandTotal.toFixed(2)}&cu=INR`;
+      }
+
+      try {
+        window.location.href = appUrl;
+      } catch (e) {
+        window.location.href = upiUrl;
+      }
+    }
+  };
+
   const [showAddressPopup, setShowAddressPopup] = useState(false);
 
   const handlePayWithRazorpay = async () => {
@@ -256,7 +313,23 @@ export const BuyNowModal = ({
     setIsProcessing(true);
 
     try {
-      // Step 0: Ensure Razorpay SDK is dynamically loaded
+      // Step 0: Handle COD Pay on Delivery immediately
+      if (paymentMode === 'cod') {
+        const buyRes = await shopService.buyNow({
+          productId: product.productId,
+          quantity: quantity,
+          shippingAddress: shippingAddress.trim(),
+          paymentMethod: 'Cash on Delivery (Pay on Delivery)',
+          totalAmount: grandTotal
+        });
+        setIsProcessing(false);
+        const placedData = buyRes.data || buyRes;
+        setSuccessOrderId(placedData.orderId || 'ORD-' + Math.floor(100000 + Math.random() * 900000));
+        if (onPaymentSuccess) onPaymentSuccess(placedData);
+        return;
+      }
+
+      // Step 0.5: Ensure Razorpay SDK is dynamically loaded
       const isLoaded = await loadRazorpayScript();
       if (!isLoaded) {
         throw new Error('Failed to load Razorpay Payment Gateway. Please check your network connection.');
@@ -482,7 +555,7 @@ export const BuyNowModal = ({
             <CreditCard style={{ width: 14, height: 14, color: '#d97706' }} />
             <span>{translateData('Choose Payment Option')}</span>
           </div>
-          <div style={s.tabContainer}>
+          <div style={{ ...s.tabContainer, gridTemplateColumns: 'repeat(auto-fit, minmax(125px, 1fr))' }}>
             <button
               onClick={() => setPaymentMode('razorpay')}
               style={{
@@ -491,7 +564,7 @@ export const BuyNowModal = ({
               }}
             >
               <Smartphone style={{ width: 16, height: 16 }} />
-              <span>{translateData('UPI Apps & Cards')}</span>
+              <span>{translateData('UPI & Cards')}</span>
             </button>
 
             <button
@@ -502,9 +575,132 @@ export const BuyNowModal = ({
               }}
             >
               <QrCode style={{ width: 16, height: 16 }} />
-              <span>{translateData('Scan UPI QR Code')}</span>
+              <span>{translateData('UPI QR Code')}</span>
+            </button>
+
+            <button
+              onClick={() => setPaymentMode('cod')}
+              style={{
+                ...s.tabBtn,
+                ...(paymentMode === 'cod' ? s.tabBtnActive : {}),
+              }}
+            >
+              <DollarSign style={{ width: 16, height: 16 }} />
+              <span>{translateData('Pay on Delivery')}</span>
             </button>
           </div>
+
+          {/* Amazon-Style Payment Method Details Cards */}
+          {paymentMode === 'razorpay' && (
+            <div style={{
+              background: '#fffbeb',
+              border: '1.5px solid #fde68a',
+              borderRadius: '0.85rem',
+              padding: '0.85rem 1rem',
+              marginBottom: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.65rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#78350f' }}>
+                  💳 {translateData('Select Preferred Payment Method')}
+                </span>
+                <span style={{ fontSize: '0.7rem', color: '#b45309', fontWeight: 800, background: '#ffffff', padding: '2px 8px', borderRadius: 99, border: '1px solid #fde68a' }}>
+                  {translateData('Instant Approval')}
+                </span>
+              </div>
+
+              {/* Amazon-style Interactive UPI App Badges with Real SVG Icons */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => handleOpenMobileUpiApp('phonepe')}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                    fontSize: '0.74rem', fontWeight: 800, padding: '5px 12px', borderRadius: '8px',
+                    background: subPaymentApp === 'phonepe' ? '#5f259f' : '#ffffff',
+                    color: subPaymentApp === 'phonepe' ? '#ffffff' : '#5f259f',
+                    border: subPaymentApp === 'phonepe' ? '2px solid #4a1c7d' : '1.5px solid #d8b4fe',
+                    cursor: 'pointer', boxShadow: subPaymentApp === 'phonepe' ? '0 2px 8px rgba(95, 37, 159, 0.35)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <PhonePeIcon />
+                  <span>PhonePe {subPaymentApp === 'phonepe' && '✓'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenMobileUpiApp('gpay')}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                    fontSize: '0.74rem', fontWeight: 800, padding: '5px 12px', borderRadius: '8px',
+                    background: subPaymentApp === 'gpay' ? '#15803d' : '#ffffff',
+                    color: subPaymentApp === 'gpay' ? '#ffffff' : '#15803d',
+                    border: subPaymentApp === 'gpay' ? '2px solid #166534' : '1.5px solid #bbf7d0',
+                    cursor: 'pointer', boxShadow: subPaymentApp === 'gpay' ? '0 2px 8px rgba(21, 128, 61, 0.3)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <GPayIcon />
+                  <span>Google Pay {subPaymentApp === 'gpay' && '✓'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenMobileUpiApp('paytm')}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                    fontSize: '0.74rem', fontWeight: 800, padding: '5px 12px', borderRadius: '8px',
+                    background: subPaymentApp === 'paytm' ? '#002970' : '#ffffff',
+                    color: subPaymentApp === 'paytm' ? '#ffffff' : '#002970',
+                    border: subPaymentApp === 'paytm' ? '2px solid #001e54' : '1.5px solid #93c5fd',
+                    cursor: 'pointer', boxShadow: subPaymentApp === 'paytm' ? '0 2px 8px rgba(0, 41, 112, 0.35)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <PaytmIcon />
+                  <span>Paytm UPI {subPaymentApp === 'paytm' && '✓'}</span>
+                </button>
+              </div>
+
+              <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                {translateData('Supports all Credit Cards, Debit Cards, NetBanking, and UPI Apps with 256-Bit Bank Encryption.')}
+              </p>
+            </div>
+          )}
+
+          {paymentMode === 'cod' && (
+            <div style={{
+              background: 'linear-gradient(135deg, #fffbeb 0%, #ffffff 100%)',
+              border: '1.5px solid #fde68a',
+              borderRadius: '0.85rem',
+              padding: '0.85rem 1rem',
+              marginBottom: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#b45309', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  💵 {translateData('Pay on Delivery (COD) Options')}
+                </span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#92400e', background: '#fef3c7', padding: '2px 8px', borderRadius: 99, border: '1px solid #fde68a' }}>
+                  {translateData('Zero Advance Required')}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <p style={{ fontSize: '0.76rem', color: '#1e293b', margin: 0, fontWeight: 700 }}>
+                  • {translateData('Pay via Cash, UPI QR, or Card at your doorstep upon delivery.')}
+                </p>
+                <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0 }}>
+                  • {translateData('Sanitized, tamper-proof packaging assured by Sanjeevani Central Express Hub.')}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* QR Code Display View */}
           {paymentMode === 'qr' && (
@@ -637,6 +833,16 @@ export const BuyNowModal = ({
               <>
                 <Loader2 style={{ width: 18, height: 18, animation: 'spin 1s linear infinite' }} />
                 <span>{translateData('Processing Payment...')}</span>
+              </>
+            ) : paymentMode === 'cod' ? (
+              <>
+                <DollarSign style={{ width: 18, height: 18 }} />
+                <span>{translateData('Pay')} ₹{grandTotal.toFixed(2)} {translateData('on Delivery (COD)')}</span>
+              </>
+            ) : paymentMode === 'amazonpay' ? (
+              <>
+                <Zap style={{ width: 18, height: 18 }} />
+                <span>{translateData('Pay')} ₹{grandTotal.toFixed(2)} {translateData('via Amazon Pay')}</span>
               </>
             ) : paymentMode === 'qr' ? (
               <>

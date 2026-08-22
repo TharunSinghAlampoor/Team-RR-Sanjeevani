@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
+import BrandLoader from './components/BrandLoader';
 
 import Dashboard from './pages/Dashboard';
 import { LandingPage } from './pages/LandingPage';
@@ -97,7 +98,7 @@ function App() {
       <LanguageProvider>
         <AuthProvider>
           <Router>
-            <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-emerald-50"><div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div></div>}>
+            <Suspense fallback={<BrandLoader fullScreen message="Loading..." />}>
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />

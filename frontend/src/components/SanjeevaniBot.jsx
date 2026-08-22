@@ -439,7 +439,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
       symptomName: 'Body Pain & Muscle Pain',
       emoji: '💪',
       triggers: ['body pain', 'muscle pain', 'back pain', 'joint pain', 'pain', 'ache', 'dard', 'दर्द', 'कमर दर्द', 'जोड़ों का दर्द', 'నొప్పి', 'ನೋವು', 'sprain', 'strain', 'leg pain', 'knee pain', 'shoulder pain', 'neck pain'],
-      medicineKeywords: ['ibuprofen', 'diclofenac', 'combiflam', 'volini', 'moov', 'flexon', 'pain relief', 'muscle', 'pain', 'spray', 'gel', 'ointment', 'move', 'brufen', 'meftal', 'nise', 'aceclofenac', 'thiocolchicoside', 'relaxant'],
+      medicineKeywords: ['ibuprofen', 'diclofenac', 'combiflam', 'volini', 'moov', 'flexon', 'pain relief', 'pain balm', 'pain spray', 'pain gel', 'brufen', 'meftal', 'nise', 'aceclofenac', 'thiocolchicoside', 'ortho'],
       advice: 'For body & muscle pain, try Ibuprofen, Combiflam, or Diclofenac tablets. For topical relief, Volini Spray or Moov cream work well. Apply ice for acute injuries. See a doctor for persistent or severe pain.',
     },
     {
@@ -1017,6 +1017,23 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
           const pName = (p.name || '').toLowerCase();
           const pCat = (p.categoryName || '').toLowerCase();
 
+          const isCosmeticOrPersonalCare = (
+            pName.includes('lotion') || pName.includes('wash') || pName.includes('cleanser') ||
+            pName.includes('serum') || pName.includes('sunscreen') || pName.includes('facial') ||
+            pName.includes('shampoo') || pName.includes('soap') || pCat.includes('skin')
+          );
+
+          const isPainOrFeverSymptom = (
+            symptomResult.symptomName.includes('Pain') ||
+            symptomResult.symptomName.includes('Fever') ||
+            symptomResult.symptomName.includes('Headache') ||
+            symptomResult.symptomName.includes('Cold')
+          );
+
+          if (isPainOrFeverSymptom && isCosmeticOrPersonalCare) {
+            return false; // Hard exclude facial sprays, acne gels, cleansers from pain/fever symptoms!
+          }
+
           if (symptomResult.symptomName.includes('Dental')) {
             return pName.includes('tooth') || pName.includes('teeth') || pName.includes('dental') || pName.includes('sensodyne') || pName.includes('mouthwash') || pName.includes('listerine') || pName.includes('clove');
           }
@@ -1217,59 +1234,78 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
         </motion.div>
       )}
 
-      {/* ── SANJEEVANI BOT CHAT DIALOG / DRAWER ────────────────────────── */}
+      {/* ── SANJEEVANI BOT CHAT SIDEBAR DRAWER (ALL DEVICE SIZES) ────────────────────────── */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-            className="sanjeevani-bot-window"
-            style={{
-              position: 'fixed',
-              bottom: '24px',
-              right: '24px',
-              zIndex: 10000,
-              width: 'min(420px, calc(100vw - 32px))',
-              height: '610px',
-              maxHeight: 'calc(100vh - 48px)',
-              background: '#ffffff',
-              borderRadius: '24px',
-              boxShadow: '0 24px 60px rgba(15, 23, 42, 0.28), 0 10px 30px rgba(5, 150, 105, 0.18)',
-              border: '1.5px solid rgba(5, 150, 105, 0.25)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              fontFamily: "'Inter', system-ui, sans-serif"
-            }}
-          >
+          <>
+            {/* Backdrop Blur Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setIsOpen(false)}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 9999,
+                background: 'rgba(15, 23, 42, 0.45)',
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
+              }}
+            />
+
+            {/* Right-Side Push Sidebar Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="sanjeevani-bot-window"
+              style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 10000,
+                width: 'min(450px, 100vw)',
+                height: '100vh',
+                background: '#ffffff',
+                boxShadow: '-10px 0 40px rgba(15, 23, 42, 0.22)',
+                borderLeft: '1.5px solid rgba(5, 150, 105, 0.25)',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                fontFamily: "'Inter', system-ui, sans-serif"
+              }}
+            >
             {/* 1. Header with Sanjeevani Brand Logo & Voice Controls */}
             <div style={{
-              background: 'linear-gradient(135deg, #064e3b 0%, #059669 50%, #047857 100%)',
+              background: 'linear-gradient(135deg, #09475B 0%, #0D5C75 50%, #059669 100%)',
               color: '#ffffff',
-              padding: '0.95rem 1.15rem',
+              padding: '1rem 1.25rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 4px 16px rgba(5, 150, 105, 0.25)'
+              boxShadow: '0 4px 20px rgba(13, 92, 117, 0.25)',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.15)'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <AnimatedDoctorRoboIcon size={34} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <AnimatedDoctorRoboIcon size={38} />
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.35rem', letterSpacing: '0.5px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.12rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem', letterSpacing: '0.01em' }}>
                     SANJEEVANI
-                    <Sparkles style={{ width: 15, height: 15, color: '#fde047' }} />
+                    <Sparkles style={{ width: 16, height: 16, color: '#fde047' }} />
                   </h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '1px' }}>
-                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 6px #4ade80' }} />
-                    <span style={{ fontSize: '0.72rem', color: '#d1fae5', fontWeight: 700 }}>24/7 AI Health Assistant</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '2px' }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }} />
+                    <span style={{ fontSize: '0.75rem', color: '#d1fae5', fontWeight: 700 }}>24/7 AI Health Assistant</span>
                   </div>
                 </div>
               </div>
 
               {/* Controls: Voice On/Off Toggle + Close */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
                 {/* Text-to-Speech (Agent Talking) Toggle */}
                 <button
                   onClick={() => {
@@ -1279,14 +1315,14 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
                   }}
                   title={isVoiceOutputEnabled ? 'Agent Voice ON — Click to mute' : 'Agent Voice OFF — Click to enable'}
                   style={{
-                    background: isVoiceOutputEnabled ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.25)',
-                    border: '1px solid rgba(255,255,255,0.4)',
-                    borderRadius: '99px',
-                    padding: '0.3rem 0.7rem',
+                    background: isVoiceOutputEnabled ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.25)',
+                    border: '1px solid rgba(255, 255, 255, 0.4)',
+                    borderRadius: 99,
+                    padding: '0.35rem 0.75rem',
                     display: 'flex', alignItems: 'center', gap: '0.35rem',
                     color: '#ffffff', cursor: 'pointer',
-                    fontSize: '0.72rem', fontWeight: 800,
-                    backdropFilter: 'blur(4px)',
+                    fontSize: '0.74rem', fontWeight: 800,
+                    backdropFilter: 'blur(6px)',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -1301,14 +1337,14 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
                     window.speechSynthesis?.cancel();
                   }}
                   style={{
-                    background: 'rgba(255,255,255,0.18)', border: 'none',
-                    borderRadius: '50%', width: 32, height: 32,
+                    background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '50%', width: 34, height: 34,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: '#ffffff', cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  <X style={{ width: 17, height: 17 }} />
+                  <X style={{ width: 18, height: 18 }} />
                 </button>
               </div>
             </div>
@@ -1324,14 +1360,95 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
               gap: '1rem'
             }}>
               {messages.length === 0 && (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#64748b', textAlign: 'center', padding: '2rem 1rem' }}>
-                  <AnimatedDoctorRoboIcon size={54} />
-                  <h4 style={{ margin: '0.85rem 0 0.25rem 0', color: '#0f172a', fontSize: '1.05rem', fontWeight: 900, letterSpacing: '0.3px' }}>
-                    Sanjeevani RAG AI
-                  </h4>
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b', lineHeight: 1.5, maxWidth: '280px' }}>
-                    Ask about medicines, sunscreen, orders, shipping, refunds, or payment options...
-                  </p>
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  padding: '1.5rem 1rem',
+                  gap: '1.25rem'
+                }}>
+                  {/* Hero Doctor Robo Icon Card */}
+                  <div style={{
+                    position: 'relative',
+                    padding: '1.25rem',
+                    borderRadius: '2rem',
+                    background: 'linear-gradient(135deg, rgba(13, 92, 117, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%)',
+                    border: '1.5px solid rgba(5, 150, 105, 0.2)',
+                    boxShadow: '0 10px 30px rgba(5, 150, 105, 0.1)'
+                  }}>
+                    <AnimatedDoctorRoboIcon size={64} />
+                  </div>
+
+                  <div>
+                    <h4 style={{ margin: 0, color: '#0f172a', fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.01em' }}>
+                      Hello! I'm Sanjeevani AI
+                    </h4>
+                    <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.86rem', color: '#64748b', lineHeight: 1.5, maxWidth: '300px', fontWeight: 500 }}>
+                      Your 24/7 official assistant for medical supplies, health advice, and order tracking.
+                    </p>
+                  </div>
+
+                  {/* 2x2 Quick Action Topic Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.65rem', width: '100%', maxWidth: '360px', marginTop: '0.5rem' }}>
+                    <button
+                      onClick={() => handleSendWithText('medicine for fever')}
+                      style={{
+                        padding: '0.75rem', borderRadius: '1rem', background: '#ffffff',
+                        border: '1.5px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem',
+                        textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>💊</span>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>Find Medicines</span>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Fever, cold, pain...</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleSendWithText('track my orders')}
+                      style={{
+                        padding: '0.75rem', borderRadius: '1rem', background: '#ffffff',
+                        border: '1.5px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem',
+                        textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>📦</span>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>Track Orders</span>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Check status & delivery</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleSendWithText('skincare products')}
+                      style={{
+                        padding: '0.75rem', borderRadius: '1rem', background: '#ffffff',
+                        border: '1.5px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem',
+                        textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>✨</span>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>Skincare Advice</span>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Sunscreen, lotion...</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleSendWithText('contact support')}
+                      style={{
+                        padding: '0.75rem', borderRadius: '1rem', background: '#ffffff',
+                        border: '1.5px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem',
+                        textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>📞</span>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>24/7 Support</span>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Refunds, returns, help</span>
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -1345,18 +1462,26 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
                     gap: '0.35rem'
                   }}
                 >
+                  {/* Bot Sender Avatar Badge */}
+                  {msg.sender === 'bot' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', paddingLeft: '0.2rem', marginBottom: '0.15rem' }}>
+                      <AnimatedDoctorRoboIcon size={20} />
+                      <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0d5c75' }}>Sanjeevani AI</span>
+                    </div>
+                  )}
+
                   <div style={{
-                    maxWidth: '85%',
-                    padding: '0.85rem 1.05rem',
-                    borderRadius: msg.sender === 'user' ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
-                    background: msg.sender === 'user' ? 'linear-gradient(135deg, #0D5C75 0%, #0369a1 100%)' : '#ffffff',
-                    color: msg.sender === 'user' ? '#ffffff' : '#1A2E35',
+                    maxWidth: '88%',
+                    padding: '0.9rem 1.15rem',
+                    borderRadius: msg.sender === 'user' ? '1.25rem 1.25rem 0.25rem 1.25rem' : '1.25rem 1.25rem 1.25rem 0.25rem',
+                    background: msg.sender === 'user' ? 'linear-gradient(135deg, #0D5C75 0%, #059669 100%)' : '#ffffff',
+                    color: msg.sender === 'user' ? '#ffffff' : '#0f172a',
                     fontSize: '0.88rem',
-                    lineHeight: 1.5,
+                    lineHeight: 1.55,
                     fontWeight: 500,
                     wordBreak: 'break-word',
-                    boxShadow: msg.sender === 'user' ? '0 4px 12px rgba(13,92,117,0.25)' : '0 2px 8px rgba(0,0,0,0.04)',
-                    border: msg.sender === 'user' ? 'none' : '1px solid #e2e8f0',
+                    boxShadow: msg.sender === 'user' ? '0 4px 14px rgba(5, 150, 105, 0.25)' : '0 4px 18px rgba(15, 23, 42, 0.06)',
+                    border: msg.sender === 'user' ? 'none' : '1.5px solid #cbd5e1',
                     position: 'relative'
                   }}>
                     {msg.sender === 'user' ? (
@@ -1611,7 +1736,7 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
-                                <span style={{ fontSize: '0.86rem', fontWeight: 900, color: '#0369a1' }}>#{ord.orderId}</span>
+                                <span style={{ fontSize: '0.86rem', fontWeight: 900, color: '#0369a1' }}>{ord.orderId}</span>
                                 <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 9px', borderRadius: 99, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
                                   {statusLabel}
                                 </span>
@@ -1708,39 +1833,40 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
               <div ref={messagesEndRef} />
             </div>
 
-            {/* 3. Input Footer with Microphone Voice Recognition */}
+            {/* 3. Modern Glassmorphism Input Footer */}
             <div style={{
-              padding: '0.75rem 1rem',
+              padding: '0.9rem 1.1rem',
               background: '#ffffff',
               borderTop: '1px solid #e2e8f0',
+              boxShadow: '0 -4px 20px rgba(15, 23, 42, 0.04)',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.45rem'
+              gap: '0.6rem'
             }}>
               {/* Microphone Voice Input Button */}
               <button
                 onClick={toggleListening}
                 title={isListening ? 'Listening... Speak now' : 'Speak to Sanjeevani'}
                 style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: '12px',
-                  background: isListening ? '#ef4444' : '#f0fdf4',
+                  width: 42,
+                  height: 42,
+                  borderRadius: '50%',
+                  background: isListening ? '#ef4444' : '#ecfdf5',
                   color: isListening ? '#ffffff' : '#059669',
-                  border: isListening ? 'none' : '1.5px solid #a7f3d0',
+                  border: isListening ? '2px solid #fca5a5' : '1.5px solid #a7f3d0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  boxShadow: isListening ? '0 0 14px rgba(239, 68, 68, 0.6)' : 'none',
+                  boxShadow: isListening ? '0 0 16px rgba(239, 68, 68, 0.6)' : '0 2px 8px rgba(5, 150, 105, 0.12)',
                   transition: 'all 0.2s ease',
                   flexShrink: 0
                 }}
               >
                 {isListening ? (
-                  <MicOff style={{ width: 17, height: 17, animation: 'pulse 1s infinite' }} />
+                  <MicOff style={{ width: 19, height: 19, animation: 'pulse 1s infinite' }} />
                 ) : (
-                  <Mic style={{ width: 17, height: 17 }} />
+                  <Mic style={{ width: 19, height: 19 }} />
                 )}
               </button>
 
@@ -1753,13 +1879,15 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
                 placeholder={isListening ? translateData('Listening... Speak now!') : translateData('Ask or speak to Sanjeevani...')}
                 style={{
                   flex: 1,
-                  padding: '0.65rem 0.85rem',
-                  borderRadius: '12px',
+                  padding: '0.75rem 1.1rem',
+                  borderRadius: 99,
                   border: isListening ? '2px solid #ef4444' : '1.5px solid #cbd5e1',
                   outline: 'none',
-                  fontSize: '0.86rem',
+                  fontSize: '0.9rem',
                   color: '#0f172a',
-                  background: '#f8fafc'
+                  background: '#f8fafc',
+                  boxShadow: 'inset 0 1.5px 3px rgba(0, 0, 0, 0.04)',
+                  transition: 'all 0.2s ease'
                 }}
               />
 
@@ -1768,9 +1896,9 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
                 onClick={handleSend}
                 disabled={!inputValue.trim()}
                 style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: '12px',
+                  width: 42,
+                  height: 42,
+                  borderRadius: '50%',
                   background: inputValue.trim() ? 'linear-gradient(135deg, #0D5C75 0%, #059669 100%)' : '#e2e8f0',
                   color: '#ffffff',
                   border: 'none',
@@ -1778,18 +1906,20 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
-                  boxShadow: inputValue.trim() ? '0 4px 12px rgba(13,92,117,0.3)' : 'none',
+                  boxShadow: inputValue.trim() ? '0 4px 14px rgba(13, 92, 117, 0.35)' : 'none',
+                  transition: 'all 0.2s ease',
                   flexShrink: 0
                 }}
               >
-                <Send style={{ width: 17, height: 17 }} />
+                <Send style={{ width: 18, height: 18 }} />
               </button>
             </div>
           </motion.div>
+          </>
         )}
       </AnimatePresence>
 
-      {/* ── RESPONSIVE ALIGNMENT STYLES (Android, iPhone, Tablet, PC) ────── */}
+      {/* ── RESPONSIVE ALIGNMENT STYLES (ALL DEVICE SIZES RIGHT-SIDE SIDEBAR DRAWER) ────── */}
       <style>{`
         @media (max-width: 480px) {
           .sanjeevani-bot-fab-container {
@@ -1797,40 +1927,27 @@ export const SanjeevaniBot = ({ onOpenCart, onOpenOrders, onOpenDetails, onBuyNo
             right: 14px !important;
           }
           .sanjeevani-bot-window {
-            bottom: 8px !important;
-            right: 8px !important;
-            left: 8px !important;
-            width: auto !important;
-            max-width: calc(100vw - 16px) !important;
-            height: calc(100vh - 75px) !important;
-            max-height: 580px !important;
-            border-radius: 16px !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            top: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            border-radius: 0 !important;
           }
         }
 
-        @media (min-width: 481px) and (max-width: 1024px) {
+        @media (min-width: 481px) {
           .sanjeevani-bot-fab-container {
             bottom: 80px !important;
             right: 20px !important;
           }
           .sanjeevani-bot-window {
-            bottom: 20px !important;
-            right: 20px !important;
-            width: 390px !important;
-            height: 580px !important;
-          }
-        }
-
-        @media (min-width: 1025px) {
-          .sanjeevani-bot-fab-container {
-            bottom: 88px !important;
-            right: 26px !important;
-          }
-          .sanjeevani-bot-window {
-            bottom: 24px !important;
-            right: 24px !important;
-            width: 420px !important;
-            height: 610px !important;
+            width: min(450px, 100vw) !important;
+            height: 100vh !important;
+            top: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            border-radius: 1.5rem 0 0 1.5rem !important;
           }
         }
       `}</style>

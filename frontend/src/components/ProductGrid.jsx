@@ -1,5 +1,6 @@
 import React from 'react';
 import ProductCard from './ProductCard';
+import BrandLoader from './BrandLoader';
 
 export const ProductGrid = ({
   products = [],
@@ -11,19 +12,7 @@ export const ProductGrid = ({
   onOpenDetails,
 }) => {
   if (loading) {
-    return (
-      <div className="product-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-          <div key={n} className="skeleton-card animate-pulse bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 space-y-4">
-            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/3" />
-            <div className="h-40 bg-slate-100 dark:bg-slate-800 rounded-2xl" />
-            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4" />
-            <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-1/2" />
-            <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-xl" />
-          </div>
-        ))}
-      </div>
-    );
+    return <BrandLoader fullScreen={false} message="Loading Healthcare Essentials..." />;
   }
 
   if (products.length === 0) {

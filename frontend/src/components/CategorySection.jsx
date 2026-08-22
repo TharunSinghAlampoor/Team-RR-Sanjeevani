@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronDown, Pill, Baby, Stethoscope, Sparkles, Activity } from 'lucide-react';
 import ProductCard from './ProductCard';
+import BrandLoader from './BrandLoader';
 
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
 import { useLanguage } from '../context/LanguageContext';
@@ -158,6 +159,8 @@ export const CategorySection = ({
   cartItemsMap = {},
   onToggleFavorite,
   onAddToCart,
+  onUpdateQuantity,
+  onRemoveFromCart,
   onBuyNow,
   onOpenDetails,
 }) => {
@@ -239,24 +242,28 @@ export const CategorySection = ({
       <div className="cat-section__divider" style={{ background: `linear-gradient(90deg, ${meta.color}40, transparent)` }} />
 
       {/* Product Grid */}
-      <div className="cat-section__grid">
-        {loading
-          ? Array.from({ length: PREVIEW_COUNT }).map((_, i) => <SkeletonCard key={i} index={i} />)
-          : displayProducts.map((product, i) => (
-              <ProductCard
-                key={product.productId}
-                product={product}
-                index={i}
-                isFavorite={!!favoritesMap[product.productId]}
-                isInCart={!!cartItemsMap[product.productId]}
-                onToggleFavorite={onToggleFavorite}
-                onAddToCart={onAddToCart}
-                onBuyNow={onBuyNow}
-                onOpenDetails={onOpenDetails}
-              />
-            ))
-        }
-      </div>
+      {loading ? (
+        <BrandLoader fullScreen={false} message={`Loading ${category.categoryName || 'Category'} Healthcare Essentials...`} />
+      ) : (
+        <div className="cat-section__grid">
+          {displayProducts.map((product, i) => (
+            <ProductCard
+              key={product.productId}
+              product={product}
+              index={i}
+              isFavorite={!!favoritesMap[product.productId]}
+              isInCart={!!cartItemsMap[product.productId]}
+              cartQuantity={cartItemsMap[product.productId] || 0}
+              onToggleFavorite={onToggleFavorite}
+              onAddToCart={onAddToCart}
+              onUpdateQuantity={onUpdateQuantity}
+              onRemoveFromCart={onRemoveFromCart}
+              onBuyNow={onBuyNow}
+              onOpenDetails={onOpenDetails}
+            />
+          ))}
+        </div>
+      )}
 
       {/* No Products */}
       <AnimatePresence>

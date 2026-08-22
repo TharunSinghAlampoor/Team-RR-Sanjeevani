@@ -294,7 +294,7 @@ export const TrackOrderPage = () => {
     events.push({
       id: 'evt-1',
       title: 'Order Confirmed',
-      desc: `Order #${selectedOrder.orderId} recorded in Sanjeevani database.`,
+      desc: `Order ${selectedOrder.orderId} recorded in Sanjeevani database.`,
       time: formatExactDateTime(createdDate),
       done: stage >= 1
     });
@@ -367,7 +367,7 @@ export const TrackOrderPage = () => {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" }}>
+      <div style={{ minHeight: '100vh', background: '#f8fafc', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
         {/* Render Dashboard Navbar even while loading */}
         <Navbar
           user={user}
@@ -484,7 +484,7 @@ export const TrackOrderPage = () => {
                   </h2>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0D5C75', fontFamily: 'monospace', background: '#E8F3EF', padding: '0.15rem 0.55rem', borderRadius: '6px', border: '1px solid #A4C3D2' }}>
-                      {translateData('Order')} #{rawOrderId}
+                      {translateData('Order')} {rawOrderId}
                     </span>
                     <button
                       onClick={handleCopyOrderId}

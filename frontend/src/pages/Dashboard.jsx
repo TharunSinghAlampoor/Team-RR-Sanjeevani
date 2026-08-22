@@ -477,6 +477,17 @@ export const Dashboard = () => {
     }
   };
 
+  const handleUpdateQuantityByProductId = async (productId, newQty) => {
+    const item = (cartItems || []).find(i => String(i.productId || i.product?.productId || i.id) === String(productId));
+    if (!item) return;
+    const cartItemId = item.id || item.cartItemId;
+    if (newQty <= 0) {
+      await handleRemoveCartItem(cartItemId);
+    } else {
+      await handleUpdateCartQuantity(cartItemId, newQty);
+    }
+  };
+
   // ─── Favorite Handlers ────────────────────────────────────────────
   const handleToggleFavorite = async (productId) => {
     const targetPId = typeof productId === 'object' ? productId.productId : productId;
@@ -708,6 +719,7 @@ export const Dashboard = () => {
                       cartQuantity={cartItemsMap[product.productId] || 0}
                       onToggleFavorite={handleToggleFavorite}
                       onAddToCart={handleAddToCart}
+                      onUpdateQuantity={handleUpdateQuantityByProductId}
                       onRemoveFromCart={handleRemoveFromCartByProductId}
                       onBuyNow={handleStartBuyNow}
                       onOpenDetails={handleOpenDetails}
@@ -807,6 +819,9 @@ export const Dashboard = () => {
                 favoritesMap={favoritesMap}
                 onToggleFavorite={handleToggleFavorite}
                 onAddToCart={handleAddToCart}
+                onUpdateQuantity={handleUpdateQuantityByProductId}
+                onRemoveFromCart={handleRemoveFromCartByProductId}
+                cartItemsMap={cartItemsMap}
                 onBuyNow={handleStartBuyNow}
                 onOpenDetails={handleOpenDetails}
               />

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, PackageCheck, CheckCircle2, Calendar, Clock, MapPin, User, Download, Truck, AlertCircle, FileText, ChevronRight, Navigation, Phone, Mail, Send, Check, Copy, Sparkles, ShieldCheck } from 'lucide-react';
 import ProductImage from './ProductImage';
+import BrandLoader from './BrandLoader';
 import shopService from '../api/shopService';
 import { parseExactDate, formatExactDateTime, formatExactDateStr, formatExactTimeStr } from '../utils/dateUtils';
 
@@ -974,6 +975,7 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
   };
 
   const [internalFetchedOrders, setInternalFetchedOrders] = React.useState([]);
+  const [loadingOrders, setLoadingOrders] = React.useState(true);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -986,6 +988,8 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
         }
       } catch (e) {
         console.error('OrdersModal auto-fetch error:', e);
+      } finally {
+        if (isMounted) setLoadingOrders(false);
       }
     };
     fetchApiOrders();
@@ -1097,7 +1101,9 @@ export const OrdersModal = ({ isOpen = true, orders = [], onClose, initialOrderI
 
           {/* Orders Scrollable Drawer Body */}
           <div style={drawerStyles.scrollArea}>
-            {sortedOrders.length === 0 ? (
+            {loadingOrders && sortedOrders.length === 0 ? (
+              <BrandLoader fullScreen={false} message="Syncing your orders & receipts..." />
+            ) : sortedOrders.length === 0 ? (
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 1rem', textAlign: 'center', color: '#94a3b8' }}>
                 <PackageCheck style={{ width: 58, height: 58, strokeWidth: 1.5, margin: '0 auto 0.85rem', color: '#a7f3d0' }} />
                 <p style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.25rem' }}>No Placed Orders Found</p>

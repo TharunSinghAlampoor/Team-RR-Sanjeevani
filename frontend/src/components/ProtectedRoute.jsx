@@ -1,16 +1,13 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import BrandLoader from './BrandLoader';
 
 export const ProtectedRoute = ({ children }) => {
   const { user, isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div className="spinner"></div>
-      </div>
-    );
+    return <BrandLoader fullScreen message="Verifying your session..." />;
   }
 
   if (!isAuthenticated) {

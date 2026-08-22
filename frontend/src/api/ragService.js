@@ -58,10 +58,12 @@ export const filterAndRankProducts = (allProds, rawQuery) => {
   const q = rawQuery.toLowerCase().trim();
   const cleanQ = q.replace(/[^a-z0-9\s]/g, '');
 
+  const isPainQuery = q.includes('pain') || q.includes('pains') || q.includes('ache') || q.includes('headache') || q.includes('backache') || q.includes('cramp') || q.includes('sprain') || q.includes('balm') || q.includes('volini') || q.includes('moov') || q.includes('joint') || q.includes('muscle');
+  const isFeverColdQuery = q.includes('fever') || q.includes('cold') || q.includes('cough') || q.includes('flu') || q.includes('throat');
   const isAdultQuery = q.includes('adult') || q.includes('skin care') || q.includes('skincare') || q.includes('sunscreen') || q.includes('serum') || q.includes('acne') || q.includes('vitamin c') || q.includes('lotion');
   const isBabyQuery = q.includes('baby') || q.includes('kid') || q.includes('child') || q.includes('infant') || q.includes('pediatric') || q.includes('toddler');
 
-  const stopWords = ['show', 'find', 'search', 'give', 'me', 'want', 'need', 'what', 'is', 'tell', 'about', 'the', 'a', 'an', 'some', 'for', 'please', 'i', 'can', 'you', 'get', 'of', 'in', 'on', 'with', 'care', 'health', 'healthcare', 'product', 'products', 'medicine', 'medicines', 'treatment', 'solution', 'solutions', 'good', 'best', 'top', 'buy', 'item', 'items'];
+  const stopWords = ['show', 'find', 'search', 'give', 'me', 'want', 'need', 'what', 'is', 'tell', 'about', 'the', 'a', 'an', 'some', 'for', 'please', 'i', 'can', 'you', 'get', 'of', 'in', 'on', 'with', 'care', 'health', 'healthcare', 'product', 'products', 'medicine', 'medicines', 'treatment', 'solution', 'solutions', 'good', 'best', 'top', 'buy', 'item', 'items', 'body'];
   const keywords = cleanQ.split(/\s+/).filter(w => !stopWords.includes(w) && w.length > 1);
 
   const scored = allProds.map(p => {
@@ -73,25 +75,54 @@ export const filterAndRankProducts = (allProds, rawQuery) => {
     const fullText = `${name} ${brand} ${desc} ${cat}`;
     const noSpaceText = fullText.replace(/[^a-z0-9]/g, '');
 
+    const isCosmeticOrPersonalCare = (
+      name.includes('lotion') || name.includes('wash') || name.includes('cleanser') ||
+      name.includes('serum') || name.includes('sunscreen') || name.includes('cream') ||
+      name.includes('shampoo') || name.includes('soap') || cat.includes('skin') || cat.includes('baby')
+    );
+
+    const isPainProduct = (
+      name.includes('pain') || desc.includes('pain') || name.includes('balm') || desc.includes('balm') ||
+      name.includes('relief') || desc.includes('relief') || name.includes('gel') || desc.includes('gel') ||
+      name.includes('spray') || desc.includes('spray') || name.includes('paracetamol') || desc.includes('paracetamol') ||
+      name.includes('ibuprofen') || name.includes('diclofenac') || name.includes('volini') || name.includes('moov') ||
+      name.includes('crocin') || name.includes('dolo') || name.includes('ortho') || name.includes('knee') || name.includes('hot water')
+    );
+
+    // Strict Pain Intent Filtering
+    if (isPainQuery) {
+      if (isCosmeticOrPersonalCare && !isPainProduct) {
+        return { product: p, score: -999 }; // Exclude body lotions, face washes, cosmetics
+      }
+      if (!isPainProduct && !cat.includes('prescription') && !cat.includes('device')) {
+        return { product: p, score: -999 };
+      }
+    }
+
+    // Strict Fever/Cold Intent Filtering
+    if (isFeverColdQuery && isCosmeticOrPersonalCare && !isPainProduct) {
+      return { product: p, score: -999 };
+    }
+
     // Audience Check
     const isBabyProduct = cat.includes('baby') || cat.includes('kid') || name.includes('baby') || name.includes('kid') || name.includes('child') || name.includes('infant') || name.includes('pediatric') || cat.includes('pediatric') || name.includes('diaper') || name.includes('cerelac') || name.includes('lactogen');
 
     if (isAdultQuery && isBabyProduct) {
-      return { product: p, score: -999 }; // Hard exclude baby products for adult requests!
+      return { product: p, score: -999 };
     }
 
     if (isBabyQuery && !isBabyProduct) {
-      return { product: p, score: -999 }; // Exclude non-baby products when explicitly asking for baby care!
+      return { product: p, score: -999 };
     }
 
     let score = 0;
 
-    // Exact phrase match
-    if (fullText.includes(q)) score += 50;
+    if (isPainQuery && isPainProduct) {
+      score += 70;
+    }
 
-    // Exact compound term
-    const noSpaceQ = cleanQ.replace(/\s+/g, '');
-    if (noSpaceQ.length > 3 && noSpaceText.includes(noSpaceQ)) score += 30;
+    // Exact name or brand match
+    if (name.includes(cleanQ) || (noSpaceText.includes(cleanQ) && cleanQ.length > 2)) score += 50;
 
     // Specific multi-word keywords match
     if (q.includes('vitamin c') && (name.includes('vitamin c') || desc.includes('vitamin c') || cat.includes('vitamin c') || name.includes('serum') || desc.includes('serum'))) {
@@ -100,17 +131,18 @@ export const filterAndRankProducts = (allProds, rawQuery) => {
 
     for (const kw of keywords) {
       if (kw.length <= 1) continue;
-      if (name.includes(kw)) score += 15;
-      else if (cat.includes(kw)) score += 10;
-      else if (brand.includes(kw)) score += 10;
-      else if (desc.includes(kw)) score += 5;
+      if (name.includes(kw)) score += 30;
+      else if (cat.includes(kw)) score += 20;
+      else if (brand.includes(kw)) score += 20;
+      else if (desc.includes(kw)) score += 10;
     }
 
     return { product: p, score };
   });
 
+  // Only return products that pass a strict relevance threshold of score >= 15
   return scored
-    .filter(item => item.score > 0)
+    .filter(item => item.score >= 15)
     .sort((a, b) => b.score - a.score)
     .map(item => item.product);
 };
@@ -118,41 +150,76 @@ export const filterAndRankProducts = (allProds, rawQuery) => {
 /**
  * Universal Intelligent Answer Synthesizer for ANY General / Health / Conversational Question
  */
+/**
+ * Official Sanjeevani AI Assistant System Persona & Response Guidelines
+ */
+const DOCTOR_DISCLAIMER = "Please consult a licensed doctor or pharmacist for advice specific to you.";
+
+const EMERGENCY_SYMPTOMS = [
+  'chest pain', 'difficulty breathing', 'shortness of breath', 'can\'t breathe',
+  'severe bleeding', 'stroke', 'numbness on one side', 'loss of consciousness',
+  'fainted', 'unconscious', 'suicidal', 'suicide', 'severe allergic reaction',
+  'anaphylaxis', 'choking', 'seizure', 'heart attack'
+];
+
+const OUT_OF_SCOPE_KEYWORDS = [
+  'movie', 'cricket', 'game', 'sports', 'python', 'java', 'programming', 'code',
+  'politics', 'election', 'song', 'music', 'crypto', 'bitcoin', 'stock market'
+];
+
+/**
+ * Universal Intelligent Answer Synthesizer aligned with Sanjeevani AI Persona
+ */
 const synthesizeUniversalResponse = (queryText, cleanQ) => {
-  // 1. Skincare, Lotion, Moisturizer, Face Wash, Serums
+  // 1. Emergency Symptom Check
+  if (EMERGENCY_SYMPTOMS.some(s => cleanQ.includes(s))) {
+    return `🚨 **URGENT ADVISORY: THIS COULD BE A MEDICAL EMERGENCY.**\n\nPlease call your local emergency number (108 / 112) or get to the nearest emergency room right away — don't wait. If someone is with you, ask them to help you get there now.`;
+  }
+
+  // 2. Out of Scope Check
+  if (OUT_OF_SCOPE_KEYWORDS.some(k => cleanQ.includes(k))) {
+    return `I'm here to help with Sanjeevani orders and general health questions — is there something in that area I can help with?`;
+  }
+
+  // 3. Mild Symptom & Over-The-Counter Guidance (Headache, Fever, Pain, Cold)
+  if (cleanQ.includes('headache') || cleanQ.includes('fever') || cleanQ.includes('pain') || cleanQ.includes('cold') || cleanQ.includes('cough')) {
+    return `For mild, occasional symptoms like fever or headaches, many people use common over-the-counter options like **paracetamol** as directed on the package label. Rest, staying hydrated with water, and avoiding screen strain can also support your recovery.\n\n${DOCTOR_DISCLAIMER}`;
+  }
+
+  // 4. Skincare, Lotion, Moisturizer, Serums
   if (cleanQ.includes('lotion') || cleanQ.includes('cream') || cleanQ.includes('moistur') || cleanQ.includes('skin') || cleanQ.includes('face') || cleanQ.includes('acne') || cleanQ.includes('serum') || cleanQ.includes('sunscreen')) {
-    return `✨ Skincare & Dermocosmetic Information for "${queryText}":\n\n• Primary Benefits: Deeply hydrates skin, locks in moisture, and protects skin barrier from environmental damage.\n• Active Ingredients: Look for Ceramides, Hyaluronic Acid, Niacinamide, Salicylic Acid, or Vitamin C.\n• How to Use: Apply evenly on clean, dry skin twice daily (Morning & Night).\n• Protection Tip: Always pair daytime skincare with broad-spectrum SPF 30+/50+ Sunscreen.`;
+    return `✨ **Skincare & Product Info:**\n\n• **Hydration & Barrier Care**: Look for gentle formulations with **Ceramides**, **Hyaluronic Acid**, or **Niacinamide**.\n• **Application**: Apply evenly on clean, dry skin twice daily (Morning & Night).\n• **Sun Protection**: Pair your routine with broad-spectrum **SPF 30+ / 50+ Sunscreen**.\n\n${DOCTOR_DISCLAIMER}`;
   }
 
-  // 2. Nutrition, Vitamin, Protein, Diet, Supplements
+  // 5. Nutrition & Supplements
   if (cleanQ.includes('vitamin') || cleanQ.includes('protien') || cleanQ.includes('protein') || cleanQ.includes('diet') || cleanQ.includes('nutrition') || cleanQ.includes('supplement') || cleanQ.includes('calcium') || cleanQ.includes('iron') || cleanQ.includes('zinc')) {
-    return `💊 Nutrition & Vitamin Guidance for "${queryText}":\n\n• Key Role: Supports daily cellular energy, immune strength, muscle repair, and bone density.\n• Dietary Sources: Green leafy vegetables, citrus fruits, nuts, seeds, milk, eggs, and lean protein.\n• Supplement Tip: Take multivitamins (Vitamin D3, B12, Calcium) after main meals as advised by your healthcare provider.\n• Hydration: Drink 2.5 to 3 Liters of water daily for optimal nutrient absorption.`;
+    return `💊 **Nutrition & Wellness Info:**\n\n• **Multivitamins**: Essential for daily cellular energy, immune strength, and bone density.\n• **Dietary Support**: Consume green vegetables, citrus fruits, nuts, and adequate protein.\n• **Best Usage**: Take supplements after main meals as directed on the label.\n\n${DOCTOR_DISCLAIMER}`;
   }
 
-  // 3. Fever, Cold, Cough, Pain, Headache Symptoms
-  if (cleanQ.includes('fever') || cleanQ.includes('cold') || cleanQ.includes('cough') || cleanQ.includes('pain') || cleanQ.includes('headache') || cleanQ.includes('acidity') || cleanQ.includes('stomach')) {
-    return `🩺 Health Guidance for "${queryText}":\n\n• Symptoms Overview: Common body defense responses to seasonal infection, fatigue, or inflammation.\n• Recommended Care: Adequate rest, light warm meals, and hydration (warm water/herbal tea).\n• OTC Options: Paracetamol (for fever/pain), Cetirizine (for cold/allergy), Gelusil/Eno (for acidity).\n• Caution: Seek immediate medical consultation if symptoms persist for more than 3 days.`;
+  // 6. Diabetes, Blood Pressure, Chronic Care
+  if (cleanQ.includes('diabetes') || cleanQ.includes('sugar') || cleanQ.includes('bp') || cleanQ.includes('blood pressure') || cleanQ.includes('hypertension') || cleanQ.includes('heart') || cleanQ.includes('thyroid')) {
+    return `❤️ **Health & Chronic Care Info:**\n\n• **Monitoring**: Regularly track blood sugar or blood pressure using digital home monitors.\n• **Lifestyle**: Maintain a balanced low-sodium diet and engage in 30 minutes of daily light exercise.\n• **Prescriptions**: Always follow your doctor's exact dosage for prescription medications.\n\n${DOCTOR_DISCLAIMER}`;
   }
 
-  // 4. Diabetes, Blood Pressure, Heart Health, Chronic Conditions
-  if (cleanQ.includes('diabetes') || cleanQ.includes('sugar') || cleanQ.includes('bp') || cleanQ.includes('blood pressure') || cleanQ.includes('hypertension') || cleanQ.includes('cholesterol') || cleanQ.includes('heart') || cleanQ.includes('thyroid')) {
-    return `❤️ Health & Disease Management Guide for "${queryText}":\n\n• Monitoring: Check blood sugar or blood pressure regularly using digital home monitors.\n• Lifestyle Measures: Reduce daily salt & refined sugar intake, engage in 30 mins walking.\n• Medication: Never skip prescribed medications (Metformin, Telmisartan, Amlodipine).\n• Medical Consultation: Schedule routine quarterly doctor check-ups and blood tests.`;
-  }
-
-  // 5. Sleep, Wellness, Stress, Fitness, Immunity
-  if (cleanQ.includes('sleep') || cleanQ.includes('wellness') || cleanQ.includes('fitness') || cleanQ.includes('exercise') || cleanQ.includes('stress') || cleanQ.includes('immunity') || cleanQ.includes('water') || cleanQ.includes('weight')) {
-    return `🌿 Wellness & Health Lifestyle Advice for "${queryText}":\n\n• Sleep Hygiene: Aim for 7 to 8 hours of uninterrupted sleep every night.\n• Active Living: Incorporate daily walking, yoga, or light cardiovascular exercise.\n• Hydration & Immunity: Drink 2.5L+ clean water daily and consume Vitamin C rich fruits.\n• Stress Management: Practice 10 minutes of daily mindfulness or deep breathing exercises.`;
-  }
-
-  // 6. Universal General Knowledge & Any Other Question
-  return `💡 Guidance on "${queryText}":\n\n• Sanjeevani AI Healthcare Assistant is here to provide reliable medical, wellness, and store guidance.\n• What You Can Ask: Symptoms ("medicine for fever"), Skincare ("best lotion for dry skin"), Nutrition ("vitamin D3 benefits"), Orders ("track my order").\n• Pharmacy Catalog: Browse our 159+ certified medicines, health devices, and personal care products on the store dashboard.\n• Customer Support: Need further assistance? Contact support@sanjeevani.com or call 1800-123-4567 (24/7).`;
+  // 7. General Knowledge Fallback
+  return `I'm Sanjeevani AI Assistant, here to help with your orders, products, and general health inquiries.\n\n• **Explore Catalog**: Browse 159+ certified medical products, devices, and skincare on our store.\n• **Order Help**: Ask me about delivery tracking, payments, or returns.\n\n${DOCTOR_DISCLAIMER}`;
 };
 
 export const performRAGQuery = async (queryText, userSession = {}) => {
   const rawQ = queryText.toLowerCase().trim();
   const cleanQ = rawQ.replace(/[^a-z0-9\s]/g, '');
 
-  // 1. RETRIEVAL PHASE — Fetch Live Database & Knowledge Context
+  // 1. Check Emergency First
+  if (EMERGENCY_SYMPTOMS.some(s => cleanQ.includes(s))) {
+    return {
+      text: `🚨 **URGENT ADVISORY: THIS COULD BE A MEDICAL EMERGENCY.**\n\nPlease call your local emergency number (108 / 112) or get to the nearest emergency room right away — don't wait. If someone is with you, ask them to help you get there now.`,
+      products: null,
+      orderList: null,
+      isEmergency: true
+    };
+  }
+
+  // 2. RETRIEVAL PHASE — Fetch Live Database & Knowledge Context
   let productContext = [];
   let orderContext = [];
   let faqMatches = [];
@@ -189,12 +256,19 @@ export const performRAGQuery = async (queryText, userSession = {}) => {
     );
   } catch (e) {}
 
-  // 2. GENERATION PHASE — Universal Response Synthesis
+  // 3. GENERATION PHASE — Response Synthesis
   let synthesizedText = '';
+
   if (faqMatches.length > 0) {
     synthesizedText = faqMatches.map(f => f.answer).join('\n\n');
+  } else if (cleanQ.includes('order') || cleanQ.includes('track') || cleanQ.includes('where is my order') || cleanQ.includes('status')) {
+    if (matchingOrders.length > 0) {
+      synthesizedText = ` Here are your recent Sanjeevani orders:`;
+    } else {
+      synthesizedText = `I don't have your order details in front of me — you can check real-time status on the **Track Order** page using your order ID, or I can point you to support if it's delayed. Want me to do that?`;
+    }
   } else if (matchingProducts.length > 0) {
-    synthesizedText = `✨ Top Verified Products for "${queryText}":\n\nHere are matching health & medical products available on Sanjeevani Store:`;
+    synthesizedText = `✨ Here are top matching products on **Sanjeevani Store** for "${queryText}":`;
   } else {
     synthesizedText = synthesizeUniversalResponse(queryText, cleanQ);
   }

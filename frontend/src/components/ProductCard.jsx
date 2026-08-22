@@ -182,16 +182,16 @@ const ProductCard = React.memo(({
       </div>
 
       {/* Price + Stock */}
-      <div className="pcard__price-row" style={{ marginTop: '0.4rem' }}>
-        <span className="pcard__price" style={{ color: '#0f766e', fontSize: '1.12rem', fontWeight: 900, letterSpacing: '-0.02em' }}>₹{Number(product.price).toLocaleString('en-IN')}</span>
+      <div className="pcard__price-row">
+        <span className="pcard__price">₹{Number(product.price).toLocaleString('en-IN')}</span>
         {inStock
-          ? <span className="pcard__stock pcard__stock--in" style={{ background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', color: '#047857', border: '1px solid #6ee7b7', fontWeight: 800, padding: '2px 8px', borderRadius: '0.4rem', fontSize: '0.7rem' }}><CheckCircle2 className="w-3 h-3" /> {t('inStock')}</span>
-          : <span className="pcard__stock pcard__stock--out" style={{ background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 800, padding: '2px 8px', borderRadius: '0.4rem', fontSize: '0.7rem' }}><AlertCircle className="w-3 h-3" /> {t('outOfStock')}</span>
+          ? <span className="pcard__stock pcard__stock--in"><CheckCircle2 className="w-3 h-3" /> {t('inStock')}</span>
+          : <span className="pcard__stock pcard__stock--out"><AlertCircle className="w-3 h-3" /> {t('outOfStock')}</span>
         }
       </div>
 
       {/* Actions */}
-      <div className="pcard__actions" style={{ marginTop: 'auto', paddingTop: '0.5rem' }}>
+      <div className="pcard__actions">
         {inCartActive && qty > 0 ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', width: '100%' }}>
             {/* Stepper Pill (- Count +) */}
@@ -201,12 +201,12 @@ const ProductCard = React.memo(({
                 flex: 1,
                 padding: '0.3rem 0.4rem',
                 borderRadius: '0.75rem',
-                background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
+                background: 'linear-gradient(135deg, #0d5c75 0%, #059669 100%)',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                boxShadow: '0 3px 10px rgba(255, 71, 87, 0.32)',
+                boxShadow: '0 3px 10px rgba(5, 150, 105, 0.25)',
               }}
             >
               <button
@@ -308,10 +308,10 @@ const ProductCard = React.memo(({
               gap: '0.45rem',
               cursor: inStock ? 'pointer' : 'not-allowed',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-              background: 'linear-gradient(135deg, #ff4757 0%, #e11d48 100%)',
+              background: 'linear-gradient(135deg, #0d5c75 0%, #059669 100%)',
               color: '#ffffff',
               border: 'none',
-              boxShadow: '0 4px 16px rgba(255, 71, 87, 0.38)',
+              boxShadow: '0 4px 14px rgba(5, 150, 105, 0.28)',
             }}
           >
             <ShoppingCart style={{ width: 16, height: 16 }} />

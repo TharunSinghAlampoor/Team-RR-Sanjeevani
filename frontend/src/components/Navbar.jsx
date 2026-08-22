@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Heart, ShoppingCart, Truck, LogOut, Key,
-  X, Home, LayoutGrid, ChevronDown, UserCheck, ShieldCheck,
+  X, Home, LayoutGrid, ChevronDown, ChevronRight, UserCheck, ShieldCheck,
   User, MapPin, Package, Bot, Edit3
 } from 'lucide-react';
 import { formatCategoryName, toCategorySlug } from '../utils/categoryUtils';
@@ -165,24 +165,91 @@ export const Navbar = ({
             </button>
 
             <AnimatePresence>
-              {showCategoriesDropdown && categories.length > 0 && (
-                <motion.div
-                  className="navbar-cat-dropdown"
-                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  {categories.map(cat => (
+              {showCategoriesDropdown && (
+                <>
+                  {/* Desktop Categories Dropdown */}
+                  <motion.div
+                    className="navbar-cat-dropdown desktop-cat-dropdown"
+                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                  >
                     <button
-                      key={cat.categoryId}
-                      onClick={(e) => handleCategoryClick(e, cat.categoryName, cat.categoryId)}
+                      onClick={(e) => handleCategoryClick(e, 'All Products', 'all-products')}
                       className="navbar-cat-item"
+                      style={{ fontWeight: 800, color: '#0d5c75', borderBottom: '1px solid #f1f5f9' }}
                     >
-                      {formatCategoryName(cat.categoryName)}
+                      🏪 All Products
                     </button>
-                  ))}
-                </motion.div>
+                    {categories.map(cat => (
+                      <button
+                        key={cat.categoryId}
+                        onClick={(e) => handleCategoryClick(e, cat.categoryName, cat.categoryId)}
+                        className="navbar-cat-item"
+                      >
+                        {formatCategoryName(cat.categoryName)}
+                      </button>
+                    ))}
+                  </motion.div>
+
+                  {/* Mobile Category Bottom Sheet Drawer */}
+                  <motion.div
+                    className="mobile-cat-sheet-backdrop"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setShowCategoriesDropdown(false)}
+                  >
+                    <motion.div
+                      className="mobile-cat-sheet"
+                      initial={{ y: '100%' }}
+                      animate={{ y: 0 }}
+                      exit={{ y: '100%' }}
+                      transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="mobile-cat-sheet__header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <LayoutGrid style={{ width: 20, height: 20, color: '#059669' }} />
+                          <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>
+                            {t('categories') || translateData('Explore Categories')}
+                          </h3>
+                        </div>
+                        <button
+                          onClick={() => setShowCategoriesDropdown(false)}
+                          style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                        >
+                          <X style={{ width: 16, height: 16, color: '#64748b' }} />
+                        </button>
+                      </div>
+
+                      <div className="mobile-cat-sheet__body">
+                        {[
+                          { name: 'All Products', icon: '🏪', desc: 'Browse full store catalog', slug: 'all-products' },
+                          { name: 'Prescriptions & Pharmacy', icon: '💊', desc: 'Authentic prescription medicines & treatments', slug: 'prescriptions-pharmacy' },
+                          { name: 'Nutrition & Health', icon: '🥗', desc: 'Vitamins, protein & wellness supplements', slug: 'nutrition-health' },
+                          { name: 'Medical Devices', icon: '🩺', desc: 'BP monitors, oximeters & medical equipment', slug: 'medical-devices' },
+                          { name: 'Baby & Kids', icon: '👶', desc: 'Baby skincare, diapers & infant nutrition', slug: 'baby-kids' },
+                          { name: 'Skin Care', icon: '✨', desc: 'Dermatologist-tested skincare & serums', slug: 'skin-care' },
+                        ].map(item => (
+                          <div
+                            key={item.slug}
+                            onClick={(e) => handleCategoryClick(e, item.name, item.slug)}
+                            className="mobile-cat-sheet__item"
+                          >
+                            <div className="mobile-cat-sheet__icon">{item.icon}</div>
+                            <div style={{ flex: 1 }}>
+                              <p className="mobile-cat-sheet__title">{translateData(item.name)}</p>
+                              <p className="mobile-cat-sheet__desc">{translateData(item.desc)}</p>
+                            </div>
+                            <ChevronRight style={{ width: 16, height: 16, color: '#94a3b8' }} />
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                </>
               )}
             </AnimatePresence>
           </div>
